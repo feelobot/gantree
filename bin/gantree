@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+
+$:.unshift(File.expand_path('../../lib', __FILE__))
+require 'gantree'
+require 'gantree/cli'
+
+Gantree::CLI.start(ARGV)
