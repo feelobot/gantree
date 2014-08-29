@@ -53,7 +53,13 @@ module Gantree
           }
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
-        puts "Version not created, already exists"
+        puts "Version already exists, recreating..."
+        @eb.delete_application_version({
+          :application_name => @app,
+          :version_label => @version_label,
+          :delete_source_bundle => true
+        })
+        retry
       end
     end
 
