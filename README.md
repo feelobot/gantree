@@ -1,8 +1,7 @@
 # Gantree
 
 [![Build Status](https://magnum.travis-ci.com/)](https://magnum.travis-ci.com/)
-[![Code Climate](https://codeclimate.com/)](https://codeclimate.com/)
-[![Code Climate](https://codeclimate.com/)](https://codeclimate.com/)
+[![Code Climate](https://codeclimate.com/github/feelobot/gantree/badges/gpa.svg)](https://codeclimate.com/github/feelobot/gantree)
 
 To these the gantree, run these commands:
 
@@ -21,24 +20,3 @@ And then execute:
 Or install it yourself as:
 
     $ gem install gantree
-
-## Usage
-
-<pre>
-git clone https://github.com/tongueroo/gantree.git
-mv gantree <project_name>
-cd <project_name>
-rake rename
-rm -rf .git
-git init
-git add .
-git commit -m 'init commit'
-</pre>
-
-## Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
