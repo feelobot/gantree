@@ -1,4 +1,4 @@
- require 'thor'
+require 'thor'
 require 'gantree/cli/help'
 
 module Gantree
@@ -13,4 +13,4 @@ module Gantree
       puts "Deploying #{app}"
     end
   end
-e
+end
