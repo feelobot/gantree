@@ -3,6 +3,9 @@
 [![Build Status](https://travis-ci.org/feelobot/gantree.svg)](https://travis-ci.org/feelobot/gantree)
 [![Test Coverage](https://codeclimate.com/github/feelobot/gantree/badges/coverage.svg)](https://codeclimate.com/github/feelobot/gantree)
 [![Code Climate](https://codeclimate.com/github/feelobot/gantree/badges/gpa.svg)](https://codeclimate.com/github/feelobot/gantree)
+## Why Gantree?
+
+The name is derived from the word gantry which is a large crane used in ports to pick up shipping containers and load them on a ship. Gantry was already taken so I spelled it "tree" because the primary use is for elastic beanstalk and I guess a beanstalk is a form of tree? 
 
 ## Description
 
@@ -36,7 +39,7 @@ gem install 'gantree'
 What this does is create a new Dockerrun.aws.json inside your repository and uploads your docker login credentials to s3 (for private repo access) so you can do deploys. We need the -u to specify a username to rename your .dockercfg and reference it in the Dockerrun.aws.json
 
 ```
-gantree init -u frodriguez bleacher/cauldron
+gantree init -u frodriguez bleacher/cauldron:master
 ```
 
 
