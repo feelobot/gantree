@@ -26,6 +26,14 @@ end
 
 RSpec.configure do |c|
   c.include Helpers
+  # Use color in STDOUT
+  c.color = true
+
+  # Use color not only in STDOUT but also in pagers and files
+  c.tty = true
+
+  # Use the specified formatter
+  c.formatter = :documentation # :progress, :html, :textmate
   c.around(:each) do |example|
     VCR.use_cassette(example.metadata[:full_description], :serialize_with => :json) do
       example.run
@@ -35,4 +43,4 @@ end
 
 VCR.configure do |config|
   config.ignore_hosts 'codeclimate.com'
-end
+end if ENV['VCR'] == '1'

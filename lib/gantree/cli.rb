@@ -1,6 +1,7 @@
 require 'thor'
 require 'aws-sdk'
 require 'gantree/cli/help'
+require 'gantree/init'
 
 module Gantree
 
@@ -37,6 +38,9 @@ module Gantree
       rescue AWS::S3::Errors::NoSuchBucket
         bucket = s3.buckets.create("#{@app}-versions")
         retry
+      rescue AWS::S3::Errors::AccessDenied
+        puts "Your key is not configured for s3 access, please let your operations team know"
+        exit
       end
       FileUtils.rm(filename)
     end
