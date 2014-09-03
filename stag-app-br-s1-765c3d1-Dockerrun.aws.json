@@ -1,0 +1,16 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Authentication": {
+    "Bucket": "docker-cfgs",
+    "Key": "frodriguez.dockercfg"
+  },
+  "Image": {
+    "Name": "feelobot/deploy-dash:latest",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": "1337"
+    }
+  ]
+}
