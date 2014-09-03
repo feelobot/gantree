@@ -5,6 +5,7 @@
 # and cli specs not using vcr and vice versa.
 ENV['VCR'] ? ENV['VCR'] : ENV['VCR'] = '1'
 ENV['TEST'] = '1'
+ENV['CODECLIMATE_REPO_TOKEN'] = ENV['CODECLIMATE_GANTREE_TOKEN']
 
 require "codeclimate-test-reporter"
 CodeClimate::TestReporter.start

@@ -9,7 +9,6 @@ module Gantree
       :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
       :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
 
-    class_option :verbose, :type => :boolean
     desc "deploy APP", "deploy specified APP"
     option :branch, :desc => 'branch to deploy'
     method_option :tag, :aliases => "-t", :desc => "Set docker tag to deploy"
