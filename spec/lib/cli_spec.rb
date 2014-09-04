@@ -11,6 +11,7 @@ describe Gantree::CLI do
     @owner = "bleacher"
     @repo = "cauldron"
     @tag =  "master"
+    @user = "feelobot"
   end
 
   describe "gantree" do

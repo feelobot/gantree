@@ -1,4 +1,4 @@
-guard 'rspec', :version => 2 do
+guard :rspec, cmd: 'bundle exec rspec' do
   watch(%r{^spec/.+_spec\.rb$})
   watch(%r{^lib/(.+)\.rb$})      { "spec/gantree_spec.rb" }
   watch(%r{^lib/gantree/(.+)\.rb$})  { "spec/gantree_spec.rb" }
