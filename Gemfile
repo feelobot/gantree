@@ -5,6 +5,6 @@ gem "codeclimate-test-reporter", group: :test, require: nil
 gem "aws-sdk"
 gem "guard", group: :test
 gem "rspec", group: :test
-gem "thor-vcr"
 gem "rake"
-gem 'guard-rspec', require: false
+gem "guard-rspec", require: false
+gem "webmock"

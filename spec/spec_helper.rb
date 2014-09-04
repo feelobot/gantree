@@ -34,13 +34,13 @@ RSpec.configure do |c|
 
   # Use the specified formatter
   c.formatter = :documentation # :progress, :html, :textmate
-  c.around(:each) do |example|
-    VCR.use_cassette(example.metadata[:full_description], :serialize_with => :json) do
-      example.run
-    end if ENV['VCR'] == '1'
-  end
+  #c.around(:each) do |example|
+  #  VCR.use_cassette(example.metadata[:full_description], :serialize_with => :json) do
+  #    example.run
+  #  end if ENV['VCR'] == '1'
+  #end
 end
 
-VCR.configure do |config|
-  config.ignore_hosts 'codeclimate.com'
-end if ENV['VCR'] == '1'
+#VCR.configure do |config|
+#  config.ignore_hosts 'codeclimate.com'
+#end if ENV['VCR'] == '1'

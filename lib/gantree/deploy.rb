@@ -1,17 +1,21 @@
 module Gantree
   class Deploy
 
-    def initialize options
+    def initialize app,options
       @options = options
-      @env = options.app
-      @app = options.app.match(/^*\-(.*\-).*\-/)[1][0..-2]
+      AWS.config(
+        :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
+        :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
+      @env = app
+      @app =@env.match(/^*\-(.*\-).*\-/)[1][0..-2]
       @version_label = set_version_label
       @eb = AWS::ElasticBeanstalk::Client.new
-      @tag = options["tag"]
+      @s3 = AWS::S3.new
+      @tag = options.tag
     end
 
     def run
-      puts "Deploying #{app}"
+      puts "Deploying #{@app}"
       upload_to_s3
       create_version
       update_application
@@ -20,15 +24,16 @@ module Gantree
     private
 
     def upload_to_s3
-      s3 = AWS::S3.new
+      
       filename = @version_label
       FileUtils.cp("Dockerrun.aws.json", filename)
       set_tag_to_deploy if @tag
       key = File.basename(filename)
       begin
-        s3.buckets["#{@app}-versions"].objects[key].write(:file => filename)
+        puts ENV['AWS_ACCESS_KEY_ID']
+        @s3.buckets["#{@app}-versions"].objects[key].write(:file => filename)
       rescue AWS::S3::Errors::NoSuchBucket
-        bucket = s3.buckets.create("#{@app}-versions")
+        bucket = @s3.buckets.create("#{@app}-versions")
         retry
       rescue AWS::S3::Errors::AccessDenied
         puts "Your key is not configured for s3 access, please let your operations team know"
