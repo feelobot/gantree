@@ -7,3 +7,4 @@ gem "guard", group: :test
 gem "rspec", group: :test
 gem "thor-vcr"
 gem "rake"
+gem 'guard-rspec', require: false
