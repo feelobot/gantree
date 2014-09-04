@@ -34,14 +34,13 @@ Install the gem
 gem install 'gantree'
 ```
 
-### Initialize (not yet created)
+### Initialize
 
 What this does is create a new Dockerrun.aws.json inside your repository and uploads your docker login credentials to s3 (for private repo access) so you can do deploys. We need the -u to specify a username to rename your .dockercfg and reference it in the Dockerrun.aws.json
 
 ```
-gantree init -u frodriguez bleacher/cauldron:master
+gantree init -u frodriguez -p 3000 bleacher/cauldron:master
 ```
-
 
 ### Deploy
 
