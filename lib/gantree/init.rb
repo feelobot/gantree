@@ -33,6 +33,7 @@ module Gantree
           Name: @image,
           Update: true
         },
+        Logging: "/var/log/nginx",
         Ports: [
           {
             ContainerPort: @options.port
