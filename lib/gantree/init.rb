@@ -32,14 +32,14 @@ module Gantree
         },
         Ports: [
           {
-            "ContainerPort": @options.port
+            ContainerPort: @options.port
           }
         ]
       }
       if @options.user
         docker.Authentication = {
-          "Bucket": "docker-cfgs",
-          "Key": "#{@options.user}.dockercfg"
+          Bucket: "docker-cfgs",
+          Key: "#{@options.user}.dockercfg"
         }
       end
     end
