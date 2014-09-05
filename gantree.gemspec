@@ -6,11 +6,11 @@ require 'gantree/version'
 Gem::Specification.new do |spec|
   spec.name          = "gantree"
   spec.version       = Gantree::VERSION
-  spec.authors       = ["Tung Nguyen"]
-  spec.email         = ["tongueroo@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.authors       = ["Felix"]
+  spec.email         = ["felix.a.rod@gmail.com"]
+  spec.description   = "cli tool for automating docker deploys to elastic beanstalk"
+  spec.summary       = "This tool is intended to help you setup a Dockerrun.aws.json which allows you to deploy a prebuilt image of your application to Elastic Beanstalk. This also allows you to do versioned deploys to your Elastic Beanstalk application and create an archive of every versioned Dockerrun.aws.json in amazons s3 bucket service."
+  spec.homepage      = "https://github.com/feelobot/gantree"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
@@ -25,7 +25,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
-  spec.add_development_dependency "thor-vcr"
   spec.add_development_dependency "guard"
   spec.add_development_dependency "guard-bundler"
   spec.add_development_dependency "guard-rspec"
