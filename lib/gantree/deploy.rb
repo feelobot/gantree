@@ -7,7 +7,7 @@ module Gantree
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
       @env = app
-      @app = @env.match(/\-[a-zA-Z]*\-(.*)\-/)[1]
+      @app = @env.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-/)[1]
       @version_label = set_version_label
       @eb = AWS::ElasticBeanstalk::Client.new
       @s3 = AWS::S3.new
