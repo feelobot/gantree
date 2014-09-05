@@ -7,7 +7,7 @@ module Gantree
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
       @env = app
-      @app =@env.match(/^*\-(.*\-).*\-/)[1][0..-2]
+      @app = @env.match(/\-[a-zA-Z]*\-(.*)\-/)[1]
       @version_label = set_version_label
       @eb = AWS::ElasticBeanstalk::Client.new
       @s3 = AWS::S3.new
@@ -30,13 +30,14 @@ module Gantree
       set_tag_to_deploy if @tag
       key = File.basename(filename)
       begin
-        puts ENV['AWS_ACCESS_KEY_ID']
+        puts "uploading dockerrun to #{@app}-versions"
         @s3.buckets["#{@app}-versions"].objects[key].write(:file => filename)
       rescue AWS::S3::Errors::NoSuchBucket
         bucket = @s3.buckets.create("#{@app}-versions")
         retry
       rescue AWS::S3::Errors::AccessDenied
         puts "Your key is not configured for s3 access, please let your operations team know"
+        FileUtils.rm(filename)
         exit
       end
       FileUtils.rm(filename)
@@ -54,12 +55,16 @@ module Gantree
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
         puts "Version already exists, recreating..."
-        @eb.delete_application_version({
-          :application_name => @app,
-          :version_label => @version_label,
-          :delete_source_bundle => true
-        })
-        retry
+        begin 
+          @eb.delete_application_version({
+            :application_name => @app,
+            :version_label => @version_label,
+            :delete_source_bundle => true
+          })
+          retry
+        rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
+          puts "No Application named #{@app} found"
+        end
       end
     end
 
@@ -75,8 +80,7 @@ module Gantree
     end
 
     def set_version_label
-      branch = `git branch`
-      branch = branch[2..-1]
+      branch = `git rev-parse --abbrev-ref HEAD`
       hash = `git rev-parse --verify --short #{branch}`.strip
       "#{@env}-#{hash}-Dockerrun.aws.json"
     end
