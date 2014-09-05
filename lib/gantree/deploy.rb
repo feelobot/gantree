@@ -5,7 +5,7 @@ module Gantree
       @options = options
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
+        :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
       @env = app
       @app =@env.match(/^*\-(.*\-).*\-/)[1][0..-2]
       @version_label = set_version_label

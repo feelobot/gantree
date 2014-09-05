@@ -7,7 +7,10 @@ module Gantree
     def initialize image,options
       @image = image
       @options = options
-      @s3 = AWS.s3.new
+      AWS.config(
+        :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
+        :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
+      @s3 = AWS::S3.new
     end
 
     def run
@@ -37,11 +40,12 @@ module Gantree
         ]
       }
       if @options.user
-        docker.Authentication = {
+        docker["Authentication"] = {
           Bucket: "docker-cfgs",
           Key: "#{@options.user}.dockercfg"
         }
       end
+      docker
     end
 
     def create_dockerrun
@@ -49,8 +53,9 @@ module Gantree
     end
 
     def upload_docker_config
-      FileUtils.cp("~/.dockercfg", "~/#{@options.user}.dockercfg")
-      key = File.basename("~/#{@options.user}.dockercfg")
+      filename = "#{ENV['HOME']}/#{@options.user}.dockercfg"
+      FileUtils.cp("#{ENV['HOME']}/.dockercfg", "#{ENV['HOME']}/#{@options.user}.dockercfg")
+      key = File.basename(filename)
       @s3.buckets["docker-cfgs"].objects[key].write(:file => filename)
     end
 
