@@ -6,8 +6,8 @@ module Gantree
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
+      @app = app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[2] + "-" + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
       @env = app
-      @app = @env.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-/)[1]
       @version_label = set_version_label
       @eb = AWS::ElasticBeanstalk::Client.new
       @s3 = AWS::S3.new
@@ -33,6 +33,7 @@ module Gantree
         puts "uploading dockerrun to #{@app}-versions"
         @s3.buckets["#{@app}-versions"].objects[key].write(:file => filename)
       rescue AWS::S3::Errors::NoSuchBucket
+        puts "#{@app}-versions bucket didn't exist...creating..."
         bucket = @s3.buckets.create("#{@app}-versions")
         retry
       rescue AWS::S3::Errors::AccessDenied
