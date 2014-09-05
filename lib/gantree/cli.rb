@@ -7,7 +7,8 @@ module Gantree
 
     desc "deploy APP", "deploy specified APP"
     option :branch, :desc => 'branch to deploy'
-    method_option :tag, :aliases => "-t", :desc => "Set docker tag to deploy"
+    method_option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
+    method_option :environment, :aliases => "-e", :desc => "elastic beanstalk environment"
     def deploy app
       Gantree::Deploy.new(app, options).run
     end
