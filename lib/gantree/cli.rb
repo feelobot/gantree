@@ -19,5 +19,12 @@ module Gantree
     def init image
       Gantree::Init.new(image,options).run
     end
+
+    desc "cfn COMMAND", "create/update a cfn stack"
+    method_option :app, :aliases => "-a", :desc => "application name"
+    method_option :port, :aliases => "-p", :desc => "port of running application"
+    def init image
+      Gantree::Init.new(image,options).run
+    end
   end
 end
