@@ -20,10 +20,9 @@ module Gantree
       Gantree::Init.new(image,options).run
     end
 
-    desc "cfn_create app", "create|update a cfn stack"
-    method_option :app, :aliases => "-a", :desc => "application name"
-    def cfn_create app
-      Gantree::Cfn.new(app,options).create
+    desc "create APP", "create or update a cfn stack"
+    def create app
+      Gantree::Stack.new(app).create
     end
   end
 end

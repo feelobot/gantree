@@ -1,13 +1,12 @@
 class MasterTemplate
-  def initialize(options ={})
-    @app = options.app
-    @env = options.env
+  def initialize app
+    @app = app
+    @env = "test"
     @cfn_bucket = "br-templates"
   end
 
-  def generate
-    IO.write("master_cfn.rb","
-      require 'cloudformation-ruby-dsl/cfntemplate'
+  def template
+      "require 'cloudformation-ruby-dsl/cfntemplate'
       require 'cloudformation-ruby-dsl/spotprice'
       require 'cloudformation-ruby-dsl/table'
       template do 
@@ -63,7 +62,11 @@ class MasterTemplate
                :Description => 'URL of the AWS Elastic Beanstalk Environment',
                :Value => get_att('App', 'Outputs.URL')
 
-      end.exec!")
-      `bundle exec cfn-validate master_cfn.rb`
+      end.exec!"
+    end
+
+    def generate
+      IO.write("master_template.rb", template)
+      `bundle exec cfn-validate-template master_template.rb`
     end
   end
