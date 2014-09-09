@@ -31,13 +31,18 @@ docker login
 
 Install the gem
 ```
-gem install 'gantree'
+gem install gantree
 ```
 
 ### Initialize
 
 What this does is create a new Dockerrun.aws.json inside your repository and uploads your docker login credentials to s3 (for private repo access) so you can do deploys. We need the -u to specify a username to rename your .dockercfg and reference it in the Dockerrun.aws.json
 
+For a public repo
+```
+gantree init -p 3000 bleacher/cauldron:master
+```
+For a private repo
 ```
 gantree init -u frodriguez -p 3000 bleacher/cauldron:master
 ```
@@ -48,6 +53,11 @@ This command renames your Dockerrun.aws.json temporarily to NAME_OF_ENV-GITHUB_H
 
 ```
 gantree deploy stag-cauldron-app-s1
+```
+By default this will check for the environment cauldron-stag-s1 and deploy to the app stag-cauldron-app. You can also specify an environment name directly using -e.
+
+```
+gantree deploy -e cauldron-stag-s1 stag-cauldron-app-s1
 ```
 
 You can also specify a new image tag to use for the deploy
