@@ -1,11 +1,10 @@
 require 'cloudformation-ruby-dsl'
-require 'cfn/master'
-require 'cfn/beanstalk'
-require 'cfn/resources'
+require_relative 'cfn/master'
+require_relative 'cfn/beanstalk'
+require_relative 'cfn/resources'
 
 module Gantree
   class Cfn
-
     def initialize app,options
       @options = options
       AWS.config(
