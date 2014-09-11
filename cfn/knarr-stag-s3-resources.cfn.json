@@ -1,0 +1,40 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "knarr-stag-s3 Services Resources (2014-06-30)",
+  "Parameters": {
+    "ApplicationName": {
+      "Type": "String",
+      "Default": {
+        "Ref": "ApplicationName"
+      }
+    }
+  },
+  "Resources": {
+    "InstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "an EC2 instance security group created for ",
+              {
+                "Ref": "ApplicationName"
+              }
+            ]
+          ]
+        },
+        "SecurityGroupIngress": [
+
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "InstanceSecurityGroup": {
+      "Value": {
+        "Ref": "InstanceSecurityGroup"
+      }
+    }
+  }
+}
