@@ -21,8 +21,9 @@ module Gantree
     end
 
     desc "create APP", "create or update a cfn stack"
+    method_option :env, :aliases => "-e", :desc => "(optional) environment name"
     def create app
-      Gantree::Stack.new(app).create
+      Gantree::Stack.new(app, options).create
     end
   end
 end

@@ -1,10 +1,12 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Knarr Services Resources (2014-06-30)",
+  "Description": "knarr-stag-s3 Services Resources (2014-06-30)",
   "Parameters": {
     "ApplicationName": {
       "Type": "String",
-      "Default": "knarr"
+      "Default": {
+        "Ref": "ApplicationName"
+      }
     }
   },
   "Resources": {

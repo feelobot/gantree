@@ -12,11 +12,11 @@ class ResourcesTemplate
 
       value :AWSTemplateFormatVersion => '2010-09-09'
 
-      value :Description => 'Knarr Services Resources (2014-06-30)'
+      value :Description => '#{@env} Services Resources (2014-06-30)'
 
       parameter 'ApplicationName',
                 :Type => 'String',
-                :Default => 'knarr'
+                :Default => ref('ApplicationName')
 
       resource 'InstanceSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
           :GroupDescription => join('', 'an EC2 instance security group created for ', ref('ApplicationName')),
