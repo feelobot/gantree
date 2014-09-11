@@ -15,12 +15,12 @@ class MasterTemplate
       parameter 'ResourcesTemplate',
                 :Description => 'The key of the template for the resources required to run the app',
                 :Type => 'String',
-                :Default => '#{@stack_name}-resources.cfn.json'
+                :Default => '#{@env}-resources.cfn.json'
 
       parameter 'AppTemplate',
                 :Description => 'The key of the template for the EB app/env substack',
                 :Type => 'String',
-                :Default => '#{@stack_name}-elasticbeanstalk.cfn.json'
+                :Default => '#{@env}-elasticbeanstalk.cfn.json'
 
       parameter 'KeyName',
                 :Default => 'default'
@@ -31,6 +31,7 @@ class MasterTemplate
 
       parameter 'ApplicationName',
                 :Type => 'String'
+                :Default => '#{@stack_name}'
 
       parameter 'Environment',
                 :Type => 'String',

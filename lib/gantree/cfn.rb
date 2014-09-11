@@ -58,6 +58,8 @@ module Gantree
 
     def create_aws_cfn_stack
       puts "Creating stack on aws..."
+      cfm = AWS::CloudFormation.new
+      stack = cfm.stacks.create(stack_name, template)
     end
 
   end

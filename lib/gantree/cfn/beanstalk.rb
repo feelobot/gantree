@@ -12,7 +12,7 @@ class BeanstalkTemplate
 
       value :AWSTemplateFormatVersion => '2010-09-09'
 
-      value :Description => 'Knarr Service Parent Template (2014-08-15)'
+      value :Description => '#{@env} Service Parent Template (2014-08-15)'
 
       mapping 'LongName',
               :stag => { :name => 'staging' },
@@ -39,7 +39,7 @@ class BeanstalkTemplate
       parameter 'ApplicationName',
                 :Description => 'The name of the Elastic Beanstalk Application',
                 :Type => 'String',
-                :Default => 'knarr'
+                :Default => ref('ApplicationName')
 
       parameter 'Environment',
                 :Type => 'String'
@@ -57,8 +57,8 @@ class BeanstalkTemplate
           :ApplicationName => ref('Application'),
           :Description => 'Initial Version',
           :SourceBundle => {
-              :S3Bucket => 'br-repos',
-              :S3Key => join('', ref('ApplicationName'), '-', ref('Environment'), '.zip'),
+              :S3Bucket => join('/','br-repos',ref('Environment')),
+              :S3Key => join('',ref('Environment'), '-Dockerrun.aws.json'),
           },
       }
 
