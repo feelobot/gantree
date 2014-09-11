@@ -30,7 +30,7 @@ class MasterTemplate
                 :Default => 't1.micro'
 
       parameter 'ApplicationName',
-                :Type => 'String'
+                :Type => 'String',
                 :Default => '#{@stack_name}'
 
       parameter 'Environment',
