@@ -1,26 +1,32 @@
-#!/usr/bin/env ruby
+class ResourcesTemplate
 
-require 'bundler/setup'
-require 'cloudformation-ruby-dsl/cfntemplate'
-require 'cloudformation-ruby-dsl/spotprice'
-require 'cloudformation-ruby-dsl/table'
+  def initialize params
+    @stack_name = params[:stack_name]
+    @env = params[:env]
+    @requirements = params[:requirements]
+  end
 
-template do
+  def create
+    "#{@requirements}
+    template do
 
-  value :AWSTemplateFormatVersion => '2010-09-09'
+      value :AWSTemplateFormatVersion => '2010-09-09'
 
-  value :Description => 'Knarr Service\'s Resources (2014-06-30)'
+      value :Description => 'Knarr Services Resources (2014-06-30)'
 
-  parameter 'ApplicationName',
-            :Type => 'String',
-            :Default => ref('ApplicationName')
+      parameter 'ApplicationName',
+                :Type => 'String',
+                :Default => 'knarr'
 
-  resource 'InstanceSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-      :GroupDescription => join('', 'an EC2 instance security group created for ', ref('ApplicationName')),
-      :SecurityGroupIngress => [],
-  }
+      resource 'InstanceSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
+          :GroupDescription => join('', 'an EC2 instance security group created for ', ref('ApplicationName')),
+          :SecurityGroupIngress => [],
+      }
 
-  output 'InstanceSecurityGroup',
-         :Value => ref('InstanceSecurityGroup')
+      output 'InstanceSecurityGroup',
+             :Value => ref('InstanceSecurityGroup')
 
-end.exec!
+    end.exec!
+    "
+  end
+end
