@@ -41,8 +41,9 @@
           "Fn::Join": [
             "/",
             [
-              "http://s3.amazonaws.com/br-templates",
-              "prod-knarr-app-s5",
+              "http://s3.amazonaws.com",
+              "br-templates",
+              "knarr-prod-s5",
               {
                 "Ref": "ResourcesTemplate"
               }
@@ -63,10 +64,9 @@
           "Fn::Join": [
             "/",
             [
-              "http://s3.amazonaws.com/",
-              {
-                "Ref": "ApplicationName"
-              },
+              "http://s3.amazonaws.com",
+              "br-templates",
+              "knarr-prod-s5",
               {
                 "Ref": "AppTemplate"
               }

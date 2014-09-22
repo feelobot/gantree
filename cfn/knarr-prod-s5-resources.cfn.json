@@ -4,29 +4,14 @@
   "Parameters": {
     "ApplicationName": {
       "Type": "String",
-      "Default": {
-        "Ref": "ApplicationName"
-      }
+      "Default": "knarr-prod-s5"
     }
   },
   "Resources": {
     "InstanceSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": {
-          "Fn::Join": [
-            "",
-            [
-              "an EC2 instance security group created for ",
-              {
-                "Ref": "ApplicationName"
-              }
-            ]
-          ]
-        },
-        "SecurityGroupIngress": [
-
-        ]
+        "GroupDescription": "an EC2 instance security group created for knarr-prod-s5"
       }
     }
   },

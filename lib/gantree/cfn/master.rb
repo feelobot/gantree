@@ -3,6 +3,7 @@ class MasterTemplate
   def initialize params
     @stack_name = params[:stack_name]
     @env = params[:env]
+    @bucket = params[:cfn_bucket]
     @requirements = params[:requirements]
   end
 
@@ -43,12 +44,12 @@ class MasterTemplate
                 :Default => 'EbApp'
 
       resource 'AppResources', :Type => 'AWS::CloudFormation::Stack', :Properties => {
-          :TemplateURL => join('/', 'http://s3.amazonaws.com/br-templates', '#{@stack_name}', ref('ResourcesTemplate')),
+          :TemplateURL => join('/', 'http://s3.amazonaws.com', '#{@bucket}', '#{@env}', ref('ResourcesTemplate')),
           :Parameters => { :ApplicationName => ref('ApplicationName') },
       }
 
       resource 'App', :Type => 'AWS::CloudFormation::Stack', :Properties => {
-          :TemplateURL => join('/', 'http://s3.amazonaws.com/#{@cfn_bucket}', ref('ApplicationName'), ref('AppTemplate')),
+          :TemplateURL => join('/', 'http://s3.amazonaws.com','#{@bucket}', '#{@env}', ref('AppTemplate')),
           :Parameters => {
               :KeyName => ref('KeyName'),
               :InstanceSecurityGroup => get_att('AppResources', 'Outputs.InstanceSecurityGroup'),

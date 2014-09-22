@@ -16,11 +16,10 @@ class ResourcesTemplate
 
       parameter 'ApplicationName',
                 :Type => 'String',
-                :Default => ref('ApplicationName')
+                :Default => '#{@env}'
 
       resource 'InstanceSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-          :GroupDescription => join('', 'an EC2 instance security group created for ', ref('ApplicationName')),
-          :SecurityGroupIngress => [],
+          :GroupDescription => join('', 'an EC2 instance security group created for #{@env}')
       }
 
       output 'InstanceSecurityGroup',
