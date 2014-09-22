@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Knarr Service Parent Template (2014-08-15)",
+  "Description": "knarr-prod-s5 Service Parent Template (2014-08-15)",
   "Mappings": {
     "LongName": {
       "stag": {
@@ -49,7 +49,9 @@
     "ApplicationName": {
       "Description": "The name of the Elastic Beanstalk Application",
       "Type": "String",
-      "Default": "knarr"
+      "Default": {
+        "Ref": "ApplicationName"
+      }
     },
     "Environment": {
       "Type": "String"
@@ -89,19 +91,25 @@
         },
         "Description": "Initial Version",
         "SourceBundle": {
-          "S3Bucket": "br-repos",
+          "S3Bucket": {
+            "Fn::Join": [
+              "/",
+              [
+                "br-repos",
+                {
+                  "Ref": "Environment"
+                }
+              ]
+            ]
+          },
           "S3Key": {
             "Fn::Join": [
               "",
               [
                 {
-                  "Ref": "ApplicationName"
-                },
-                "-",
-                {
                   "Ref": "Environment"
                 },
-                ".zip"
+                "-Dockerrun.aws.json"
               ]
             ]
           }

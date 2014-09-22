@@ -10,6 +10,7 @@ module Gantree
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
       @s3 = AWS::S3.new
+      @cfm = AWS::CloudFormation.new
       @requirements = "#!/usr/bin/env ruby
         require 'bundler/setup'
         require 'cloudformation-ruby-dsl/cfntemplate'
@@ -29,13 +30,14 @@ module Gantree
       generate("master", MasterTemplate.new(@params).create)
       generate("beanstalk", BeanstalkTemplate.new(@params).create)
       generate("resources", ResourcesTemplate.new(@params).create)
+      create_aws_cfn_stack
     end
 
     def generate(template_name, template)
       IO.write("cfn/#{template_name}.rb", template)
       json = `ruby cfn/#{template_name}.rb expand`
       Dir.mkdir 'cfn' rescue Errno::ENOENT
-      template_file_name = "#{@params[:env]}-#{template_name}.cfn.json"
+      template_file_name = "#{@env}-#{template_name}.cfn.json"
       IO.write("cfn/#{template_file_name}", json)
       puts "Created #{template_file_name} in the cfn directory"
       FileUtils.rm("cfn/#{template_name}.rb")
@@ -58,8 +60,8 @@ module Gantree
 
     def create_aws_cfn_stack
       puts "Creating stack on aws..."
-      cfm = AWS::CloudFormation.new
-      stack = cfm.stacks.create(stack_name, template)
+      template = AWS::S3.new.buckets["#{@params[:cfn_bucket]}/#{@env}"].objects["#{@env}-master.cfn.json"]
+      stack = @cfm.stacks.create(@params[:stack_name], template)
     end
 
   end

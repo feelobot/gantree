@@ -20,9 +20,10 @@ class MasterTemplate
       parameter 'AppTemplate',
                 :Description => 'The key of the template for the EB app/env substack',
                 :Type => 'String',
-                :Default => '#{@env}-elasticbeanstalk.cfn.json'
+                :Default => '#{@env}-beanstalk.cfn.json'
 
       parameter 'KeyName',
+                :Type => 'String',
                 :Default => 'default'
 
       parameter 'InstanceType',
@@ -31,7 +32,7 @@ class MasterTemplate
 
       parameter 'ApplicationName',
                 :Type => 'String',
-                :Default => '#{@stack_name}'
+                :Default => '#{@env}'
 
       parameter 'Environment',
                 :Type => 'String',
@@ -42,7 +43,7 @@ class MasterTemplate
                 :Default => 'EbApp'
 
       resource 'AppResources', :Type => 'AWS::CloudFormation::Stack', :Properties => {
-          :TemplateURL => join('/', 'http://s3.amazonaws.com/br-templates', ref('ApplicationName'), ref('ResourcesTemplate')),
+          :TemplateURL => join('/', 'http://s3.amazonaws.com/br-templates', '#{@stack_name}', ref('ResourcesTemplate')),
           :Parameters => { :ApplicationName => ref('ApplicationName') },
       }
 
