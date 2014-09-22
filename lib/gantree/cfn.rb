@@ -22,7 +22,9 @@ module Gantree
         stack_name: @stack_name,
         requirements: @requirements,
         cfn_bucket: "br-templates",
-        env: @env
+        env: @env,
+        stag_domain: "sbleacherreport.com",
+        prod_domain: "bleacherreport.com"
       }
     end
 
@@ -61,7 +63,7 @@ module Gantree
     def create_aws_cfn_stack
       puts "Creating stack on aws..."
       template = AWS::S3.new.buckets["#{@params[:cfn_bucket]}/#{@env}"].objects["#{@env}-master.cfn.json"]
-      stack = @cfm.stacks.create(@params[:stack_name], template)
+      stack = @cfm.stacks.create(@params[:stack_name], template,{ :disable_rollback => true })
     end
 
   end

@@ -49,12 +49,11 @@
     "ApplicationName": {
       "Description": "The name of the Elastic Beanstalk Application",
       "Type": "String",
-      "Default": {
-        "Ref": "ApplicationName"
-      }
+      "Default": "knarr-prod-s5"
     },
     "Environment": {
-      "Type": "String"
+      "Type": "String",
+      "Default": "stag"
     },
     "IamInstanceProfile": {
       "Type": "String",
@@ -68,19 +67,7 @@
         "Description": {
           "Ref": "ApplicationName"
         },
-        "ApplicationName": {
-          "Fn::Join": [
-            "-",
-            [
-              {
-                "Ref": "ApplicationName"
-              },
-              {
-                "Ref": "Environment"
-              }
-            ]
-          ]
-        }
+        "ApplicationName": "prod-knarr-app-s5"
       }
     },
     "ApplicationVersion": {
@@ -93,26 +80,14 @@
         "SourceBundle": {
           "S3Bucket": {
             "Fn::Join": [
-              "/",
+              "-",
               [
-                "br-repos",
-                {
-                  "Ref": "Environment"
-                }
+                "elasticbeanstalk-samples",
+                "aws_region"
               ]
             ]
           },
-          "S3Key": {
-            "Fn::Join": [
-              "",
-              [
-                {
-                  "Ref": "Environment"
-                },
-                "-Dockerrun.aws.json"
-              ]
-            ]
-          }
+          "S3Key": "docker-sample.zip "
         }
       }
     },
@@ -133,15 +108,7 @@
           {
             "Namespace": "aws:elasticbeanstalk:application:environment",
             "OptionName": "RACK_ENV",
-            "Value": {
-              "Fn::FindInMap": [
-                "LongName",
-                {
-                  "Ref": "Environment"
-                },
-                "name"
-              ]
-            }
+            "Value": "production"
           },
           {
             "Namespace": "aws:autoscaling:launchconfiguration",
@@ -175,9 +142,7 @@
                     "Fn::Join": [
                       "-",
                       [
-                        {
-                          "Ref": "Environment"
-                        },
+                        "prod",
                         "br"
                       ]
                     ]
@@ -215,23 +180,8 @@
     "EbEnvironment": {
       "Type": "AWS::ElasticBeanstalk::Environment",
       "Properties": {
-        "ApplicationName": {
-          "Ref": "Application"
-        },
-        "EnvironmentName": {
-          "Fn::Join": [
-            "-",
-            [
-              {
-                "Ref": "Environment"
-              },
-              {
-                "Ref": "ApplicationName"
-              },
-              "app"
-            ]
-          ]
-        },
+        "ApplicationName": "knarr-prod-s5",
+        "EnvironmentName": "prod-knarr-app-s5",
         "Description": "Default Environment",
         "VersionLabel": {
           "Ref": "ApplicationVersion"
@@ -252,15 +202,7 @@
           "Fn::Join": [
             "",
             [
-              {
-                "Fn::FindInMap": [
-                  "HostedZoneName",
-                  {
-                    "Ref": "Environment"
-                  },
-                  "name"
-                ]
-              },
+              "bleacherreport.com",
               "."
             ]
           ]
@@ -272,15 +214,7 @@
               {
                 "Ref": "ApplicationName"
               },
-              {
-                "Fn::FindInMap": [
-                  "HostedZoneName",
-                  {
-                    "Ref": "Environment"
-                  },
-                  "name"
-                ]
-              }
+              "bleacherreport.com"
             ]
           ]
         },
