@@ -57,7 +57,7 @@ class BeanstalkTemplate
       }
 
       resource 'ApplicationVersion', :Type => 'AWS::ElasticBeanstalk::ApplicationVersion', :Properties => {
-          :ApplicationName => '#{@env}',
+          :ApplicationName => '#{@stack_name}',
           :Description => 'Initial Version',
           :SourceBundle => {
               :S3Bucket => 'elasticbeanstalk-samples-us-east-1',
