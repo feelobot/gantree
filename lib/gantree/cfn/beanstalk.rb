@@ -53,20 +53,20 @@ class BeanstalkTemplate
 
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
           :Description => ref('ApplicationName'),
-          :ApplicationName => '#{@stack_name}',
+          :ApplicationName => '#{@env}',
       }
 
       resource 'ApplicationVersion', :Type => 'AWS::ElasticBeanstalk::ApplicationVersion', :Properties => {
-          :ApplicationName => ref('Application'),
+          :ApplicationName => '#{@env}',
           :Description => 'Initial Version',
           :SourceBundle => {
-              :S3Bucket => join('-','elasticbeanstalk-samples','aws_region'),
-              :S3Key => 'docker-sample.zip ',
+              :S3Bucket => 'elasticbeanstalk-samples-us-east-1',
+              :S3Key => 'docker-sample.zip',
           },
       }
 
       resource 'ConfigurationTemplate', :Type => 'AWS::ElasticBeanstalk::ConfigurationTemplate', :Properties => {
-          :ApplicationName => ref('Application'),
+          :ApplicationName => '#{@stack_name}',
           :SolutionStackName => '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0',
           :Description => 'Default Configuration Version 1.0 - with SSH access',
           :OptionSettings => [
