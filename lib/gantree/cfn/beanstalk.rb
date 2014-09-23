@@ -52,12 +52,12 @@ class BeanstalkTemplate
                 :Default => 'EbApp'
 
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
-          :Description => ref('ApplicationName'),
+          :Description => '#{@env}',
           :ApplicationName => '#{@env}',
       }
 
       resource 'ApplicationVersion', :Type => 'AWS::ElasticBeanstalk::ApplicationVersion', :Properties => {
-          :ApplicationName => '#{@stack_name}',
+          :ApplicationName => '#{@env}',
           :Description => 'Initial Version',
           :SourceBundle => {
               :S3Bucket => 'elasticbeanstalk-samples-us-east-1',
@@ -66,7 +66,7 @@ class BeanstalkTemplate
       }
 
       resource 'ConfigurationTemplate', :Type => 'AWS::ElasticBeanstalk::ConfigurationTemplate', :Properties => {
-          :ApplicationName => '#{@stack_name}',
+          :ApplicationName => '#{@env}',
           :SolutionStackName => '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0',
           :Description => 'Default Configuration Version 1.0 - with SSH access',
           :OptionSettings => [
