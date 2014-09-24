@@ -49,7 +49,7 @@
     "ApplicationName": {
       "Description": "The name of the Elastic Beanstalk Application",
       "Type": "String",
-      "Default": "prod-knarr-app-s5"
+      "Default": "knarr-prod-s5"
     },
     "Environment": {
       "Type": "String",
@@ -71,7 +71,9 @@
     "ApplicationVersion": {
       "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
       "Properties": {
-        "ApplicationName": "knarr-prod-s5",
+        "ApplicationName": {
+          "Ref": "Application"
+        },
         "Description": "Initial Version",
         "SourceBundle": {
           "S3Bucket": "elasticbeanstalk-samples-us-east-1",
@@ -82,7 +84,9 @@
     "ConfigurationTemplate": {
       "Type": "AWS::ElasticBeanstalk::ConfigurationTemplate",
       "Properties": {
-        "ApplicationName": "knarr-prod-s5",
+        "ApplicationName": {
+          "Ref": "Application"
+        },
         "SolutionStackName": "64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0",
         "Description": "Default Configuration Version 1.0 - with SSH access",
         "OptionSettings": [
