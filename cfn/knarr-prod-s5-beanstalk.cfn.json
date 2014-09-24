@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Knarr Service Parent Template (2014-08-15)",
+  "Description": "knarr-prod-s5 Service Parent Template (2014-08-15)",
   "Mappings": {
     "LongName": {
       "stag": {
@@ -49,10 +49,11 @@
     "ApplicationName": {
       "Description": "The name of the Elastic Beanstalk Application",
       "Type": "String",
-      "Default": "knarr"
+      "Default": "knarr-prod-s5"
     },
     "Environment": {
-      "Type": "String"
+      "Type": "String",
+      "Default": "stag"
     },
     "IamInstanceProfile": {
       "Type": "String",
@@ -63,22 +64,8 @@
     "Application": {
       "Type": "AWS::ElasticBeanstalk::Application",
       "Properties": {
-        "Description": {
-          "Ref": "ApplicationName"
-        },
-        "ApplicationName": {
-          "Fn::Join": [
-            "-",
-            [
-              {
-                "Ref": "ApplicationName"
-              },
-              {
-                "Ref": "Environment"
-              }
-            ]
-          ]
-        }
+        "Description": "knarr-prod-s5",
+        "ApplicationName": "knarr-prod-s5"
       }
     },
     "ApplicationVersion": {
@@ -89,22 +76,8 @@
         },
         "Description": "Initial Version",
         "SourceBundle": {
-          "S3Bucket": "br-repos",
-          "S3Key": {
-            "Fn::Join": [
-              "",
-              [
-                {
-                  "Ref": "ApplicationName"
-                },
-                "-",
-                {
-                  "Ref": "Environment"
-                },
-                ".zip"
-              ]
-            ]
-          }
+          "S3Bucket": "elasticbeanstalk-samples-us-east-1",
+          "S3Key": "docker-sample.zip"
         }
       }
     },
@@ -125,15 +98,7 @@
           {
             "Namespace": "aws:elasticbeanstalk:application:environment",
             "OptionName": "RACK_ENV",
-            "Value": {
-              "Fn::FindInMap": [
-                "LongName",
-                {
-                  "Ref": "Environment"
-                },
-                "name"
-              ]
-            }
+            "Value": "production"
           },
           {
             "Namespace": "aws:autoscaling:launchconfiguration",
@@ -167,9 +132,7 @@
                     "Fn::Join": [
                       "-",
                       [
-                        {
-                          "Ref": "Environment"
-                        },
+                        "prod",
                         "br"
                       ]
                     ]
@@ -207,23 +170,8 @@
     "EbEnvironment": {
       "Type": "AWS::ElasticBeanstalk::Environment",
       "Properties": {
-        "ApplicationName": {
-          "Ref": "Application"
-        },
-        "EnvironmentName": {
-          "Fn::Join": [
-            "-",
-            [
-              {
-                "Ref": "Environment"
-              },
-              {
-                "Ref": "ApplicationName"
-              },
-              "app"
-            ]
-          ]
-        },
+        "ApplicationName": "knarr-prod-s5",
+        "EnvironmentName": "prod-knarr-app-s5",
         "Description": "Default Environment",
         "VersionLabel": {
           "Ref": "ApplicationVersion"
@@ -244,15 +192,7 @@
           "Fn::Join": [
             "",
             [
-              {
-                "Fn::FindInMap": [
-                  "HostedZoneName",
-                  {
-                    "Ref": "Environment"
-                  },
-                  "name"
-                ]
-              },
+              "bleacherreport.com",
               "."
             ]
           ]
@@ -264,15 +204,7 @@
               {
                 "Ref": "ApplicationName"
               },
-              {
-                "Fn::FindInMap": [
-                  "HostedZoneName",
-                  {
-                    "Ref": "Environment"
-                  },
-                  "name"
-                ]
-              }
+              "bleacherreport.com"
             ]
           ]
         },

@@ -1,18 +1,19 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "stag-knarr-app-s3 Master Template",
+  "Description": "prod-knarr-app-s5 Master Template",
   "Parameters": {
     "ResourcesTemplate": {
       "Description": "The key of the template for the resources required to run the app",
       "Type": "String",
-      "Default": "stag-knarr-app-s3-resources.cfn.json"
+      "Default": "knarr-prod-s5-resources.cfn.json"
     },
     "AppTemplate": {
       "Description": "The key of the template for the EB app/env substack",
       "Type": "String",
-      "Default": "stag-knarr-app-s3-elasticbeanstalk.cfn.json"
+      "Default": "knarr-prod-s5-beanstalk.cfn.json"
     },
     "KeyName": {
+      "Type": "String",
       "Default": "default"
     },
     "InstanceType": {
@@ -20,11 +21,12 @@
       "Default": "t1.micro"
     },
     "ApplicationName": {
-      "Type": "String"
+      "Type": "String",
+      "Default": "knarr-prod-s5"
     },
     "Environment": {
       "Type": "String",
-      "Default": "knarr-stag-s3"
+      "Default": "prod"
     },
     "IamInstanceProfile": {
       "Type": "String",
@@ -39,10 +41,9 @@
           "Fn::Join": [
             "/",
             [
-              "http://s3.amazonaws.com/br-templates",
-              {
-                "Ref": "ApplicationName"
-              },
+              "http://s3.amazonaws.com",
+              "br-templates",
+              "knarr-prod-s5",
               {
                 "Ref": "ResourcesTemplate"
               }
@@ -63,10 +64,9 @@
           "Fn::Join": [
             "/",
             [
-              "http://s3.amazonaws.com/",
-              {
-                "Ref": "ApplicationName"
-              },
+              "http://s3.amazonaws.com",
+              "br-templates",
+              "knarr-prod-s5",
               {
                 "Ref": "AppTemplate"
               }

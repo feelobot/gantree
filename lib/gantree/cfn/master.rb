@@ -3,6 +3,7 @@ class MasterTemplate
   def initialize params
     @stack_name = params[:stack_name]
     @env = params[:env]
+    @bucket = params[:cfn_bucket]
     @requirements = params[:requirements]
   end
 
@@ -20,9 +21,10 @@ class MasterTemplate
       parameter 'AppTemplate',
                 :Description => 'The key of the template for the EB app/env substack',
                 :Type => 'String',
-                :Default => '#{@env}-elasticbeanstalk.cfn.json'
+                :Default => '#{@env}-beanstalk.cfn.json'
 
       parameter 'KeyName',
+                :Type => 'String',
                 :Default => 'default'
 
       parameter 'InstanceType',
@@ -31,23 +33,23 @@ class MasterTemplate
 
       parameter 'ApplicationName',
                 :Type => 'String',
-                :Default => '#{@stack_name}'
+                :Default => '#{@env}'
 
       parameter 'Environment',
                 :Type => 'String',
-                :Default => '#{@env}'
+                :Default => '#{env_type}'
 
       parameter 'IamInstanceProfile',
                 :Type => 'String',
                 :Default => 'EbApp'
 
       resource 'AppResources', :Type => 'AWS::CloudFormation::Stack', :Properties => {
-          :TemplateURL => join('/', 'http://s3.amazonaws.com/br-templates', ref('ApplicationName'), ref('ResourcesTemplate')),
+          :TemplateURL => join('/', 'http://s3.amazonaws.com', '#{@bucket}', '#{@env}', ref('ResourcesTemplate')),
           :Parameters => { :ApplicationName => ref('ApplicationName') },
       }
 
       resource 'App', :Type => 'AWS::CloudFormation::Stack', :Properties => {
-          :TemplateURL => join('/', 'http://s3.amazonaws.com/#{@cfn_bucket}', ref('ApplicationName'), ref('AppTemplate')),
+          :TemplateURL => join('/', 'http://s3.amazonaws.com','#{@bucket}', '#{@env}', ref('AppTemplate')),
           :Parameters => {
               :KeyName => ref('KeyName'),
               :InstanceSecurityGroup => get_att('AppResources', 'Outputs.InstanceSecurityGroup'),
@@ -63,5 +65,15 @@ class MasterTemplate
              :Value => get_att('App', 'Outputs.URL')
 
     end.exec!"
+  end
+
+  def env_type
+    if @env.include?("prod")
+      "prod"
+    elsif @env.include?("stag")
+      "stag"
+    else
+      ""
+    end
   end
 end

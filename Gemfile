@@ -8,4 +8,3 @@ gem "rspec", group: :test
 gem "rake"
 gem "guard-rspec", require: false
 gem "webmock"
-gem "cloudformation-ruby-dsl"

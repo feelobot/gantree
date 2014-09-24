@@ -3,6 +3,8 @@ class BeanstalkTemplate
   def initialize params
     @stack_name = params[:stack_name]
     @env = params[:env]
+    @prod_domain = params[:prod_domain]
+    @stag_domain = params[:stag_domain]
     @requirements = params[:requirements]
   end
 
@@ -19,8 +21,8 @@ class BeanstalkTemplate
               :prod => { :name => 'production' }
 
       mapping 'HostedZoneName',
-              :stag => { :name => 'sbleacherreport.com' },
-              :prod => { :name => 'bleacherreport.com' }
+              :stag => { :name => '#{@stag_domain}' },
+              :prod => { :name => '#{@prod_domain}' }
 
       parameter 'KeyName',
                 :Description => 'The Key Pair to launch instances with',
@@ -39,26 +41,27 @@ class BeanstalkTemplate
       parameter 'ApplicationName',
                 :Description => 'The name of the Elastic Beanstalk Application',
                 :Type => 'String',
-                :Default => ref('ApplicationName')
+                :Default =>  '#{@env}'
 
       parameter 'Environment',
-                :Type => 'String'
+                :Type => 'String',
+                :Default => 'stag'
 
       parameter 'IamInstanceProfile',
                 :Type => 'String',
                 :Default => 'EbApp'
 
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
-          :Description => ref('ApplicationName'),
-          :ApplicationName => join('-', ref('ApplicationName'), ref('Environment')),
+          :Description => '#{@env}',
+          :ApplicationName => '#{@env}',
       }
 
       resource 'ApplicationVersion', :Type => 'AWS::ElasticBeanstalk::ApplicationVersion', :Properties => {
           :ApplicationName => ref('Application'),
           :Description => 'Initial Version',
           :SourceBundle => {
-              :S3Bucket => join('/','br-repos',ref('Environment')),
-              :S3Key => join('',ref('Environment'), '-Dockerrun.aws.json'),
+              :S3Bucket => 'elasticbeanstalk-samples-us-east-1',
+              :S3Key => 'docker-sample.zip',
           },
       }
 
@@ -75,7 +78,7 @@ class BeanstalkTemplate
               {
                   :Namespace => 'aws:elasticbeanstalk:application:environment',
                   :OptionName => 'RACK_ENV',
-                  :Value => find_in_map('LongName', ref('Environment'), 'name'),
+                  :Value => find_in_map('LongName', '#{env_type}', 'name'),
               },
               {
                   :Namespace => 'aws:autoscaling:launchconfiguration',
@@ -95,7 +98,7 @@ class BeanstalkTemplate
               {
                   :Namespace => 'aws:autoscaling:launchconfiguration',
                   :OptionName => 'SecurityGroups',
-                  :Value => join(',', join('-', ref('Environment'), 'br'), ref('InstanceSecurityGroup')),
+                  :Value => join(',', join('-', '#{env_type}', 'br'), ref('InstanceSecurityGroup')),
               },
               { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'RollingUpdateEnabled', :Value => 'true' },
               { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MaxBatchSize', :Value => '1' },
@@ -105,8 +108,8 @@ class BeanstalkTemplate
       }
 
       resource 'EbEnvironment', :Type => 'AWS::ElasticBeanstalk::Environment', :Properties => {
-          :ApplicationName => ref('Application'),
-          :EnvironmentName => join('-', ref('Environment'), ref('ApplicationName'), 'app'),
+          :ApplicationName => '#{@env}',
+          :EnvironmentName => '#{@stack_name}',
           :Description => 'Default Environment',
           :VersionLabel => ref('ApplicationVersion'),
           :TemplateName => ref('ConfigurationTemplate'),
@@ -115,8 +118,8 @@ class BeanstalkTemplate
 
       resource 'HostRecord', :Type => 'AWS::Route53::RecordSet', :Properties => {
           :Comment => 'DNS name for my stack',
-          :HostedZoneName => join('', find_in_map('HostedZoneName', ref('Environment'), 'name'), '.'),
-          :Name => join('.', ref('ApplicationName'), find_in_map('HostedZoneName', ref('Environment'), 'name')),
+          :HostedZoneName => join('', find_in_map('HostedZoneName', '#{env_type}', 'name'), '.'),
+          :Name => join('.', ref('ApplicationName'), find_in_map('HostedZoneName', '#{env_type}', 'name')),
           :ResourceRecords => [ get_att('EbEnvironment', 'EndpointURL') ],
           :TTL => '60',
           :Type => 'CNAME',
@@ -129,4 +132,15 @@ class BeanstalkTemplate
     end.exec!
     "
   end
+
+  def env_type
+    if @env.include?("prod")
+      "prod"
+    elsif @env.include?("stag")
+      "stag"
+    else
+      ""
+    end
+  end
+
 end
