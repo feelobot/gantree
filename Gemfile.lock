@@ -9,11 +9,14 @@ GEM
       nokogiri (>= 1.4.4)
     celluloid (0.15.2)
       timers (~> 1.1.0)
+    cloudformation-ruby-dsl (0.4.6)
+      detabulator
     codeclimate-test-reporter (0.4.0)
       simplecov (>= 0.7.1, < 1.0.0)
     coderay (1.1.0)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
+    detabulator (0.1.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
     ffi (1.9.3)
@@ -76,6 +79,7 @@ PLATFORMS
 
 DEPENDENCIES
   aws-sdk
+  cloudformation-ruby-dsl
   codeclimate-test-reporter
   guard
   guard-rspec
