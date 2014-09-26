@@ -6,6 +6,7 @@ require_relative 'cfn/resources'
 module Gantree
   class Stack
     def initialize stack_name,options
+      check_credentials
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
@@ -28,11 +29,21 @@ module Gantree
       }
     end
 
+    def check_credentials
+      raise "Please set your AWS Environment Variables" if ENV['AWS_SECRET_ACCES_KEY'] == nil
+      raise "Please set your AWS Environment Variables" if ENV['AWS_ACCES_KEY_ID'] == nil
+    end
+
     def create
+      create_cfn_if_needed
       generate("master", MasterTemplate.new(@params).create)
       generate("beanstalk", BeanstalkTemplate.new(@params).create)
       generate("resources", ResourcesTemplate.new(@params).create)
       create_aws_cfn_stack
+    end
+
+    def create_cfn_if_needed
+      Dir.mkdir 'cfn' unless File.directory?("cfn")
     end
 
     def generate(template_name, template)

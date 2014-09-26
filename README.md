@@ -65,3 +65,61 @@ You can also specify a new image tag to use for the deploy
 ```
 gantree deploy -t latest stag-cauldon-app-s1
 ```
+
+### Create Stacks
+
+Gantree allows you to leverage the power of aws cloud formation to create your entire elastic beanstalk stack, rds, caching layer etc all while maintaining a set naming convention. This does the following: 
+* uses the ruby-cloudformation-dsl to generate nested cloud formation templates inside a cfn folder in your repo
+* uploads them to an s3 bucket
+* uses aws-sdk to communicate with cfn and initiate the stack creation
+
+To generate a basic staging cluster for linguist we would do:
+```
+gantree create stag-linguist-app-s1
+```
+
+In the elastic beanstalk console you will now see an application called 
+**linguist-stag-s1** with an environment called **stag-linguist-app-s1**
+
+You can modify the name of the environment if this does not fit your naming convention:
+```
+gantre create your_app_name -e your_env_name
+```
+
+## TODO:
+
+### .gantreecfg
+Allow defaults for commands to be set in a json file 
+```json
+{
+  "ebextensions" : "configs/.ebextensions",
+  "default_instance_size" : "m3.medium"
+}
+```
+
+#### .ebextension Support
+Elastic Beanstalk cli allows you to create a .ebextension folder that you can package with your deploy to control the host/environment of your application. Deploying only a docker container image referenced in Dockerrun.aws.json has the unfortunate side effect of losing this extreamly powerful feature. To allow this feature to be included in gantree and make it even better you can select either to package a local .ebextension folder with your deploy, package a remote .ebextension folder hosted in github (with branch support) or even create a .gantreecfg file to make either of these type of deploys a default.
+
+```
+gantree deploy --ext "git:br/ebextensions:master" stag-cauldron-app-s1
+```
+
+By default your application will be created on a t1.micro unless you specify otherwise:
+```
+gantree ceate your_app_name -i m3.medium
+```
+
+#### What if you need a database? Here enters the beauty of RDS
+
+**PostgreSQL:** ```gantree create your_app_name --rds pg```
+
+**Mysql:** ```gantree create your_app_name --rds msql```
+
+#### What if you want a cdn behind each of your generated applications
+
+**Fastly:** ```gantree create your_app_name --cdn fastly```
+
+**CloudFront:** ```gantree create yoour_app_name --cdn cloudfront```
+
+
+Also if the cloud formation template that is generated doesn't match your needs (which it might now) you can edit the .rb files in the repo's cfn folder, build your own gem and use it how you like.
