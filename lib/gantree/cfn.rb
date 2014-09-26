@@ -6,9 +6,11 @@ require_relative 'cfn/resources'
 module Gantree
   class Stack
     def initialize stack_name,options
+      check_credentials
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
+      raise "Please set your AWS Environment Variables" if ENV['AWS_SECRET_ACCES_KEY']
       @s3 = AWS::S3.new
       @cfm = AWS::CloudFormation.new
       @requirements = "#!/usr/bin/env ruby
@@ -26,6 +28,11 @@ module Gantree
         stag_domain: "sbleacherreport.com",
         prod_domain: "bleacherreport.com"
       }
+    end
+
+    def check_credentials
+      raise "Please set your AWS Environment Variables" if ENV['AWS_SECRET_ACCES_KEY'] == nil
+      raise "Please set your AWS Environment Variables" if ENV['AWS_ACCES_KEY_ID'] == nil
     end
 
     def create
