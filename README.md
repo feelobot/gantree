@@ -101,8 +101,8 @@ Allow defaults for commands to be set in a json file
 Elastic Beanstalk cli allows you to create a .ebextension folder that you can package with your deploy to control the host/environment of your application. Deploying only a docker container image referenced in Dockerrun.aws.json has the unfortunate side effect of losing this extreamly powerful feature. To allow this feature to be included in gantree and make it even better you can select either to package a local .ebextension folder with your deploy, package a remote .ebextension folder hosted in github (with branch support) or even create a .gantreecfg file to make either of these type of deploys a default.
 
 ```
-gantree
-
+gantree deploy --ext "git:br/ebextensions:master" stag-cauldron-app-s1
+```
 
 By default your application will be created on a t1.micro unless you specify otherwise:
 ```
