@@ -29,10 +29,15 @@ module Gantree
     end
 
     def create
+      create_cfn_if_needed
       generate("master", MasterTemplate.new(@params).create)
       generate("beanstalk", BeanstalkTemplate.new(@params).create)
       generate("resources", ResourcesTemplate.new(@params).create)
       create_aws_cfn_stack
+    end
+
+    def create_cfn_if_needed
+      Dir.mkdir 'cfn' unless File.directory?("cfn")
     end
 
     def generate(template_name, template)
