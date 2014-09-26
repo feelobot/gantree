@@ -86,4 +86,40 @@ You can modify the name of the environment if this does not fit your naming conv
 gantre create your_app_name -e your_env_name
 ```
 
+## TODO:
+
+### .gantreecfg
+Allow defaults for commands to be set in a json file 
+```json
+{
+  "ebextensions" : "configs/.ebextensions",
+  "default_instance_size" : "m3.medium"
+}
+```
+
+#### .ebextension Support
+Elastic Beanstalk cli allows you to create a .ebextension folder that you can package with your deploy to control the host/environment of your application. Deploying only a docker container image referenced in Dockerrun.aws.json has the unfortunate side effect of losing this extreamly powerful feature. To allow this feature to be included in gantree and make it even better you can select either to package a local .ebextension folder with your deploy, package a remote .ebextension folder hosted in github (with branch support) or even create a .gantreecfg file to make either of these type of deploys a default.
+
+```
+gantree
+
+
+By default your application will be created on a t1.micro unless you specify otherwise:
+```
+gantree ceate your_app_name -i m3.medium
+```
+
+#### What if you need a database? Here enters the beauty of RDS
+
+**PostgreSQL:** ```gantree create your_app_name --rds pg```
+
+**Mysql:** ```gantree create your_app_name --rds msql```
+
+#### What if you want a cdn behind each of your generated applications
+
+**Fastly:** ```gantree create your_app_name --cdn fastly```
+
+**CloudFront:** ```gantree create yoour_app_name --cdn cloudfront```
+
+
 Also if the cloud formation template that is generated doesn't match your needs (which it might now) you can edit the .rb files in the repo's cfn folder, build your own gem and use it how you like.
