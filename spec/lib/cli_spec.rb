@@ -12,17 +12,20 @@ describe Gantree::CLI do
     @repo = "cauldron"
     @tag =  "master"
     @user = "feelobot"
-  end
+  end 
 
-  describe "gantree" do
+  describe "init" do
     it "should create a new dockerrun for a private repo" do 
       out = execute("bin/gantree init -u #{@user} #{@owner}/#{@repo}:#{@tag}")
-      expect(out).to include ""
+      expect(out).to include "initialize image"
+      expect(File.exist?("Dockerrun.aws.json")).to be true
+      expect(IO.read("Dockerrun.aws.json").include? @user)
     end
 
     it "should create a new dockerrun for a public repo" do 
       out = execute("bin/gantree init #{@owner}/#{@repo}:#{@tag}")
-      expect(out).to include ""
+      expect(out).to include "initialize image"
+      expect(File.exist?("Dockerrun.aws.json")).to be true
     end
 
     it "should deploy images" do

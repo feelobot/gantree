@@ -22,6 +22,31 @@ class ResourcesTemplate
           :GroupDescription => join('', 'an EC2 instance security group created for #{@env}')
       }
 
+      value :sampleDB => {
+        :Type => 'AWS::RDS::DBInstance',
+        :Properties => {
+            :DBName => 'sampledb',
+            :AllocatedStorage => '10',
+            :DBInstanceClass => 'db.m3.large',
+            :DBSecurityGroups => [ ref('DBSecurityGroup') ],
+            :Engine => 'postgres',
+            :EngineVersion => '9.3',
+            :MasterUsername => 'masterUser',
+            :MasterUserPassword => 'masterpassword',
+        },
+        :DeletionPolicy => 'Snapshot',
+      }
+
+      value :DBSecurityGroup => {
+        :Type => 'AWS::RDS::DBSecurityGroup',
+        :Properties => {
+            :DBSecurityGroupIngress => [
+                { :EC2SecurityGroupName => ref('InstanceSecurityGroup') },
+            ],
+            :GroupDescription => 'Allow Beanstalk Instances Access',
+        },
+      }
+
       output 'InstanceSecurityGroup',
              :Value => ref('InstanceSecurityGroup')
 
