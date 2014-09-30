@@ -5,7 +5,6 @@ class MasterTemplate
     @stack_name = params[:stack_name]
     @env = params[:env]
     @bucket = params[:cfn_bucket]
-    @instance_size = params[:instance_size]
     @requirements = params[:requirements]
   end
 

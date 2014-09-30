@@ -2,6 +2,7 @@ class ResourcesTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
+    @rds = parmas[:rds]
     @env = params[:env]
     @requirements = params[:requirements]
   end
@@ -22,7 +23,18 @@ class ResourcesTemplate
           :GroupDescription => join('', 'an EC2 instance security group created for #{@env}')
       }
 
-      value :sampleDB => {
+      #{rds if rds_enabled?}
+
+      output 'InstanceSecurityGroup',
+             :Value => ref('InstanceSecurityGroup')
+
+    end.exec!
+    "
+  end
+
+  def rds
+    "
+    value :sampleDB => {
         :Type => 'AWS::RDS::DBInstance',
         :Properties => {
             :DBName => 'sampledb',
@@ -47,10 +59,19 @@ class ResourcesTemplate
         },
       }
 
-      output 'InstanceSecurityGroup',
-             :Value => ref('InstanceSecurityGroup')
-
-    end.exec!
+      output 'RDSHostURL',
+        :Value => get_att('sampleDB', 'Endpoint.Address')
     "
   end
+
+  def rds_enabled?
+    if @rds == nil
+      false
+    elsif @rds == "pg" || "mysql"
+      true
+    else
+      raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
+    end
+  end
+
 end
