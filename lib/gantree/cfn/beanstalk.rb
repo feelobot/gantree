@@ -135,7 +135,11 @@ class BeanstalkTemplate
     "
   end
   def set_rds_parameters
-
+    "{
+      :Namespace => 'aws:elasticbeanstalk:application:environment',
+      :OptionName => 'DB_HostURL',
+      :Value => ref('RDSHostURL'),
+    },"
   end
 
   def rds_enabled?
