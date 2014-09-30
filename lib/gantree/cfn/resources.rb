@@ -35,30 +35,24 @@ class ResourcesTemplate
   def rds
     if rds_enabled?
       "
-      resource :sampleDB => {
-        :Type => 'AWS::RDS::DBInstance',
-        :Properties => {
-            :DBName => 'sampledb',
-            :AllocatedStorage => '10',
-            :DBInstanceClass => 'db.m3.large',
-            :DBSecurityGroups => [ ref('DBSecurityGroup') ],
-            :Engine => 'postgres',
-            :EngineVersion => '9.3',
-            :MasterUsername => 'masterUser',
-            :MasterUserPassword => 'masterpassword',
-        },
-        :DeletionPolicy => 'Snapshot',
-      }
-      resource :DBSecurityGroup => {
-        :Type => 'AWS::RDS::DBSecurityGroup',
-        :Properties => {
-            :DBSecurityGroupIngress => [
-                { :EC2SecurityGroupName => ref('InstanceSecurityGroup') },
-            ],
-            :GroupDescription => 'Allow Beanstalk Instances Access',
-        },
+      resource 'sampleDB', :Type => 'AWS::RDS::DBInstance', :DeletionPolicy => 'Snapshot', :Properties => {
+        :DBName => 'sampledb',
+        :AllocatedStorage => '10',
+        :DBInstanceClass => 'db.m3.large',
+        :DBSecurityGroups => [ ref('DBSecurityGroup') ],
+        :Engine => 'postgres',
+        :EngineVersion => '9.3',
+        :MasterUsername => 'masterUser',
+        :MasterUserPassword => 'masterpassword',
       }
 
+      resource 'DBSecurityGroup', :Type => 'AWS::RDS::DBSecurityGroup', :Properties => {
+        :DBSecurityGroupIngress => [
+            { :EC2SecurityGroupName => ref('InstanceSecurityGroup') },
+        ],
+        :GroupDescription => 'Allow Beanstalk Instances Access',
+      }
+      
       output 'RDSHostURL',
         :Value => get_att('sampleDB', 'Endpoint.Address')
       "

@@ -53,6 +53,9 @@ class BeanstalkTemplate
                 :Type => 'String',
                 :Default => 'EbApp'
 
+      parameter 'DB_HostURL',
+                :Type => 'String'
+
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
           :Description => '#{@env}',
           :ApplicationName => '#{@env}',
