@@ -54,6 +54,7 @@ module Gantree
     end
 
     def upload_docker_config
+      raise "You need to run 'docker login' to generate a .dockercfg file" if File.exist?("#{ENV['HOME']}/.dockercfg") != true
       filename = "#{ENV['HOME']}/#{@options.user}.dockercfg"
       FileUtils.cp("#{ENV['HOME']}/.dockercfg", "#{ENV['HOME']}/#{@options.user}.dockercfg")
       key = File.basename(filename)
