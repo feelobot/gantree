@@ -2,6 +2,7 @@ class BeanstalkTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
+    @size = params[:instance_size]
     @rds = params[:rds]
     @env = params[:env]
     @prod_domain = params[:prod_domain]
@@ -37,7 +38,7 @@ class BeanstalkTemplate
                 :Description => 'EC2 Instance Type',
                 :Type => 'String',
                 :AllowedValues => %w(t1.micro m1.small m3.medium m3.large m3.xlarge m3.2xlarge c3.large c3.xlarge c3.2xlarge c3.4xlarge c3.8xlarge),
-                :Default => 'm3.large'
+                :Default => '#{@size}'
 
       parameter 'ApplicationName',
                 :Description => 'The name of the Elastic Beanstalk Application',
@@ -148,8 +149,10 @@ class BeanstalkTemplate
 
   def rds_enabled?
     if @rds == nil
+      puts "RDS is not enabled, no DB created"
       false
     elsif @rds == "pg" || @rds == "mysql"
+      puts "RDS is enabled, creating DB"
       true
     else
       raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"

@@ -1,7 +1,6 @@
 class MasterTemplate
 
   def initialize params
-    @size = params[:instance_size] ||= "t1.micro"
     @stack_name = params[:stack_name]
     @env = params[:env]
     @bucket = params[:cfn_bucket]
@@ -28,10 +27,6 @@ class MasterTemplate
                 :Type => 'String',
                 :Default => 'default'
 
-      parameter 'InstanceType',
-                :Type => 'String',
-                :Default => '#{@size}'
-
       parameter 'ApplicationName',
                 :Type => 'String',
                 :Default => '#{@env}'
@@ -54,7 +49,6 @@ class MasterTemplate
           :Parameters => {
               :KeyName => ref('KeyName'),
               :InstanceSecurityGroup => get_att('AppResources', 'Outputs.InstanceSecurityGroup'),
-              :InstanceType => ref('InstanceType'),
               :ApplicationName => ref('ApplicationName'),
               :Environment => ref('Environment'),
               :IamInstanceProfile => ref('IamInstanceProfile'),
