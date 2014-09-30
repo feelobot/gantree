@@ -2,6 +2,7 @@ class BeanstalkTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
+    @rds = parmas[:rds]
     @env = params[:env]
     @prod_domain = params[:prod_domain]
     @stag_domain = params[:stag_domain]
@@ -104,6 +105,7 @@ class BeanstalkTemplate
               { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MaxBatchSize', :Value => '1' },
               { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MinInstancesInService', :Value => '2' },
               { :Namespace => 'aws:elasticbeanstalk:hostmanager', :OptionName => 'LogPublicationControl', :Value => 'true' },
+              #{set_rds_parameters if rds_enabled? }
           ],
       }
 
@@ -131,6 +133,19 @@ class BeanstalkTemplate
 
     end.exec!
     "
+  end
+  def set_rds_parameters
+
+  end
+
+  def rds_enabled?
+    if @rds == nil
+      false
+    elsif @rds == "pg" || "mysql"
+      true
+    else
+      raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
+    end
   end
 
   def env_type

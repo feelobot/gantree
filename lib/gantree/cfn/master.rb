@@ -43,7 +43,7 @@ class MasterTemplate
       parameter 'IamInstanceProfile',
                 :Type => 'String',
                 :Default => 'EbApp'
-
+                
       resource 'AppResources', :Type => 'AWS::CloudFormation::Stack', :Properties => {
           :TemplateURL => join('/', 'http://s3.amazonaws.com', '#{@bucket}', '#{@env}', ref('ResourcesTemplate')),
           :Parameters => { :ApplicationName => ref('ApplicationName') },
