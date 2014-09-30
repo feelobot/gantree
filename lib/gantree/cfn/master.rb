@@ -1,7 +1,7 @@
 class MasterTemplate
 
   def initialize params
-    @size = params[:instance_size]
+    @size = params[:instance_size] ||= "t1.micro"
     @stack_name = params[:stack_name]
     @env = params[:env]
     @bucket = params[:cfn_bucket]
@@ -43,7 +43,7 @@ class MasterTemplate
       parameter 'IamInstanceProfile',
                 :Type => 'String',
                 :Default => 'EbApp'
-                
+
       resource 'AppResources', :Type => 'AWS::CloudFormation::Stack', :Properties => {
           :TemplateURL => join('/', 'http://s3.amazonaws.com', '#{@bucket}', '#{@env}', ref('ResourcesTemplate')),
           :Parameters => { :ApplicationName => ref('ApplicationName') },

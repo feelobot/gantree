@@ -2,7 +2,7 @@ class BeanstalkTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
-    @rds = parmas[:rds]
+    @rds = params[:rds]
     @env = params[:env]
     @prod_domain = params[:prod_domain]
     @stag_domain = params[:stag_domain]
@@ -105,7 +105,7 @@ class BeanstalkTemplate
               { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MaxBatchSize', :Value => '1' },
               { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MinInstancesInService', :Value => '2' },
               { :Namespace => 'aws:elasticbeanstalk:hostmanager', :OptionName => 'LogPublicationControl', :Value => 'true' },
-              #{set_rds_parameters if rds_enabled? }
+              #{set_rds_parameters}
           ],
       }
 
@@ -135,17 +135,21 @@ class BeanstalkTemplate
     "
   end
   def set_rds_parameters
-    "{
-      :Namespace => 'aws:elasticbeanstalk:application:environment',
-      :OptionName => 'DB_HostURL',
-      :Value => ref('RDSHostURL'),
-    },"
+    if rds_enabled?
+      "{
+        :Namespace => 'aws:elasticbeanstalk:application:environment',
+        :OptionName => 'DB_HostURL',
+        :Value => ref('RDSHostURL'),
+      },"
+    else
+      nil
+    end
   end
 
   def rds_enabled?
     if @rds == nil
       false
-    elsif @rds == "pg" || "mysql"
+    elsif @rds == "pg" || @rds == "mysql"
       true
     else
       raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"

@@ -2,7 +2,7 @@ class ResourcesTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
-    @rds = parmas[:rds]
+    @rds = params[:rds]
     @env = params[:env]
     @requirements = params[:requirements]
   end
@@ -23,7 +23,7 @@ class ResourcesTemplate
           :GroupDescription => join('', 'an EC2 instance security group created for #{@env}')
       }
 
-      #{rds if rds_enabled?}
+      #{rds}
 
       output 'InstanceSecurityGroup',
              :Value => ref('InstanceSecurityGroup')
@@ -33,41 +33,45 @@ class ResourcesTemplate
   end
 
   def rds
-    "
-    value :sampleDB => {
-        :Type => 'AWS::RDS::DBInstance',
-        :Properties => {
-            :DBName => 'sampledb',
-            :AllocatedStorage => '10',
-            :DBInstanceClass => 'db.m3.large',
-            :DBSecurityGroups => [ ref('DBSecurityGroup') ],
-            :Engine => 'postgres',
-            :EngineVersion => '9.3',
-            :MasterUsername => 'masterUser',
-            :MasterUserPassword => 'masterpassword',
-        },
-        :DeletionPolicy => 'Snapshot',
-      }
+    if rds_enabled?
+      "
+      value :sampleDB => {
+          :Type => 'AWS::RDS::DBInstance',
+          :Properties => {
+              :DBName => 'sampledb',
+              :AllocatedStorage => '10',
+              :DBInstanceClass => 'db.m3.large',
+              :DBSecurityGroups => [ ref('DBSecurityGroup') ],
+              :Engine => 'postgres',
+              :EngineVersion => '9.3',
+              :MasterUsername => 'masterUser',
+              :MasterUserPassword => 'masterpassword',
+          },
+          :DeletionPolicy => 'Snapshot',
+        }
 
-      value :DBSecurityGroup => {
-        :Type => 'AWS::RDS::DBSecurityGroup',
-        :Properties => {
-            :DBSecurityGroupIngress => [
-                { :EC2SecurityGroupName => ref('InstanceSecurityGroup') },
-            ],
-            :GroupDescription => 'Allow Beanstalk Instances Access',
-        },
-      }
+        value :DBSecurityGroup => {
+          :Type => 'AWS::RDS::DBSecurityGroup',
+          :Properties => {
+              :DBSecurityGroupIngress => [
+                  { :EC2SecurityGroupName => ref('InstanceSecurityGroup') },
+              ],
+              :GroupDescription => 'Allow Beanstalk Instances Access',
+          },
+        }
 
-      output 'RDSHostURL',
-        :Value => get_att('sampleDB', 'Endpoint.Address')
-    "
+        output 'RDSHostURL',
+          :Value => get_att('sampleDB', 'Endpoint.Address')
+      "
+    else
+      nil
+    end
   end
 
   def rds_enabled?
     if @rds == nil
       false
-    elsif @rds == "pg" || "mysql"
+    elsif @rds == "pg" || @rds == "mysql"
       true
     else
       raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
