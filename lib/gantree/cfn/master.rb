@@ -52,7 +52,7 @@ class MasterTemplate
               :ApplicationName => ref('ApplicationName'),
               :Environment => ref('Environment'),
               :IamInstanceProfile => ref('IamInstanceProfile'),
-              :RDSHostURLPass => get_att('AppResources','Outputs.RDSHostURL'),
+              #{":RDSHostURLPass => get_att('AppResources','Outputs.RDSHostURL')," if rds_enabled?}
           },
       }
 
@@ -61,6 +61,17 @@ class MasterTemplate
              :Value => get_att('App', 'Outputs.URL')
 
     end.exec!"
+  end
+  def rds_enabled?
+    if @rds == nil
+      puts "RDS is not enabled, no DB created"
+      false
+    elsif @rds == "pg" || @rds == "mysql"
+      puts "RDS is enabled, creating DB"
+      true
+    else
+      raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
+    end
   end
 
   def env_type
