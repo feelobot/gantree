@@ -53,7 +53,7 @@ class BeanstalkTemplate
                 :Type => 'String',
                 :Default => 'EbApp'
 
-      parameter 'DB_HostURL',
+      parameter 'RDSHostURL',
                 :Type => 'String'
 
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
@@ -143,7 +143,7 @@ class BeanstalkTemplate
       "{
         :Namespace => 'aws:elasticbeanstalk:application:environment',
         :OptionName => 'DB_HostURL',
-        :Value => ref('RDSHostURL'),
+        :Value => ref('RDSHostURLPass'),
       },"
     else
       nil

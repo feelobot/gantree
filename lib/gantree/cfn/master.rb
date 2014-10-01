@@ -52,6 +52,7 @@ class MasterTemplate
               :ApplicationName => ref('ApplicationName'),
               :Environment => ref('Environment'),
               :IamInstanceProfile => ref('IamInstanceProfile'),
+              :RDSHostURLPass => get_att('AppResources','Outputs.RDSHostURL'),
           },
       }
 

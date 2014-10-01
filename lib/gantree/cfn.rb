@@ -34,8 +34,8 @@ module Gantree
     end
 
     def check_credentials
-      raise "Please set your AWS Environment Variables" if ENV['AWS_SECRET_ACCES_KEY'] == nil
-      raise "Please set your AWS Environment Variables" if ENV['AWS_ACCES_KEY_ID'] == nil
+      raise "Please set your AWS Environment Variables" if ENV['AWS_SECRET_ACCESS_KEY'] == nil
+      raise "Please set your AWS Environment Variables" if ENV['AWS_ACCESS_KEY_ID'] == nil
     end
 
     def create
