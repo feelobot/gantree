@@ -2,7 +2,7 @@ module Gantree
   class Deploy
 
     def initialize app,options
-      @options = options
+      @options = merge_defaults(options)
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
@@ -90,6 +90,15 @@ module Gantree
       docker =JSON.parse(IO.read("Dockerrun.aws.json"))
       docker["Image"]["Name"].gsub!(/:(.*)$/, ":#{@tag}")
       IO.write(@version_label,JSON.pretty_generate(docker))
+    end
+
+    def merge_defaults(options)
+      if File.exist?(".gantreecfg")
+        defaults = JSON.parse(File.open(".gantreecfg").read)
+        defaults.merge(options)
+      else
+        options
+      end
     end
   end
 end
