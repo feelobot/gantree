@@ -53,7 +53,7 @@ class BeanstalkTemplate
                 :Type => 'String',
                 :Default => 'EbApp'
 
-      parameter 'RDSHostURL',
+      parameter 'RDSHostURLPass',
                 :Type => 'String'
 
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
