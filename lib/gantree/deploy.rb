@@ -91,5 +91,11 @@ module Gantree
       docker["Image"]["Name"].gsub!(/:(.*)$/, ":#{@tag}")
       IO.write(@version_label,JSON.pretty_generate(docker))
     end
+
+    def ext?
+      if @options[:ext]
+
+      end
+    end
   end
 end
