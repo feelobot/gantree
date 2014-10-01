@@ -62,8 +62,12 @@ module Gantree
     end
 
     def merge_defaults(options)
-      defaults = JSON.parse(File.open(".gantree.cfg").read)
-      defaults.merge(options)
+      if File.exist?(".gantree.cfg")
+        defaults = JSON.parse(File.open(".gantree.cfg").read)
+        defaults.merge(options)
+      else
+        options
+      end
     end
   end
 end
