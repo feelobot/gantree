@@ -7,27 +7,39 @@ require 'spec_helper'
 #   $ rake clean:vcr ; time rake
 describe Gantree::CLI do
   before(:all) do
-    @env = "stag-app-br-s1"
+    @env = "stag-app-knarr-s1"
     @owner = "bleacher"
     @repo = "cauldron"
     @tag =  "master"
     @user = "feelobot"
-  end
+  end 
 
-  describe "gantree" do
+  describe "init" do
     it "should create a new dockerrun for a private repo" do 
       out = execute("bin/gantree init -u #{@user} #{@owner}/#{@repo}:#{@tag}")
-      expect(out).to include ""
+      expect(out).to include "initialize image"
+      expect(File.exist?("Dockerrun.aws.json")).to be true
+      expect(IO.read("Dockerrun.aws.json").include? @user)
     end
 
     it "should create a new dockerrun for a public repo" do 
       out = execute("bin/gantree init #{@owner}/#{@repo}:#{@tag}")
-      expect(out).to include ""
+      expect(out).to include "initialize image"
+      expect(File.exist?("Dockerrun.aws.json")).to be true
     end
+  end
 
+  describe "deploy" do
     it "should deploy images" do
       out = execute("bin/gantree deploy #{@env}")
       expect(out).to include("Deploying")
+    end
+  end
+
+  describe "create" do
+    it "should create clusters" do
+      #out = execute("bin/gantree create #{@env}")
+      #expect(out).to include "Created"
     end
   end
 end

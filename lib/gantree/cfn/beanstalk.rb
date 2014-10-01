@@ -2,6 +2,8 @@ class BeanstalkTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
+    @size = params[:instance_size]
+    @rds = params[:rds]
     @env = params[:env]
     @prod_domain = params[:prod_domain]
     @stag_domain = params[:stag_domain]
@@ -36,7 +38,7 @@ class BeanstalkTemplate
                 :Description => 'EC2 Instance Type',
                 :Type => 'String',
                 :AllowedValues => %w(t1.micro m1.small m3.medium m3.large m3.xlarge m3.2xlarge c3.large c3.xlarge c3.2xlarge c3.4xlarge c3.8xlarge),
-                :Default => 'm3.large'
+                :Default => '#{@size}'
 
       parameter 'ApplicationName',
                 :Description => 'The name of the Elastic Beanstalk Application',
@@ -50,6 +52,9 @@ class BeanstalkTemplate
       parameter 'IamInstanceProfile',
                 :Type => 'String',
                 :Default => 'EbApp'
+
+      parameter 'RDSHostURL',
+                :Type => 'String'
 
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
           :Description => '#{@env}',
@@ -104,6 +109,7 @@ class BeanstalkTemplate
               { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MaxBatchSize', :Value => '1' },
               { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MinInstancesInService', :Value => '2' },
               { :Namespace => 'aws:elasticbeanstalk:hostmanager', :OptionName => 'LogPublicationControl', :Value => 'true' },
+              #{set_rds_parameters}
           ],
       }
 
@@ -131,6 +137,29 @@ class BeanstalkTemplate
 
     end.exec!
     "
+  end
+  def set_rds_parameters
+    if rds_enabled?
+      "{
+        :Namespace => 'aws:elasticbeanstalk:application:environment',
+        :OptionName => 'DB_HostURL',
+        :Value => ref('RDSHostURLPass'),
+      },"
+    else
+      nil
+    end
+  end
+
+  def rds_enabled?
+    if @rds == nil
+      puts "RDS is not enabled, no DB created"
+      false
+    elsif @rds == "pg" || @rds == "mysql"
+      puts "RDS is enabled, creating DB"
+      true
+    else
+      raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
+    end
   end
 
   def env_type

@@ -27,10 +27,6 @@ class MasterTemplate
                 :Type => 'String',
                 :Default => 'default'
 
-      parameter 'InstanceType',
-                :Type => 'String',
-                :Default => 't1.micro'
-
       parameter 'ApplicationName',
                 :Type => 'String',
                 :Default => '#{@env}'
@@ -53,10 +49,10 @@ class MasterTemplate
           :Parameters => {
               :KeyName => ref('KeyName'),
               :InstanceSecurityGroup => get_att('AppResources', 'Outputs.InstanceSecurityGroup'),
-              :InstanceType => ref('InstanceType'),
               :ApplicationName => ref('ApplicationName'),
               :Environment => ref('Environment'),
               :IamInstanceProfile => ref('IamInstanceProfile'),
+              :RDSHostURLPass => get_att('AppResources','Outputs.RDSHostURL'),
           },
       }
 

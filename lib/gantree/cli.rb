@@ -22,6 +22,9 @@ module Gantree
 
     desc "create APP", "create or update a cfn stack"
     method_option :env, :aliases => "-e", :desc => "(optional) environment name"
+    method_option :instance_size, :aliases => "-i", :desc => "(optional) set instance size"
+    method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
+    method_option :dry_run, :desc => "do not actually create the stack"
     def create app
       Gantree::Stack.new(app, options).create
     end

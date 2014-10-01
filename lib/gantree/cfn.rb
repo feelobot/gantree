@@ -6,12 +6,14 @@ require_relative 'cfn/resources'
 module Gantree
   class Stack
     def initialize stack_name,options
+      @options = options
       check_credentials
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
       @s3 = AWS::S3.new
       @cfm = AWS::CloudFormation.new
+      @size = options[:instance_size] ||= "t1.micro"
       @requirements = "#!/usr/bin/env ruby
         require 'bundler/setup'
         require 'cloudformation-ruby-dsl/cfntemplate'
@@ -20,18 +22,20 @@ module Gantree
       @stack_name = stack_name
       @env = options[:env] || stack_name.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + stack_name.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + stack_name.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
       @params = {
+        instance_size: @size,
+        rds: options[:rds],
         stack_name: @stack_name,
         requirements: @requirements,
         cfn_bucket: "br-templates",
         env: @env,
         stag_domain: "sbleacherreport.com",
-        prod_domain: "bleacherreport.com"
+        prod_domain: "bleacherreport.com",
       }
     end
 
     def check_credentials
-      raise "Please set your AWS Environment Variables" if ENV['AWS_SECRET_ACCES_KEY'] == nil
-      raise "Please set your AWS Environment Variables" if ENV['AWS_ACCES_KEY_ID'] == nil
+      raise "Please set your AWS Environment Variables" if ENV['AWS_SECRET_ACCESS_KEY'] == nil
+      raise "Please set your AWS Environment Variables" if ENV['AWS_ACCESS_KEY_ID'] == nil
     end
 
     def create
@@ -39,7 +43,7 @@ module Gantree
       generate("master", MasterTemplate.new(@params).create)
       generate("beanstalk", BeanstalkTemplate.new(@params).create)
       generate("resources", ResourcesTemplate.new(@params).create)
-      create_aws_cfn_stack
+      create_aws_cfn_stack unless @options[:dry_run] 
     end
 
     def create_cfn_if_needed

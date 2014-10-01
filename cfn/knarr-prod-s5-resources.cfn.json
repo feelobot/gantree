@@ -15,6 +15,33 @@
       }
     }
   },
+  "sampleDB": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBName": "sampledb",
+        "AllocatedStorage": "10",
+        "DBInstanceClass": "db.m3.large",
+        "DBSecurityGroups": [{
+          "Ref": "DBSecurityGroup"
+        }],
+        "Engine": "postgres",
+        "EngineVersion": "9.3",
+        "MasterUsername": "masterUser",
+        "MasterUserPassword": "masterpassword"
+      },
+      "DeletionPolicy": "Snapshot"
+    },
+    "DBSecurityGroup": {
+      "Type": "AWS::RDS::DBSecurityGroup",
+      "Properties": {
+        "DBSecurityGroupIngress": [{
+          "EC2SecurityGroupName": {
+            "Ref": "InstanceSecurityGroup"
+          }
+        }],
+        "GroupDescription": "Allow Beanstalk Instances Access"
+      }
+    },
   "Outputs": {
     "InstanceSecurityGroup": {
       "Value": {

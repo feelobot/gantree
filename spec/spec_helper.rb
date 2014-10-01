@@ -19,6 +19,7 @@ module Helpers
   def execute(cmd)
     puts "Running: #{cmd}" if ENV['DEBUG']
     out = `#{cmd}`
+    raise "Stack Trance Found: \n #{out}" if out.include? "Error"
     puts out if ENV['DEBUG']
     out
   end
