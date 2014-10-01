@@ -6,7 +6,7 @@ module Gantree
   class Init
     def initialize image,options
       @image = image
-      @options = options
+      @options = merge_defaults(options)
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
@@ -61,5 +61,13 @@ module Gantree
       @s3.buckets["docker-cfgs"].objects[key].write(:file => filename)
     end
 
+    def merge_defaults(options)
+      if File.exist?(".gantreecfg")
+        defaults = JSON.parse(File.open(".gantreecfg").read)
+        defaults.merge(options)
+      else
+        options
+      end
+    end
   end
 end
