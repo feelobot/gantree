@@ -3,12 +3,13 @@ module Gantree
 
     def initialize app,options
       @options = options
+      @ext = @options[:ext]
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
         :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
       @app = @options[:env] || app.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
       @env = app
-      @version_label = set_version_label
+      @packeged_version = package_version
       @eb = AWS::ElasticBeanstalk::Client.new
       @s3 = AWS::S3.new
       @tag = options.tag
@@ -24,8 +25,7 @@ module Gantree
     private
 
     def upload_to_s3
-      
-      filename = @version_label
+      filename = @packeged_version
       FileUtils.cp("Dockerrun.aws.json", filename)
       set_tag_to_deploy if @tag
       key = File.basename(filename)
@@ -48,10 +48,10 @@ module Gantree
       begin
         @eb.create_application_version({
           :application_name => @app,
-          :version_label => @version_label,
+          :version_label => @packeged_version,
           :source_bundle => {
             :s3_bucket => "#{@app}-versions",
-            :s3_key => @version_label
+            :s3_key => @packeged_version
           }
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
@@ -59,7 +59,7 @@ module Gantree
         begin 
           @eb.delete_application_version({
             :application_name => @app,
-            :version_label => @version_label,
+            :version_label => @packeged_version,
             :delete_source_bundle => false
           })
           retry
@@ -73,17 +73,22 @@ module Gantree
       begin
         @eb.update_environment({
           :environment_name => @env,
-          :version_label => @version_label
+          :version_label => @packeged_version
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
         puts "#{@env} doesn't exist"
       end
     end
 
-    def set_version_label
+    def package_version
       branch = `git rev-parse --abbrev-ref HEAD`
       hash = `git rev-parse --verify --short #{branch}`.strip
-      "#{@env}-#{hash}-Dockerrun.aws.json"
+      if ext? == false
+        "#{@env}-#{hash}-Dockerrun.aws.json"
+      else
+        clone_repo if repo?
+      end
+
     end
 
     def set_tag_to_deploy
@@ -93,9 +98,55 @@ module Gantree
     end
 
     def ext?
-      if @options[:ext]
-
+      if @ext
+        true
+      else
+        false
       end
+    end
+
+    def repo?
+      if @ext.include? "github"
+        true
+      else
+        false
+      end
+    end
+
+    def local?
+      File.directory?(@ext)
+    end
+
+    def get_ext_repo
+      if ext_branch?
+        repo = @ext.sub.(get_ext_branch)
+      else
+        @ext
+      end
+    end
+
+    def ext_branch?
+      if @ext.count(":") == 2
+        true
+      else
+        false
+      end
+    end
+
+    def get_ext_branch
+      branch = @ext.match(/:.*(:.*)$/)[0]
+    end
+
+    def clone_repo
+      if ext_branch?
+        `git clone -b #{get_ext_branch} #{get_ext_repo}`
+      else
+        `git clone #{get_ext_repo}`
+      end
+    end
+
+    def zip_ext_and_dockerrun
+
     end
   end
 end
