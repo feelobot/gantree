@@ -1,3 +1,5 @@
+require 'archive/zip'
+
 module Gantree
   class Deploy
 
@@ -9,7 +11,6 @@ module Gantree
         :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
       @app = @options[:env] || app.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
       @env = app
-      @packeged_version = package_version
       @eb = AWS::ElasticBeanstalk::Client.new
       @s3 = AWS::S3.new
       @tag = options.tag
@@ -17,34 +18,23 @@ module Gantree
 
     def run
       puts "Deploying #{@app}"
+      @packeged_version = create_version_files
       upload_to_s3
-      create_version
+      create_eb_version
       update_application
     end
 
     private
 
     def upload_to_s3
-      filename = @packeged_version
-      FileUtils.cp("Dockerrun.aws.json", filename)
-      set_tag_to_deploy if @tag
-      key = File.basename(filename)
-      begin
-        puts "uploading dockerrun to #{@app}-versions"
-        @s3.buckets["#{@app}-versions"].objects[key].write(:file => filename)
-      rescue AWS::S3::Errors::NoSuchBucket
-        puts "bucket didn't exist...creating"
-        bucket = @s3.buckets.create("#{@app}-versions")
-        retry
-      rescue AWS::S3::Errors::AccessDenied
-        puts "Your key is not configured for s3 access, please let your operations team know"
-        FileUtils.rm(filename)
-        exit
-      end
-      FileUtils.rm(filename)
+      key = File.basename(@packeged_version)
+      check_version_bucket
+      puts "uploading version to #{@app}-versions"
+      @s3.buckets["#{@app}-versions"].objects[key].write(:file => @packeged_version)
+      FileUtils.rm(@packeged_version)
     end
 
-    def create_version
+    def create_eb_version
       begin
         @eb.create_application_version({
           :application_name => @app,
@@ -80,19 +70,27 @@ module Gantree
       end
     end
 
-    def package_version
+    def create_version_files
       branch = `git rev-parse --abbrev-ref HEAD`
       hash = `git rev-parse --verify --short #{branch}`.strip
-      if ext? == false
-        "#{@env}-#{hash}-Dockerrun.aws.json"
+      version = "#{@env}-#{hash}"
+      old_dockerrun = "Dockerrun.aws.json"
+      new_dockerrun = "#{version}-Dockerrun.aws.json"
+      FileUtils.cp("Dockerrun.aws.json", "#{version}-Dockerrun.aws.json")
+      set_tag_to_deploy(new_dockerrun) if @tag
+      unless ext?
+        new_dockerrun
       else
+        zipped_version = "#{version}.zip"
         clone_repo if repo?
+        Archive::Zip.archive('#{version}.zip', ['.ebextensions/', new_dockerrun])
+        FileUtils.rm_rf ".ebextensions/" if repo?
+        zipped_version
       end
-
     end
 
-    def set_tag_to_deploy
-      docker =JSON.parse(IO.read("Dockerrun.aws.json"))
+    def set_tag_to_deploy file
+      docker = JSON.parse(IO.read(file))
       docker["Image"]["Name"].gsub!(/:(.*)$/, ":#{@tag}")
       IO.write(@version_label,JSON.pretty_generate(docker))
     end
@@ -145,8 +143,10 @@ module Gantree
       end
     end
 
-    def zip_ext_and_dockerrun
-
+    def check_version_bucket
+      name = "#{@app}-versions"
+      bucket = s3.buckets[name] # makes no request
+      @s3.buckets.create(name) unless bucket.exists?
     end
   end
 end
