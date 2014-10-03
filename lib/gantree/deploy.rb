@@ -88,7 +88,6 @@ module Gantree
         zip = "#{version}.zip"
         clone_repo if repo?
         Archive::Zip.archive(zip, ['.ebextensions/', dockerrun])
-        #FileUtils.rm_rf ".ebextensions/" if repo?
         zip
       end
     end
@@ -155,6 +154,10 @@ module Gantree
 
     def clean_up
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
+      `git checkout .ebextensions/` if repo?
+      if File.directory? ".ebextensions" == false && repo?
+        FileUtils.rm_rf ".ebextensions/"
+      end
     end
   end
 end
