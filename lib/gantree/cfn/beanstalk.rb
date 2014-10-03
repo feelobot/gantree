@@ -8,6 +8,7 @@ class BeanstalkTemplate
     @prod_domain = params[:prod_domain]
     @stag_domain = params[:stag_domain]
     @requirements = params[:requirements]
+    @rds? = parmas[:rds?]
   end
 
   def create
@@ -26,7 +27,36 @@ class BeanstalkTemplate
               :stag => { :name => '#{@stag_domain}' },
               :prod => { :name => '#{@prod_domain}' }
 
-      parameter 'KeyName',
+      #{beanstalk_parmaters}
+
+      resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
+          :Description => '#{@env}',
+          :ApplicationName => '#{@env}',
+      }
+
+      resource 'ApplicationVersion', :Type => 'AWS::ElasticBeanstalk::ApplicationVersion', :Properties => {
+          :ApplicationName => ref('Application'),
+          :Description => 'Initial Version',
+          :SourceBundle => {
+              :S3Bucket => 'elasticbeanstalk-samples-us-east-1',
+              :S3Key => 'docker-sample.zip',
+          },
+      }
+
+      #{configuration_template}
+
+      #{resources}
+
+      output 'URL',
+             :Description => 'URL of the AWS Elastic Beanstalk Environment',
+             :Value => join('', 'http://', get_att('EbEnvironment', 'EndpointURL'))
+
+    end.exec!
+    "
+  end
+
+  def beanstalk_parameters
+    "parameter 'KeyName',
                 :Description => 'The Key Pair to launch instances with',
                 :Type => 'String',
                 :Default => 'default'
@@ -53,122 +83,79 @@ class BeanstalkTemplate
                 :Type => 'String',
                 :Default => 'EbApp'
 
-      #{"parameter 'RDSHostURLPass', :Type => 'String'" if rds_enabled? }
+      #{"parameter 'RDSHostURLPass', :Type => 'String'" if rds_enabled? }"
 
-      resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
-          :Description => '#{@env}',
-          :ApplicationName => '#{@env}',
-      }
+  end
 
-      resource 'ApplicationVersion', :Type => 'AWS::ElasticBeanstalk::ApplicationVersion', :Properties => {
-          :ApplicationName => ref('Application'),
-          :Description => 'Initial Version',
-          :SourceBundle => {
-              :S3Bucket => 'elasticbeanstalk-samples-us-east-1',
-              :S3Key => 'docker-sample.zip',
-          },
-      }
+  def configuration_teplate
+    "resource 'ConfigurationTemplate', :Type => 'AWS::ElasticBeanstalk::ConfigurationTemplate', :Properties => {
+        :ApplicationName => ref('Application'),
+        :SolutionStackName => '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0',
+        :Description => 'Default Configuration Version 1.0 - with SSH access',
+        :OptionSettings => [
+            {
+                :Namespace => 'aws:elasticbeanstalk:application:environment',
+                :OptionName => 'AWS_REGION',
+                :Value => aws_region,
+            },
+            {
+                :Namespace => 'aws:elasticbeanstalk:application:environment',
+                :OptionName => 'RACK_ENV',
+                :Value => find_in_map('LongName', '#{env_type}', 'name'),
+            },
+            {
+                :Namespace => 'aws:autoscaling:launchconfiguration',
+                :OptionName => 'EC2KeyName',
+                :Value => ref('KeyName'),
+            },
+            {
+                :Namespace => 'aws:autoscaling:launchconfiguration',
+                :OptionName => 'IamInstanceProfile',
+                :Value => ref('IamInstanceProfile'),
+            },
+            {
+                :Namespace => 'aws:autoscaling:launchconfiguration',
+                :OptionName => 'InstanceType',
+                :Value => ref('InstanceType'),
+            },
+            {
+                :Namespace => 'aws:autoscaling:launchconfiguration',
+                :OptionName => 'SecurityGroups',
+                :Value => join(',', join('-', '#{env_type}', 'br'), ref('InstanceSecurityGroup')),
+            },
+            { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'RollingUpdateEnabled', :Value => 'true' },
+            { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MaxBatchSize', :Value => '1' },
+            { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MinInstancesInService', :Value => '2' },
+            { :Namespace => 'aws:elasticbeanstalk:hostmanager', :OptionName => 'LogPublicationControl', :Value => 'true' },
+            #{set_rds_parameters if @rds? }
+        ],
+    }"
+  end
 
-      resource 'ConfigurationTemplate', :Type => 'AWS::ElasticBeanstalk::ConfigurationTemplate', :Properties => {
-          :ApplicationName => ref('Application'),
-          :SolutionStackName => '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0',
-          :Description => 'Default Configuration Version 1.0 - with SSH access',
-          :OptionSettings => [
-              {
-                  :Namespace => 'aws:elasticbeanstalk:application:environment',
-                  :OptionName => 'AWS_REGION',
-                  :Value => aws_region,
-              },
-              {
-                  :Namespace => 'aws:elasticbeanstalk:application:environment',
-                  :OptionName => 'RACK_ENV',
-                  :Value => find_in_map('LongName', '#{env_type}', 'name'),
-              },
-              {
-                  :Namespace => 'aws:autoscaling:launchconfiguration',
-                  :OptionName => 'EC2KeyName',
-                  :Value => ref('KeyName'),
-              },
-              {
-                  :Namespace => 'aws:autoscaling:launchconfiguration',
-                  :OptionName => 'IamInstanceProfile',
-                  :Value => ref('IamInstanceProfile'),
-              },
-              {
-                  :Namespace => 'aws:autoscaling:launchconfiguration',
-                  :OptionName => 'InstanceType',
-                  :Value => ref('InstanceType'),
-              },
-              {
-                  :Namespace => 'aws:autoscaling:launchconfiguration',
-                  :OptionName => 'SecurityGroups',
-                  :Value => join(',', join('-', '#{env_type}', 'br'), ref('InstanceSecurityGroup')),
-              },
-              { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'RollingUpdateEnabled', :Value => 'true' },
-              { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MaxBatchSize', :Value => '1' },
-              { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MinInstancesInService', :Value => '2' },
-              { :Namespace => 'aws:elasticbeanstalk:hostmanager', :OptionName => 'LogPublicationControl', :Value => 'true' },
-              #{set_rds_parameters}
-          ],
-      }
+  def resources
+    "resource 'EbEnvironment', :Type => 'AWS::ElasticBeanstalk::Environment', :Properties => {
+        :ApplicationName => '#{@env}',
+        :EnvironmentName => '#{@stack_name}',
+        :Description => 'Default Environment',
+        :VersionLabel => ref('ApplicationVersion'),
+        :TemplateName => ref('ConfigurationTemplate'),
+        :OptionSettings => [],
+    }
 
-      resource 'EbEnvironment', :Type => 'AWS::ElasticBeanstalk::Environment', :Properties => {
-          :ApplicationName => '#{@env}',
-          :EnvironmentName => '#{@stack_name}',
-          :Description => 'Default Environment',
-          :VersionLabel => ref('ApplicationVersion'),
-          :TemplateName => ref('ConfigurationTemplate'),
-          :OptionSettings => [],
-      }
-
-      resource 'HostRecord', :Type => 'AWS::Route53::RecordSet', :Properties => {
-          :Comment => 'DNS name for my stack',
-          :HostedZoneName => join('', find_in_map('HostedZoneName', '#{env_type}', 'name'), '.'),
-          :Name => join('.', ref('ApplicationName'), find_in_map('HostedZoneName', '#{env_type}', 'name')),
-          :ResourceRecords => [ get_att('EbEnvironment', 'EndpointURL') ],
-          :TTL => '60',
-          :Type => 'CNAME',
-      }
-
-      output 'URL',
-             :Description => 'URL of the AWS Elastic Beanstalk Environment',
-             :Value => join('', 'http://', get_att('EbEnvironment', 'EndpointURL'))
-
-    end.exec!
-    "
+    resource 'HostRecord', :Type => 'AWS::Route53::RecordSet', :Properties => {
+        :Comment => 'DNS name for my stack',
+        :HostedZoneName => join('', find_in_map('HostedZoneName', '#{env_type}', 'name'), '.'),
+        :Name => join('.', ref('ApplicationName'), find_in_map('HostedZoneName', '#{env_type}', 'name')),
+        :ResourceRecords => [ get_att('EbEnvironment', 'EndpointURL') ],
+        :TTL => '60',
+        :Type => 'CNAME',
+    }"
   end
   def set_rds_parameters
-    if rds_enabled?
-      "{
-        :Namespace => 'aws:elasticbeanstalk:application:environment',
-        :OptionName => 'DB_HostURL',
-        :Value => ref('RDSHostURLPass'),
-      },"
-    else
-      nil
-    end
+    "{
+      :Namespace => 'aws:elasticbeanstalk:application:environment',
+      :OptionName => 'DB_HostURL',
+      :Value => ref('RDSHostURLPass'),
+    },"
   end
-
-  def rds_enabled?
-    if @rds == nil
-      puts "RDS is not enabled, no DB created"
-      false
-    elsif @rds == "pg" || @rds == "mysql"
-      puts "RDS is enabled, creating DB"
-      true
-    else
-      raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
-    end
-  end
-
-  def env_type
-    if @env.include?("prod")
-      "prod"
-    elsif @env.include?("stag")
-      "stag"
-    else
-      ""
-    end
-  end
-
 end
