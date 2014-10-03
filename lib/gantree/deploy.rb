@@ -95,7 +95,7 @@ module Gantree
     def set_tag_to_deploy file
       docker = JSON.parse(IO.read(file))
       docker["Image"]["Name"].gsub!(/:(.*)$/, ":#{@tag}")
-      IO.write(@version_label,JSON.pretty_generate(docker))
+      IO.write(file,JSON.pretty_generate(docker))
     end
 
     def ext?
