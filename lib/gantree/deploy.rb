@@ -154,10 +154,7 @@ module Gantree
 
     def clean_up
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
-      `git checkout .ebextensions/` if repo?
-      if File.directory? ".ebextensions" == false && repo?
-        FileUtils.rm_rf ".ebextensions/"
-      end
+      `git checkout .ebextensions/` if ext?
     end
   end
 end
