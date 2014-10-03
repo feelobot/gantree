@@ -72,21 +72,25 @@ module Gantree
 
     def create_version_files
       branch = `git rev-parse --abbrev-ref HEAD`
+      puts "branch: #{branch}"
       hash = `git rev-parse --verify --short #{branch}`.strip
+      puts "hash #{hash}"
       version = "#{@env}-#{hash}"
-      old_dockerrun = "Dockerrun.aws.json"
-      new_dockerrun = "#{version}-Dockerrun.aws.json"
-      FileUtils.cp("Dockerrun.aws.json", "#{version}-Dockerrun.aws.json")
-      set_tag_to_deploy(new_dockerrun) if @tag
+      puts "version: #{version}"
+      dockerrun = "Dockerrun.aws.json"
+      set_tag_to_deploy(dockerrun) if @tag
       unless ext?
+        new_dockerrun = "#{version}-Dockerrun.aws.json"
+        FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
         new_dockerrun
       else
-        zipped_version = "#{version}.zip"
+        zip = "#{version}.zip"
         clone_repo if repo?
-        Archive::Zip.archive('#{version}.zip', ['.ebextensions/', new_dockerrun])
-        FileUtils.rm_rf ".ebextensions/" if repo?
+        Archive::Zip.archive(zip, ['.ebextensions/', dockerrun])
+        #FileUtils.rm_rf ".ebextensions/" if repo?
         zipped_version
       end
+      `git checkout "Dockerrun.aws.json"` # reverts back to original Dockerrun.aws.json
     end
 
     def set_tag_to_deploy file
@@ -145,7 +149,7 @@ module Gantree
 
     def check_version_bucket
       name = "#{@app}-versions"
-      bucket = s3.buckets[name] # makes no request
+      bucket = @s3.buckets[name] # makes no request
       @s3.buckets.create(name) unless bucket.exists?
     end
   end
