@@ -20,6 +20,7 @@ module Gantree
       puts "Deploying #{@app}"
       @packeged_version = create_version_files
       upload_to_s3
+      clean_up
       create_eb_version
       update_application
     end
@@ -29,7 +30,7 @@ module Gantree
     def upload_to_s3
       key = File.basename(@packeged_version)
       check_version_bucket
-      puts "uploading version to #{@app}-versions"
+      puts "uploading #{@packeged_version} to #{@app}-versions"
       @s3.buckets["#{@app}-versions"].objects[key].write(:file => @packeged_version)
       FileUtils.rm(@packeged_version)
     end
@@ -88,9 +89,8 @@ module Gantree
         clone_repo if repo?
         Archive::Zip.archive(zip, ['.ebextensions/', dockerrun])
         #FileUtils.rm_rf ".ebextensions/" if repo?
-        zipped_version
+        zip
       end
-      `git checkout "Dockerrun.aws.json"` # reverts back to original Dockerrun.aws.json
     end
 
     def set_tag_to_deploy file
@@ -151,6 +151,10 @@ module Gantree
       name = "#{@app}-versions"
       bucket = @s3.buckets[name] # makes no request
       @s3.buckets.create(name) unless bucket.exists?
+    end
+
+    def clean_up
+      `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
     end
   end
 end
