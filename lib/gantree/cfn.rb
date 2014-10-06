@@ -19,17 +19,16 @@ module Gantree
         require 'cloudformation-ruby-dsl/cfntemplate'
         require 'cloudformation-ruby-dsl/spotprice'
         require 'cloudformation-ruby-dsl/table'"
-      @stack_name = stack_name
       @env = options[:env] || stack_name.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + stack_name.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + stack_name.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
-      @params = {
+      @options = {
         instance_size: @size,
-        rds: options[:rds],
-        stack_name: @stack_name,
+        stack_name: stack_name,
         requirements: @requirements,
         cfn_bucket: "br-templates",
         env: @env,
         stag_domain: "sbleacherreport.com",
         prod_domain: "bleacherreport.com",
+        rds_enabled: rds_enabled?
       }
     end
 
@@ -40,9 +39,9 @@ module Gantree
 
     def create
       create_cfn_if_needed
-      generate("master", MasterTemplate.new(@params).create)
-      generate("beanstalk", BeanstalkTemplate.new(@params).create)
-      generate("resources", ResourcesTemplate.new(@params).create)
+      generate("master", MasterTemplate.new(@options).create)
+      generate("beanstalk", BeanstalkTemplate.new(@options).create)
+      generate("resources", ResourcesTemplate.new(@options).create)
       create_aws_cfn_stack unless @options[:dry_run] 
     end
 
@@ -63,12 +62,12 @@ module Gantree
 
     def upload_template_to_s3(filename)
       begin
-        puts "uploading cfn template to #{@params[:cfn_bucket]}/#{@env}"
+        puts "uploading cfn template to #{@options[:cfn_bucket]}/#{@env}"
         key = File.basename(filename)
-        @s3.buckets["#{@params[:cfn_bucket]}/#{@env}"].objects[key].write(:file => filename)
+        @s3.buckets["#{@options[:cfn_bucket]}/#{@env}"].objects[key].write(:file => filename)
       rescue AWS::S3::Errors::NoSuchBucket
         puts "bucket didn't exist...creating"
-        bucket = @s3.buckets.create("#{@params[:cfn_bucket]}/#{@env}")
+        bucket = @s3.buckets.create("#{@options[:cfn_bucket]}/#{@env}")
         retry
       rescue AWS::S3::Errors::AccessDenied
         puts "Your key is not configured for s3 access, please let your operations team know"
@@ -77,8 +76,20 @@ module Gantree
 
     def create_aws_cfn_stack
       puts "Creating stack on aws..."
-      template = AWS::S3.new.buckets["#{@params[:cfn_bucket]}/#{@env}"].objects["#{@env}-master.cfn.json"]
-      stack = @cfm.stacks.create(@params[:stack_name], template,{ :disable_rollback => true })
+      template = AWS::S3.new.buckets["#{@options[:cfn_bucket]}/#{@env}"].objects["#{@env}-master.cfn.json"]
+      stack = @cfm.stacks.create(@options[:stack_name], template,{ :disable_rollback => true })
+    end
+
+    def rds_enabled?
+      if @rds == nil
+        puts "RDS is not enabled, no DB created"
+        false
+      elsif @rds == "pg" || @rds == "mysql"
+        puts "RDS is enabled, creating DB"
+        true
+      else
+        raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
+      end
     end
 
   end
