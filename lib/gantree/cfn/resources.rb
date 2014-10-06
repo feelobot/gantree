@@ -4,7 +4,7 @@ class ResourcesTemplate
     @stack_name = params[:stack_name]
     @rds = params[:rds]
     @env = params[:env]
-    @rds? = params[:rds?]
+    @rds_enabled = params[:rds?]
     @requirements = params[:requirements]
   end
 
@@ -27,7 +27,7 @@ class ResourcesTemplate
       output 'InstanceSecurityGroup',
              :Value => ref('InstanceSecurityGroup')
 
-      #{rds if @rds?}
+      #{rds if @rds_enabled}
 
     end.exec!
     "

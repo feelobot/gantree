@@ -28,7 +28,7 @@ module Gantree
         env: @env,
         stag_domain: "sbleacherreport.com",
         prod_domain: "bleacherreport.com",
-        rds?: rds_enabled?
+        rds_enabled: rds_enabled?
       }
     end
 

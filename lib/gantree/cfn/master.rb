@@ -3,7 +3,7 @@ class MasterTemplate
   def initialize params
     @stack_name = params[:stack_name]
     @rds = params[:rds]
-    @rds? = params[:rds?]
+    @rds_enabled = params[:rds?]
     @env = params[:env]
     @bucket = params[:cfn_bucket]
     @requirements = params[:requirements]
@@ -54,7 +54,7 @@ class MasterTemplate
               :ApplicationName => ref('ApplicationName'),
               :Environment => ref('Environment'),
               :IamInstanceProfile => ref('IamInstanceProfile'),
-              #{":RDSHostURLPass => get_att('AppResources','Outputs.RDSHostURL')," if @rds?}
+              #{":RDSHostURLPass => get_att('AppResources','Outputs.RDSHostURL')," if @rds_enabled}
           },
       }
 

@@ -127,7 +127,7 @@ class BeanstalkTemplate
             { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MaxBatchSize', :Value => '1' },
             { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MinInstancesInService', :Value => '2' },
             { :Namespace => 'aws:elasticbeanstalk:hostmanager', :OptionName => 'LogPublicationControl', :Value => 'true' },
-            #{set_rds_parameters if @rds? }
+            #{set_rds_parameters if @rds_enabled }
         ],
     }"
   end
