@@ -21,7 +21,7 @@ module Gantree
         require 'cloudformation-ruby-dsl/table'"
       @env = options[:env] || stack_name.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + stack_name.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + stack_name.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
       @options = {
-        instance_size: @size
+        instance_size: @size,
         stack_name: stack_name,
         requirements: @requirements,
         cfn_bucket: "br-templates",
