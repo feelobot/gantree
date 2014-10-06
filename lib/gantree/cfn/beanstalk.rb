@@ -8,7 +8,7 @@ class BeanstalkTemplate
     @prod_domain = params[:prod_domain]
     @stag_domain = params[:stag_domain]
     @requirements = params[:requirements]
-    @rds? = parmas[:rds?]
+    @rds_enabled = parmas[:rds?]
   end
 
   def create
