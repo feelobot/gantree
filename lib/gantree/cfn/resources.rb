@@ -6,6 +6,7 @@ class ResourcesTemplate
     @env = params[:env]
     @rds_enabled = params[:rds?]
     @requirements = params[:requirements]
+    @env_type = params[:env_type]
   end
 
   def create

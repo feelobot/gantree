@@ -35,7 +35,7 @@ class MasterTemplate
 
       parameter 'Environment',
                 :Type => 'String',
-                :Default => '#{env_type}'
+                :Default => '#{@env_type}'
 
       parameter 'IamInstanceProfile',
                 :Type => 'String',
@@ -63,15 +63,5 @@ class MasterTemplate
              :Value => get_att('App', 'Outputs.URL')
 
     end.exec!"
-  end
-
-  def env_type
-    if @env.include?("prod")
-      "prod"
-    elsif @env.include?("stag")
-      "stag"
-    else
-      ""
-    end
   end
 end
