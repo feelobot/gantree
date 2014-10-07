@@ -8,7 +8,8 @@ class BeanstalkTemplate
     @prod_domain = params[:prod_domain]
     @stag_domain = params[:stag_domain]
     @requirements = params[:requirements]
-    @rds_enabled = parmas[:rds?]
+    @rds_enabled = params[:rds?]
+    @env_type = params[:env_type]
   end
 
   def create
@@ -55,7 +56,7 @@ class BeanstalkTemplate
     "
   end
 
-  def beanstalk_parameters
+  def beanstalk_parmaters
     "parameter 'KeyName',
                 :Description => 'The Key Pair to launch instances with',
                 :Type => 'String',
@@ -83,11 +84,11 @@ class BeanstalkTemplate
                 :Type => 'String',
                 :Default => 'EbApp'
 
-      #{"parameter 'RDSHostURLPass', :Type => 'String'" if rds_enabled? }"
+      #{"parameter 'RDSHostURLPass', :Type => 'String'" if @rds_enabled }"
 
   end
 
-  def configuration_teplate
+  def configuration_template
     "resource 'ConfigurationTemplate', :Type => 'AWS::ElasticBeanstalk::ConfigurationTemplate', :Properties => {
         :ApplicationName => ref('Application'),
         :SolutionStackName => '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0',
@@ -101,7 +102,7 @@ class BeanstalkTemplate
             {
                 :Namespace => 'aws:elasticbeanstalk:application:environment',
                 :OptionName => 'RACK_ENV',
-                :Value => find_in_map('LongName', '#{env_type}', 'name'),
+                :Value => find_in_map('LongName', '#{@env_type}', 'name'),
             },
             {
                 :Namespace => 'aws:autoscaling:launchconfiguration',
@@ -121,7 +122,7 @@ class BeanstalkTemplate
             {
                 :Namespace => 'aws:autoscaling:launchconfiguration',
                 :OptionName => 'SecurityGroups',
-                :Value => join(',', join('-', '#{env_type}', 'br'), ref('InstanceSecurityGroup')),
+                :Value => join(',', join('-', '#{@env_type}', 'br'), ref('InstanceSecurityGroup')),
             },
             { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'RollingUpdateEnabled', :Value => 'true' },
             { :Namespace => 'aws:autoscaling:updatepolicy:rollingupdate', :OptionName => 'MaxBatchSize', :Value => '1' },
@@ -144,8 +145,8 @@ class BeanstalkTemplate
 
     resource 'HostRecord', :Type => 'AWS::Route53::RecordSet', :Properties => {
         :Comment => 'DNS name for my stack',
-        :HostedZoneName => join('', find_in_map('HostedZoneName', '#{env_type}', 'name'), '.'),
-        :Name => join('.', ref('ApplicationName'), find_in_map('HostedZoneName', '#{env_type}', 'name')),
+        :HostedZoneName => join('', find_in_map('HostedZoneName', '#{@env_type}', 'name'), '.'),
+        :Name => join('.', ref('ApplicationName'), find_in_map('HostedZoneName', '#{@env_type}', 'name')),
         :ResourceRecords => [ get_att('EbEnvironment', 'EndpointURL') ],
         :TTL => '60',
         :Type => 'CNAME',

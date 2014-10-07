@@ -13,7 +13,7 @@ module Gantree
         :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
       @s3 = AWS::S3.new
       @cfm = AWS::CloudFormation.new
-      @size = options[:instance_size] ||= "t1.micro"
+      @size = "t1.micro" if @options[:instance_size].nil?
       @requirements = "#!/usr/bin/env ruby
         require 'bundler/setup'
         require 'cloudformation-ruby-dsl/cfntemplate'
@@ -28,7 +28,8 @@ module Gantree
         env: @env,
         stag_domain: "sbleacherreport.com",
         prod_domain: "bleacherreport.com",
-        rds_enabled: rds_enabled?
+        rds_enabled: rds_enabled?,
+        env_type: env_type
       }
     end
 
@@ -42,6 +43,7 @@ module Gantree
       generate("master", MasterTemplate.new(@options).create)
       generate("beanstalk", BeanstalkTemplate.new(@options).create)
       generate("resources", ResourcesTemplate.new(@options).create)
+      puts "All templates created"
       create_aws_cfn_stack unless @options[:dry_run] 
     end
 
@@ -92,5 +94,14 @@ module Gantree
       end
     end
 
+    def env_type
+      if @env.include?("prod")
+        "prod"
+      elsif @env.include?("stag")
+        "stag"
+      else
+        ""
+      end
+    end
   end
 end

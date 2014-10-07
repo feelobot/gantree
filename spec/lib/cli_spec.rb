@@ -38,8 +38,8 @@ describe Gantree::CLI do
 
   describe "create" do
     it "should create clusters" do
-      #out = execute("bin/gantree create #{@env}")
-      #expect(out).to include "Created"
+      out = execute("bin/gantree create #{@env} --dry-run")
+      expect(out).to include "All templates created"
     end
   end
 end
