@@ -87,6 +87,7 @@ DEPENDENCIES
   codeclimate-test-reporter
   guard
   guard-rspec
+  json
   rake
   rspec
   webmock

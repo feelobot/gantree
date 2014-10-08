@@ -1,3 +1,4 @@
+require 'json'
 require 'archive/zip'
 
 module Gantree
@@ -19,10 +20,10 @@ module Gantree
     def run
       puts "Deploying #{@app}"
       @packeged_version = create_version_files
-      upload_to_s3
+      upload_to_s3 if @options[:dry_run].nil?
       clean_up
-      create_eb_version
-      update_application
+      create_eb_version if @options[:dry_run].nil?
+      update_application if @options[:dry_run].nil?
     end
 
     private
@@ -32,7 +33,6 @@ module Gantree
       check_version_bucket
       puts "uploading #{@packeged_version} to #{@app}-versions"
       @s3.buckets["#{@app}-versions"].objects[key].write(:file => @packeged_version)
-      FileUtils.rm(@packeged_version)
     end
 
     def create_eb_version
@@ -153,8 +153,9 @@ module Gantree
     end
 
     def clean_up
+      FileUtils.rm(@packeged_version)
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
-      `git checkout .ebextensions/` if ext?
+      `rm -rf .ebextensions/` if ext?
     end
   end
 end

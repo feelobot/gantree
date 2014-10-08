@@ -10,8 +10,9 @@ module Gantree
     method_option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
     method_option :env, :aliases => "-e", :desc => "elastic beanstalk environment"
     method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
+    option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
     def deploy app
-      Gantree::Deploy.new(app, options).run
+      Gantree::Deploy.new(app, options.merge(gantreecfg)).run
     end
 
     desc "init IMAGE", "create a dockerrun for your IMAGE"
@@ -27,7 +28,16 @@ module Gantree
     method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
     def create app
-      Gantree::Stack.new(app, options).create
+      Gantree::Stack.new(app, options.merge(gantreecfg)).create
+    end
+
+    protected
+    def gantreecfg
+      if File.exist?(".gantreecfg")
+        defaults = JSON.parse(IO.read(".gantreecfg"))
+      else
+        nil
+      end
     end
   end
 end

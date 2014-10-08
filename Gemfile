@@ -10,3 +10,4 @@ gem "guard-rspec", require: false
 gem "webmock"
 gem "cloudformation-ruby-dsl"
 gem "archive-zip"
+gem "json"
