@@ -36,7 +36,7 @@ module Gantree
       if File.exist?(".gantreecfg")
         defaults = JSON.parse(IO.read(".gantreecfg"))
       else
-        nil
+        {}
       end
     end
   end
