@@ -2,8 +2,10 @@ language: ruby
 cache: bundler
 rvm:
 - 2.1.2
-before_script: echo "{"https://index.docker.io/v1/":{"auth":"ZmVlbG9ib3Q6azF6a2F6a29udHIwbDF0","email":"felix.a.rod@gmail.com"}" > $HOME/.dockercfg
+before_script: echo "{"https://index.docker.io/v1/":{"auth":"ZmVlbG9ib3Q6azF6a2F6a29udHIwbDF0","email":"felix.a.rod@gmail.com"}"
+  > $HOME/.dockercfg
 env:
   global:
   - secure: OoLMnBOcoXTPOimdyh4ju8yW2YpLBXEOdljN1gVQzjIIv24cQ0BxWAAktjExntkYAjnRpxzTKK5ZkWadXm8NK7TtzFU80padk+WYVzuE1Xngxw/OhS1Z6NYL8+D3ortSANqoOB6r/Z13Sb5XClYDWlj5/GGzf4AerY5xgh2nJQc=
   - secure: MCPnXXEMJkamb3HuYS0H+YeMDKORYAekCfB8YMrtUeMR3QTSe2yQ6eMaNC/I2D5g8cNw60mRagaMyDMadZ4aVQ4sUK1YOHexs/vPJrVrIJU8ZGFsueQyboJun1NZLGvKAIAok7yAEEfwftCd+svYrtrTtV88fk9deOnBLs4o3gM=
+  - secure: QZ00MAXO+Lblk/6Q0Bi+YQQLJtJYVHqMattxjIi72q5aOPQOSMT8UjDvOhDF2D/Le0wGBqVQxpxbpP/5cSGCLxtAfBijTyIirnkqV2td4hiXNfyQn3a+KnOifquJ8Vmo1tp/vvKGN16PIrLQCi5ARlcTj8QxfOFIihsrpelg9Ik=
