@@ -14,7 +14,6 @@ module Gantree
       @env = app
       @eb = AWS::ElasticBeanstalk::Client.new
       @s3 = AWS::S3.new
-      @tag = options.tag
     end
 
     def run
@@ -79,7 +78,7 @@ module Gantree
       version = "#{@env}-#{hash}"
       puts "version: #{version}"
       dockerrun = "Dockerrun.aws.json"
-      set_tag_to_deploy(dockerrun) if @tag
+      set_tag_to_deploy(dockerrun) if @options[:tag]
       unless ext?
         new_dockerrun = "#{version}-Dockerrun.aws.json"
         FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
@@ -94,7 +93,7 @@ module Gantree
 
     def set_tag_to_deploy file
       docker = JSON.parse(IO.read(file))
-      docker["Image"]["Name"].gsub!(/:(.*)$/, ":#{@tag}")
+      docker["Image"]["Name"].gsub!(/:(.*)$/, ":#{@options[:tag]}")
       IO.write(file,JSON.pretty_generate(docker))
     end
 
@@ -120,7 +119,7 @@ module Gantree
 
     def get_ext_repo
       if ext_branch?
-        repo = @ext.sub.(get_ext_branch)
+        repo = @ext.sub(":#{get_ext_branch}", '')
       else
         @ext
       end
@@ -135,7 +134,8 @@ module Gantree
     end
 
     def get_ext_branch
-      branch = @ext.match(/:.*(:.*)$/)[0]
+      branch = @ext.match(/:.*(:.*)$/)[1]
+      branch.tr(':','')
     end
 
     def clone_repo
