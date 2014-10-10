@@ -7,7 +7,8 @@ require 'spec_helper'
 #   $ rake clean:vcr ; time rake
 describe Gantree::CLI do
   before(:all) do
-    @env = "stag-app-knarr-s1"
+    @env = "stag-knarr-app-s1"
+    @app = "knarr-stag-s1"
     @owner = "bleacher"
     @repo = "cauldron"
     @tag =  "master"
@@ -47,6 +48,15 @@ describe Gantree::CLI do
   describe "create" do
     it "should create clusters" do
       out = execute("bin/gantree create #{@env} --dry-run")
+      beanstalk = IO.read("cfn/#{@app}-beanstalk.cfn.json")
+      expect(beanstalk).to include "Docker 1.2.0"
+      expect(out).to include "All templates created"
+    end
+
+    it "should create clusters with any docker version" do
+      out = execute("bin/gantree create #{@env} --dry-run --docker-version '1.0.0'")
+      beanstalk = IO.read("cfn/#{@app}-beanstalk.cfn.json")
+      expect(beanstalk).to include "Docker 1.0.0"
       expect(out).to include "All templates created"
     end
   end

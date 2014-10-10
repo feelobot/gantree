@@ -2,6 +2,8 @@ class BeanstalkTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
+    @docker_version = params[:docker_version] 
+    @docker_version ||= "1.2.0"
     @size = params[:instance_size]
     @rds = params[:rds]
     @env = params[:env]
@@ -91,8 +93,8 @@ class BeanstalkTemplate
   def configuration_template
     "resource 'ConfigurationTemplate', :Type => 'AWS::ElasticBeanstalk::ConfigurationTemplate', :Properties => {
         :ApplicationName => ref('Application'),
-        :SolutionStackName => '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0',
-        :Description => 'Default Configuration Version 1.0 - with SSH access',
+        :SolutionStackName => '64bit Amazon Linux 2014.03 v1.0.1 running Docker #{@docker_version}',
+        :Description => 'Default Configuration Version #{@docker_version} - with SSH access',
         :OptionSettings => [
             {
                 :Namespace => 'aws:elasticbeanstalk:application:environment',
