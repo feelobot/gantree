@@ -54,7 +54,7 @@ describe Gantree::CLI do
     end
 
     it "should create clusters with any docker version" do
-      out = execute("bin/gantree create #{@env} --dry-run --docker-version '1.0.0'")
+      out = execute("bin/gantree create #{@env} --dry-run --docker-version '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0'")
       beanstalk = IO.read("cfn/#{@app}-beanstalk.cfn.json")
       expect(beanstalk).to include "Docker 1.0.0"
       expect(out).to include "All templates created"
