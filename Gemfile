@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 # Specify your gem's dependencies in gantree.gemspec
 gem "codeclimate-test-reporter", group: :test, require: nil
-gem "aws-sdk"
+gem "aws-sdk-v1"
 gem "guard", group: :test
 gem "guard-bundler", group: :test
 gem "rspec", group: :test

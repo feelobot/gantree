@@ -12,7 +12,8 @@ module Gantree
         :secret_access_key => ENV['AWS_SECRET_ACCES_KEY'])
       @s3 = AWS::S3.new
       @cfm = AWS::CloudFormation.new
-      @size = "t1.micro" if options[:instance_size].nil?
+      @size = options[:instance_size]
+      @size ||= "t1.micro"
       @requirements = "#!/usr/bin/env ruby
         require 'bundler/setup'
         require 'cloudformation-ruby-dsl/cfntemplate'
