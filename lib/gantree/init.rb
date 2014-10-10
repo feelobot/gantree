@@ -1,5 +1,5 @@
 require 'thor'
-require 'aws-sdk'
+require 'aws-sdk-v1'
 
 module Gantree
 
