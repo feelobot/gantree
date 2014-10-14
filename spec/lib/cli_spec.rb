@@ -40,7 +40,7 @@ describe Gantree::CLI do
       expect(out).to include("Deploying")
     end
     it "should deploy images with remote extensions on a branch" do
-      out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:feature'")
+      out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic'")
       expect(out).to include("Deploying")
     end
   end
@@ -48,16 +48,22 @@ describe Gantree::CLI do
   describe "create" do
     it "should create clusters" do
       out = execute("bin/gantree create #{@env} --dry-run")
-      beanstalk = IO.read("cfn/#{@app}-beanstalk.cfn.json")
+      beanstalk = JSON.parse(IO.read("cfn/#{@app}-beanstalk.cfn.json"))["Resources"]["ConfigurationTemplate"]["Properties"]["SolutionStackName"]
       expect(beanstalk).to include "Docker 1.2.0"
       expect(out).to include "All templates created"
+      expect(out).to include "RDS is not enabled, no DB created"
     end
 
     it "should create clusters with any docker version" do
       out = execute("bin/gantree create #{@env} --dry-run --docker-version '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0'")
-      beanstalk = IO.read("cfn/#{@app}-beanstalk.cfn.json")
+      beanstalk = JSON.parse(IO.read("cfn/#{@app}-beanstalk.cfn.json"))["Resources"]["ConfigurationTemplate"]["Properties"]["SolutionStackName"]
       expect(beanstalk).to include "Docker 1.0.0"
       expect(out).to include "All templates created"
+    end
+
+    it "should create clusters with databases" do
+      out = execute("bin/gantree create stag-knarr-app-s7 --dry-run --rds pg")
+      expect(out).to_not include "RDS is not enabled, no DB created"
     end
   end
 end
