@@ -30,12 +30,10 @@ module Gantree
         env: @env,
         stag_domain: "sbleacherreport.com",
         prod_domain: "bleacherreport.com",
-        rds_enabled: rds_enabled?,
         env_type: env_type,
       }
       @options = options.merge(additional_options)
-      puts "*** OPTIONS + ADDITIONAL"
-      puts @options
+      @options[:rds_enabled] = rds_enabled?
     end
 
     def check_credentials
@@ -90,10 +88,10 @@ module Gantree
     end
 
     def rds_enabled?
-      if @rds == nil
+      if @options[:rds] == nil
         puts "RDS is not enabled, no DB created"
         false
-      elsif @rds == "pg" || @rds == "mysql"
+      elsif @options[:rds] == "pg" || @rds == "mysql"
         puts "RDS is enabled, creating DB"
         true
       else

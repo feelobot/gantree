@@ -3,7 +3,7 @@ require_relative '../../lib/gantree/deploy'
 
 describe "#Deploy" do
   before(:all) do
-    @env = "stag-app-knarr-s1"
+    @env = "stag-knarr-app-s1"
     @owner = "bleacher"
     @repo = "cauldron"
     @tag =  "master"
