@@ -28,6 +28,7 @@ module Gantree
     method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
     option :docker_version, :desc => "set the version of docker to use as solution stack"
+    option :db_instance_size, :desc => "set the db instance size"
     def create app
       Gantree::Stack.new(app, options.merge(gantreecfg)).create
     end

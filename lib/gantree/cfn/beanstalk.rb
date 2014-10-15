@@ -10,7 +10,7 @@ class BeanstalkTemplate
     @prod_domain = params[:prod_domain]
     @stag_domain = params[:stag_domain]
     @requirements = params[:requirements]
-    @rds_enabled = params[:rds?]
+    @rds_enabled = params[:rds_enabled]
     @env_type = params[:env_type]
   end
 
