@@ -12,7 +12,7 @@ module Gantree
     method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
     def deploy app
-      Gantree::Deploy.new(app, options.merge(gantreecfg)).run
+      Gantree::Deploy.new(app, merge_defaults(options)).run
     end
 
     desc "init IMAGE", "create a dockerrun for your IMAGE"
@@ -29,16 +29,19 @@ module Gantree
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
     option :docker_version, :desc => "set the version of docker to use as solution stack"
     def create app
-      Gantree::Stack.new(app, options.merge(gantreecfg)).create
+      Gantree::Stack.new(app, merge_defaults(options)).create
     end
 
     protected
-    def gantreecfg
-      if File.exist?(".gantreecfg")
-        defaults = JSON.parse(IO.read(".gantreecfg"))
-      else
-        {}
-      end
-    end
+
+    def merge_defaults(options={})
+       if File.exist?(".gantreecfg")
+         defaults = JSON.parse(File.open(".gantreecfg").read)
+         hash = defaults.merge(options)
+         Hash[hash.map{ |k, v| [k.to_sym, v] }]
+       else
+         Hash[options.map{ |k, v| [k.to_sym, v] }]
+       end
+     end
   end
 end

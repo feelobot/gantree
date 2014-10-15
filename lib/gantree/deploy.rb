@@ -98,6 +98,7 @@ module Gantree
 
     def repo?
       if @ext.include? "github"
+        puts "Cloning: #{@ext}..."
         true
       else
         false
