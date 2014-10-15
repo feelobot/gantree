@@ -65,5 +65,10 @@ describe Gantree::CLI do
       out = execute("bin/gantree create stag-knarr-app-s7 --dry-run --rds pg")
       expect(out).to_not include "RDS is not enabled, no DB created"
     end
+
+    it "should create clusters with custom db instance size" do
+      out = execute("bin/gantree create stag-knarr-app-s7 --dry-run --rds pg --db-instance-size")
+      expect(out).to_not include "RDS is not enabled, no DB created"
+    end
   end
 end

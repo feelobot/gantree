@@ -1,10 +1,11 @@
+require 'faker'
 class ResourcesTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
-    @rds = params[:rds]
     @env = params[:env]
-    @rds_enabled = params[:rds?]
+    @db_instance_size = params[:db_instance_size]
+    @rds_enabled = params[:rds_enabled]
     @requirements = params[:requirements]
     @env_type = params[:env_type]
   end
@@ -38,10 +39,10 @@ class ResourcesTemplate
     "resource 'sampleDB', :Type => 'AWS::RDS::DBInstance', :DeletionPolicy => 'Snapshot', :Properties => {
       :DBName => 'sampledb',
       :AllocatedStorage => '10',
-      :DBInstanceClass => 'db.m3.large',
+      :DBInstanceClass => '#{@db_instance_size}',
       :DBSecurityGroups => [ ref('DBSecurityGroup') ],
-      :Engine => 'postgres',
-      :EngineVersion => '9.3',
+      :Engine => '#{db_engine}',
+      :EngineVersion => '#{db_version}',
       :MasterUsername => 'masterUser',
       :MasterUserPassword => 'masterpassword',
     }
@@ -56,5 +57,15 @@ class ResourcesTemplate
     output 'RDSHostURL',
       :Value => get_att('sampleDB', 'Endpoint.Address')
     "
+  end
+
+  def db_engine
+    return "postgres" if @rds == "pg"
+    return "MySQL" if @rds == "mysql"
+  end
+
+  def db_version
+    return "5.1.42" if @rds == "mysql"
+    return "9.3" if @rds == "pg"
   end
 end

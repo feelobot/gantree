@@ -2,8 +2,7 @@ class MasterTemplate
 
   def initialize params
     @stack_name = params[:stack_name]
-    @rds = params[:rds]
-    @rds_enabled = params[:rds?]
+    @rds_enabled = params[:rds_enabled]
     @env = params[:env]
     @bucket = params[:cfn_bucket]
     @requirements = params[:requirements]
