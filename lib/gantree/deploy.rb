@@ -35,27 +35,17 @@ module Gantree
     end
 
     def create_eb_version
-      begin
-        @eb.create_application_version({
-          :application_name => @app,
-          :version_label => @packeged_version,
-          :source_bundle => {
-            :s3_bucket => "#{@app}-versions",
-            :s3_key => @packeged_version
-          }
-        })
-      rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
-        puts "Version already exists, recreating..."
-        begin 
-          @eb.delete_application_version({
-            :application_name => @app,
-            :version_label => @packeged_version,
-            :delete_source_bundle => false
-          })
-          retry
-        rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
-          puts "No Application named #{@app} found"
-        end
+    begin
+      @eb.create_application_version({
+        :application_name => @app,
+        :version_label => @packeged_version,
+        :source_bundle => {
+          :s3_bucket => "#{@app}-versions",
+          :s3_key => @packeged_version
+        }
+      })
+      rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
+        puts "No Application named #{@app} found #{e}"
       end
     end
 
@@ -71,11 +61,12 @@ module Gantree
     end
 
     def create_version_files
+      unique_hash = (0...8).map { (65 + rand(26)).chr }.join
       branch = `git rev-parse --abbrev-ref HEAD`
       puts "branch: #{branch}"
       hash = `git rev-parse --verify --short #{branch}`.strip
       puts "hash #{hash}"
-      version = "#{@env}-#{hash}"
+      version = "#{@env}-#{hash}-#{unique_hash}"
       puts "version: #{version}"
       dockerrun = "Dockerrun.aws.json"
       set_tag_to_deploy(dockerrun) if @options[:tag]
