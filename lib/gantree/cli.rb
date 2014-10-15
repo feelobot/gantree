@@ -37,9 +37,10 @@ module Gantree
     def merge_defaults(options={})
        if File.exist?(".gantreecfg")
          defaults = JSON.parse(File.open(".gantreecfg").read)
-         defaults.merge(options)
+         hash = defaults.merge(options)
+         Hash[hash.map{ |k, v| [k.to_sym, v] }]
        else
-         options
+         Hash[options.map{ |k, v| [k.to_sym, v] }]
        end
      end
   end

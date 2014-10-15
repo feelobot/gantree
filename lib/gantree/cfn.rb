@@ -6,6 +6,8 @@ require_relative 'cfn/resources'
 module Gantree
   class Stack
     def initialize stack_name,options
+      puts "*** CREATE OPTIONS"
+      puts options
       check_credentials
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
@@ -32,6 +34,8 @@ module Gantree
         env_type: env_type,
       }
       @options = options.merge(additional_options)
+      puts "*** OPTIONS + ADDITIONAL"
+      puts @options
     end
 
     def check_credentials
@@ -45,6 +49,8 @@ module Gantree
       generate("beanstalk", BeanstalkTemplate.new(@options).create)
       generate("resources", ResourcesTemplate.new(@options).create)
       puts "All templates created"
+      puts "*** OPTIONS + ADDITIONAL pt 2"
+      puts @options
       create_aws_cfn_stack if @options[:dry_run].nil?
     end
 
