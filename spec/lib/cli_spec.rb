@@ -32,15 +32,15 @@ describe Gantree::CLI do
 
   describe "deploy" do
     it "should deploy images" do
-      out = execute("bin/gantree deploy #{@env}")
+      out = execute("bin/gantree deploy #{@env} --dry-run")
       expect(out).to include("Deploying")
     end
     it "should deploy images with remote extensions" do
-      out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions'")
+      out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions' --dry-run")
       expect(out).to include("Deploying")
     end
     it "should deploy images with remote extensions on a branch" do
-      out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic'")
+      out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic' --dry-run")
       expect(out).to include("Deploying")
     end
   end
