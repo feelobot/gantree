@@ -25,6 +25,4 @@ describe "#Deploy" do
       puts deploy.instance_eval { get_ext_repo } 
     end
   end
-
-  describe ".create_"
 end
