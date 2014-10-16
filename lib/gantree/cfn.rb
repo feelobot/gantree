@@ -1,4 +1,5 @@
 require 'cloudformation-ruby-dsl'
+require "highline/import"
 require_relative 'cfn/master'
 require_relative 'cfn/beanstalk'
 require_relative 'cfn/resources'
@@ -41,7 +42,7 @@ module Gantree
     def create
       @options[:rds_enabled] = rds_enabled? unless 
       create_cfn_if_needed
-      generate_all_templates unless @options[:local]
+      create_all_templates
       upload_templates unless @options[:dry_run]
       create_aws_cfn_stack unless @options[:dry_run]
     end
@@ -53,15 +54,44 @@ module Gantree
       @cfm.stacks[@options[:stack_name]].update(template) unless @options[:dry_run]
     end
 
+    def delete
+      input = ask "Are you sure? (y|n)"
+      if input == "y"
+        puts "Deleting stack from aws"
+      else
+        puts "canceling..."
+      end
+    end
+
     def create_cfn_if_needed
       Dir.mkdir 'cfn' unless File.directory?("cfn")
     end
 
-    def generate_all_templates
-      puts "Generating templates from gantree"
-      generate("master", MasterTemplate.new(@options).create)
-      generate("beanstalk", BeanstalkTemplate.new(@options).create)
-      generate("resources", ResourcesTemplate.new(@options).create)
+    def create_all_templates
+      if @options[:dupe]
+        puts "Duplicating cluster"
+        orgin_stack_name = @options[:dupe]
+        origin_env = @options[:dupe].match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + env_from_dupe = @options[:dupe].match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + env_from_dupe = @options[:dupe].match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
+        templates = ['master','resources','beanstalk']
+        templates.each do |template|
+          FileUtils.cp("cfn/#{origin_env}-#{template}.cfn.json", "cfn/#{@env}-#{template}.cfn.json")
+          file = IO.read("cfn/#{@env}-#{template}.cfn.json")
+          puts "#{escape_characters_in_string(orgin_stack_name)}"
+          file.gsub!(/#{escape_characters_in_string(orgin_stack_name)}/, @options[:stack_name])
+          file.gsub!(/#{escape_characters_in_string(origin_env)}/, @options[:env])
+          IO.write("cfn/#{@env}-#{template}.cfn.json",file)
+        end
+      else
+        puts "Generating templates from gantree"
+        generate("master", MasterTemplate.new(@options).create)
+        generate("beanstalk", BeanstalkTemplate.new(@options).create)
+        generate("resources", ResourcesTemplate.new(@options).create)
+      end
+    end
+
+    def escape_characters_in_string(string)
+      pattern = /(\'|\"|\.|\*|\/|\-|\\)/
+      string.gsub(pattern){|match|"\\"  + match} # <-- Trying to take the currently found match and add a \ before it I have no idea how to do that).
     end
 
     def generate(template_name, template)
@@ -75,7 +105,7 @@ module Gantree
     end
 
     def upload_templates
-      check_for_template_bucket
+      check_template_bucket
       templates = ['master','resources','beanstalk']
       templates.each do |template|
         filename = "cfn/#{@env}-#{template}.cfn.json"

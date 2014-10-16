@@ -51,6 +51,7 @@ describe Gantree::CLI do
       beanstalk = JSON.parse(IO.read("cfn/#{@app}-beanstalk.cfn.json"))["Resources"]["ConfigurationTemplate"]["Properties"]["SolutionStackName"]
       expect(beanstalk).to include "Docker 1.2.0"
       expect(out).to include "RDS is not enabled, no DB created"
+      expect(out).to include "Generating"
       expect_all_templates_created(out)
     end
 
@@ -66,8 +67,9 @@ describe Gantree::CLI do
       expect(out).to_not include "RDS is not enabled, no DB created"
     end
 
-    it "should create clusters from local cfn" do 
-      out = execute("bin/gantree create #{@env} --local --dry-run")
+    it "should create dupliacte clusters from local cfn" do 
+      out = execute("bin/gantree create stag-knarr-app-s2 --dupe #{@env} --dry-run")
+      expect(out).to include "Duplicating"
     end
   end
 
