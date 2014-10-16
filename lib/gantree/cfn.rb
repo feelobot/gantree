@@ -6,8 +6,6 @@ require_relative 'cfn/resources'
 module Gantree
   class Stack
     def initialize stack_name,options
-      puts "*** CREATE OPTIONS"
-      puts options
       check_credentials
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
