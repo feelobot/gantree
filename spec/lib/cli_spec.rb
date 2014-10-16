@@ -80,6 +80,13 @@ describe Gantree::CLI do
     end
   end
 
+  describe "delete" do
+    it "should update existing clusters" do
+      out = execute("bin/gantree delete #{@env} --dry-run --force")
+      expect(out).to include "Deleting"
+    end
+  end
+
   def expect_all_templates_created(out)
     expect(out).to include "#{@app}-master.cfn.json"
     expect(out).to include "#{@app}-beanstalk.cfn.json"

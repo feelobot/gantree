@@ -49,15 +49,22 @@ module Gantree
 
     def update
       puts "Updating stack from local cfn repo"
-      upload_templates unless @options[:dry_run]
-      template = AWS::S3.new.buckets["#{@options[:cfn_bucket]}/#{@env}"].objects["#{@env}-master.cfn.json"]
-      @cfm.stacks[@options[:stack_name]].update(template) unless @options[:dry_run]
+      unless @options[:dry_run] then
+        upload_templates 
+        template = AWS::S3.new.buckets["#{@options[:cfn_bucket]}/#{@env}"].objects["#{@env}-master.cfn.json"]
+        @cfm.stacks[@options[:stack_name]].update(:template => template) 
+      end
     end
 
     def delete
-      input = ask "Are you sure? (y|n)"
-      if input == "y"
+      if @options[:force]
+        input = "y"
+      else
+        input = ask "Are you sure? (y|n)"
+      end
+      if input == "y" || @options[:force]
         puts "Deleting stack from aws"
+        @cfm.delete_stack[@options[:stack_name]] unless @options[:dry_run]
       else
         puts "canceling..."
       end
@@ -76,7 +83,6 @@ module Gantree
         templates.each do |template|
           FileUtils.cp("cfn/#{origin_env}-#{template}.cfn.json", "cfn/#{@env}-#{template}.cfn.json")
           file = IO.read("cfn/#{@env}-#{template}.cfn.json")
-          puts "#{escape_characters_in_string(orgin_stack_name)}"
           file.gsub!(/#{escape_characters_in_string(orgin_stack_name)}/, @options[:stack_name])
           file.gsub!(/#{escape_characters_in_string(origin_env)}/, @options[:env])
           IO.write("cfn/#{@env}-#{template}.cfn.json",file)

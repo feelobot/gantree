@@ -39,6 +39,13 @@ module Gantree
       Gantree::Stack.new(app, merge_defaults(options)).update
     end
 
+    desc "delete APP", "delete a cfn stack"
+    option :force, :desc => "do not prompt"
+    option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
+    def delete app
+      Gantree::Stack.new(app, merge_defaults(options)).delete
+    end
+
     protected
 
     def merge_defaults(options={})
