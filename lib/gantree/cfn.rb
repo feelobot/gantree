@@ -52,6 +52,10 @@ module Gantree
       create_aws_cfn_stack if @options[:dry_run].nil?
     end
 
+    def update
+      puts "Updating from local cfn repo"
+    end
+
     def create_cfn_if_needed
       Dir.mkdir 'cfn' unless File.directory?("cfn")
     end

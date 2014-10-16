@@ -62,8 +62,19 @@ describe Gantree::CLI do
     end
 
     it "should create clusters with databases" do
-      out = execute("bin/gantree create stag-knarr-app-s7 --dry-run --rds pg")
+      out = execute("bin/gantree create #{@env} --dry-run --rds pg")
       expect(out).to_not include "RDS is not enabled, no DB created"
+    end
+
+    it "should create clusters from local cfn" do 
+      out = execute("bin/gantree create #{@env} --local --dry-run")
+    end
+  end
+
+  describe "update" do
+    it "should update existing clusters" do
+      out = execute("bin/gantree update #{@env} --dry-run")
+      expect(out).to include "Updating"
     end
   end
 end
