@@ -11,6 +11,7 @@ module Gantree
     method_option :env, :aliases => "-e", :desc => "elastic beanstalk environment"
     method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
+    option :silent, :aliases => "-s", :desc => "mute notifications"
     def deploy app
       Gantree::Deploy.new(app, merge_defaults(options)).run
     end
