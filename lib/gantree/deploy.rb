@@ -1,5 +1,6 @@
 require 'json'
 require 'archive/zip'
+require_relative 'notification'
 
 module Gantree
   class Deploy
@@ -23,6 +24,9 @@ module Gantree
       clean_up
       create_eb_version if @options[:dry_run].nil?
       update_application if @options[:dry_run].nil?
+      if @options[:slack]
+        Notification.new(@options[:slack]).say("hello") unless @options[:silent]
+      end
     end
 
     private
