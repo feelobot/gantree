@@ -1,4 +1,5 @@
 require 'cloudformation-ruby-dsl'
+require "highline/import"
 require_relative 'cfn/master'
 require_relative 'cfn/beanstalk'
 require_relative 'cfn/resources'
@@ -31,7 +32,6 @@ module Gantree
         env_type: env_type,
       }
       @options = options.merge(additional_options)
-      @options[:rds_enabled] = rds_enabled?
     end
 
     def check_credentials
@@ -40,18 +40,64 @@ module Gantree
     end
 
     def create
+      @options[:rds_enabled] = rds_enabled? if @options[:rds] 
       create_cfn_if_needed
-      generate("master", MasterTemplate.new(@options).create)
-      generate("beanstalk", BeanstalkTemplate.new(@options).create)
-      generate("resources", ResourcesTemplate.new(@options).create)
-      puts "All templates created"
-      puts "*** OPTIONS + ADDITIONAL pt 2"
-      puts @options
-      create_aws_cfn_stack if @options[:dry_run].nil?
+      create_all_templates
+      upload_templates unless @options[:dry_run]
+      create_aws_cfn_stack unless @options[:dry_run]
+    end
+
+    def update
+      puts "Updating stack from local cfn repo"
+      unless @options[:dry_run] then
+        upload_templates 
+        template = AWS::S3.new.buckets["#{@options[:cfn_bucket]}/#{@env}"].objects["#{@env}-master.cfn.json"]
+        @cfm.stacks[@options[:stack_name]].update(:template => template) 
+      end
+    end
+
+    def delete
+      if @options[:force]
+        input = "y"
+      else
+        input = ask "Are you sure? (y|n)"
+      end
+      if input == "y" || @options[:force]
+        puts "Deleting stack from aws"
+        @cfm.stacks[@options[:stack_name]].delete unless @options[:dry_run]
+      else
+        puts "canceling..."
+      end
     end
 
     def create_cfn_if_needed
       Dir.mkdir 'cfn' unless File.directory?("cfn")
+    end
+
+    def create_all_templates
+      if @options[:dupe]
+        puts "Duplicating cluster"
+        orgin_stack_name = @options[:dupe]
+        origin_env = @options[:dupe].match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + env_from_dupe = @options[:dupe].match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + env_from_dupe = @options[:dupe].match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
+        templates = ['master','resources','beanstalk']
+        templates.each do |template|
+          FileUtils.cp("cfn/#{origin_env}-#{template}.cfn.json", "cfn/#{@env}-#{template}.cfn.json")
+          file = IO.read("cfn/#{@env}-#{template}.cfn.json")
+          file.gsub!(/#{escape_characters_in_string(orgin_stack_name)}/, @options[:stack_name])
+          file.gsub!(/#{escape_characters_in_string(origin_env)}/, @options[:env])
+          IO.write("cfn/#{@env}-#{template}.cfn.json",file)
+        end
+      else
+        puts "Generating templates from gantree"
+        generate("master", MasterTemplate.new(@options).create)
+        generate("beanstalk", BeanstalkTemplate.new(@options).create)
+        generate("resources", ResourcesTemplate.new(@options).create)
+      end
+    end
+
+    def escape_characters_in_string(string)
+      pattern = /(\'|\"|\.|\*|\/|\-|\\)/
+      string.gsub(pattern){|match|"\\"  + match} # <-- Trying to take the currently found match and add a \ before it I have no idea how to do that).
     end
 
     def generate(template_name, template)
@@ -62,20 +108,26 @@ module Gantree
       IO.write("cfn/#{template_file_name}", json)
       puts "Created #{template_file_name} in the cfn directory"
       FileUtils.rm("cfn/#{template_name}.rb")
-      upload_template_to_s3("cfn/#{template_file_name}")
     end
 
-    def upload_template_to_s3(filename)
-      begin
-        puts "uploading cfn template to #{@options[:cfn_bucket]}/#{@env}"
+    def upload_templates
+      check_template_bucket
+      templates = ['master','resources','beanstalk']
+      templates.each do |template|
+        filename = "cfn/#{@env}-#{template}.cfn.json"
         key = File.basename(filename)
         @s3.buckets["#{@options[:cfn_bucket]}/#{@env}"].objects[key].write(:file => filename)
-      rescue AWS::S3::Errors::NoSuchBucket
-        puts "bucket didn't exist...creating"
-        bucket = @s3.buckets.create("#{@options[:cfn_bucket]}/#{@env}")
-        retry
-      rescue AWS::S3::Errors::AccessDenied
-        puts "Your key is not configured for s3 access, please let your operations team know"
+      end
+      puts "templates uploaded"
+    end
+
+    def check_template_bucket
+      bucket_name = "#{@options[:cfn_bucket]}/#{@env}"
+      if @s3.buckets[bucket_name].exists?
+        puts "uploading cfn templates to #{@options[:cfn_bucket]}/#{@env}"
+      else
+        puts "creating bucket #{@options[:cfn_bucket]}/#{@env} to upload templates"
+        @s3.buckets.create(bucket_name) 
       end
     end
 

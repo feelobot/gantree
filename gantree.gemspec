@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "cloudformation-ruby-dsl"
   spec.add_dependency "archive-zip"
   spec.add_dependency "json"
+  spec.add_dependency "highline"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
