@@ -64,7 +64,7 @@ module Gantree
       end
       if input == "y" || @options[:force]
         puts "Deleting stack from aws"
-        @cfm.delete_stack[@options[:stack_name]] unless @options[:dry_run]
+        @cfm.stacks[@options[:stack_name]].delete unless @options[:dry_run]
       else
         puts "canceling..."
       end
