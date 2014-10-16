@@ -33,6 +33,7 @@ GEM
     guard-rspec (4.3.1)
       guard (~> 2.1)
       rspec (>= 2.14, < 4.0)
+    highline (1.6.21)
     io-like (0.3.0)
     json (1.8.1)
     listen (2.7.9)
@@ -92,6 +93,7 @@ DEPENDENCIES
   guard
   guard-bundler
   guard-rspec
+  highline
   json
   rake
   rspec

@@ -23,14 +23,28 @@ module Gantree
       Gantree::Init.new(image,options).run
     end
 
-    desc "create APP", "create or update a cfn stack"
+    desc "create APP", "create a cfn stack"
     method_option :env, :aliases => "-e", :desc => "(optional) environment name"
     method_option :instance_size, :aliases => "-i", :desc => "(optional) set instance size"
     method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
     option :docker_version, :desc => "set the version of docker to use as solution stack"
+    option :dupe, :desc => "use a local cfn folder"
     def create app
       Gantree::Stack.new(app, merge_defaults(options)).create
+    end
+
+    desc "update APP", "update a cfn stack"
+    option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
+    def update app
+      Gantree::Stack.new(app, merge_defaults(options)).update
+    end
+
+    desc "delete APP", "delete a cfn stack"
+    option :force, :desc => "do not prompt"
+    option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
+    def delete app
+      Gantree::Stack.new(app, merge_defaults(options)).delete
     end
 
     protected
