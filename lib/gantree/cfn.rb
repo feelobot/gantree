@@ -41,20 +41,27 @@ module Gantree
     def create
       @options[:rds_enabled] = rds_enabled? unless 
       create_cfn_if_needed
-      generate("master", MasterTemplate.new(@options).create)
-      generate("beanstalk", BeanstalkTemplate.new(@options).create)
-      generate("resources", ResourcesTemplate.new(@options).create)
+      generate_all_templates unless @options[:local]
       upload_templates unless @options[:dry_run]
       create_aws_cfn_stack unless @options[:dry_run]
     end
 
     def update
-      puts "Updating from local cfn repo"
+      puts "Updating stack from local cfn repo"
       upload_templates unless @options[:dry_run]
+      template = AWS::S3.new.buckets["#{@options[:cfn_bucket]}/#{@env}"].objects["#{@env}-master.cfn.json"]
+      @cfm.stacks[@options[:stack_name]].update(template) unless @options[:dry_run]
     end
 
     def create_cfn_if_needed
       Dir.mkdir 'cfn' unless File.directory?("cfn")
+    end
+
+    def generate_all_templates
+      puts "Generating templates from gantree"
+      generate("master", MasterTemplate.new(@options).create)
+      generate("beanstalk", BeanstalkTemplate.new(@options).create)
+      generate("resources", ResourcesTemplate.new(@options).create)
     end
 
     def generate(template_name, template)
