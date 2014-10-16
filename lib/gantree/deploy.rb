@@ -24,7 +24,9 @@ module Gantree
       clean_up
       create_eb_version if @options[:dry_run].nil?
       update_application if @options[:dry_run].nil?
-      Notification.new(@options[:slack]).say("hello") unless @options[:silent]
+      if @options[:slack]
+        Notification.new(@options[:slack]).say("hello") unless @options[:silent]
+      end
     end
 
     private
