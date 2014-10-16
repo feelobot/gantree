@@ -40,7 +40,7 @@ module Gantree
     end
 
     def create
-      @options[:rds_enabled] = rds_enabled? unless 
+      @options[:rds_enabled] = rds_enabled? if @options[:rds] 
       create_cfn_if_needed
       create_all_templates
       upload_templates unless @options[:dry_run]

@@ -50,7 +50,6 @@ describe Gantree::CLI do
       out = execute("bin/gantree create #{@env} --dry-run")
       beanstalk = JSON.parse(IO.read("cfn/#{@app}-beanstalk.cfn.json"))["Resources"]["ConfigurationTemplate"]["Properties"]["SolutionStackName"]
       expect(beanstalk).to include "Docker 1.2.0"
-      expect(out).to include "RDS is not enabled, no DB created"
       expect(out).to include "Generating"
       expect_all_templates_created(out)
     end
