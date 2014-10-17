@@ -25,7 +25,8 @@ module Gantree
       create_eb_version if @options[:dry_run].nil?
       update_application if @options[:dry_run].nil?
       if @options[:slack]
-        Notification.new(@options[:slack]).say("Deploying #{@packaged_version} to #{@app}") unless @options[:silent]
+        msg = "#{ENV['USER']} is deploying #{@packeged_version} to #{@app}"
+        Notification.new(@options[:slack]).say(msg) unless @options[:silent]
       end
     end
 
