@@ -1,5 +1,5 @@
 require 'cloudformation-ruby-dsl'
-require "highline/import"
+require 'highline/import'
 require_relative 'cfn/master'
 require_relative 'cfn/beanstalk'
 require_relative 'cfn/resources'
@@ -16,7 +16,6 @@ module Gantree
       @size = options[:instance_size]
       @size ||= "t1.micro"
       @requirements = "#!/usr/bin/env ruby
-        require 'bundler/setup'
         require 'cloudformation-ruby-dsl/cfntemplate'
         require 'cloudformation-ruby-dsl/spotprice'
         require 'cloudformation-ruby-dsl/table'"
