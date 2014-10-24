@@ -15,6 +15,7 @@ module Gantree
       @env = app
       @eb = AWS::ElasticBeanstalk::Client.new
       @s3 = AWS::S3.new
+      @dockerrun_file = "Dockerrun.aws.json"
     end
 
     def run
@@ -73,8 +74,7 @@ module Gantree
       puts "hash #{hash}"
       version = "#{@env}-#{hash}-#{unique_hash}"
       puts "version: #{version}"
-      dockerrun = "Dockerrun.aws.json"
-      set_tag_to_deploy(dockerrun) if @options[:tag]
+      set_tag_to_deploy if @options[:tag]
       unless ext?
         new_dockerrun = "#{version}-Dockerrun.aws.json"
         FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
@@ -87,10 +87,21 @@ module Gantree
       end
     end
 
-    def set_tag_to_deploy file
-      docker = JSON.parse(IO.read(file))
-      docker["Image"]["Name"].gsub!(/:(.*)$/, ":#{@options[:tag]}")
-      IO.write(file,JSON.pretty_generate(docker))
+    def set_tag_to_deploy
+      image = get_dockerrun_field "Image"
+      image["Name"].gsub!(/:(.*)$/, ":#{@options[:tag]}")
+      IO.write(@dockerrun_file,JSON.pretty_generate(docker))
+    end
+
+    def auto_detect_app_role
+
+      get_dockerrun_field "Image"
+
+    end
+
+    def get_dockerrun_field(field)
+      docker = JSON.parse(IO.read(@dockerrun_file))
+      docker[field]
     end
 
     def ext?
