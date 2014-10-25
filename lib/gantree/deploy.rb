@@ -74,6 +74,7 @@ module Gantree
       puts "hash #{hash}"
       version = "#{@env}-#{hash}-#{unique_hash}"
       puts "version: #{version}"
+      auto_detect_app_role if @options[:autodetect_app_role] == true
       set_tag_to_deploy if @options[:tag]
       unless ext?
         new_dockerrun = "#{version}-Dockerrun.aws.json"
@@ -82,26 +83,28 @@ module Gantree
       else
         zip = "#{version}.zip"
         clone_repo if repo?
-        Archive::Zip.archive(zip, ['.ebextensions/', dockerrun])
+        Archive::Zip.archive(zip, ['.ebextensions/', @dockerrun_file])
         zip
       end
     end
 
     def set_tag_to_deploy
-      image = get_dockerrun_field "Image"
-      image["Name"].gsub!(/:(.*)$/, ":#{@options[:tag]}")
+      docker = JSON.parse(IO.read(@dockerrun_file))
+      image = docker["Image"]["Name"]
+      image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
       IO.write(@dockerrun_file,JSON.pretty_generate(docker))
     end
 
     def auto_detect_app_role
-
-      get_dockerrun_field "Image"
-
-    end
-
-    def get_dockerrun_field(field)
-      docker = JSON.parse(IO.read(@dockerrun_file))
-      docker[field]
+      role = @env.split('-')[2]
+      unless role == "app"
+        puts "Deploying app as a #{role}"
+        role_cmd = IO.read("roles/#{role}")
+        docker = JSON.parse(IO.read(@dockerrun_file))
+        docker["Cmd"] = role_cmd
+        IO.write(@dockerrun_file,JSON.pretty_generate(docker))
+        puts "Setting role cmd to '#{role_cmd}'"
+      end
     end
 
     def ext?
