@@ -99,7 +99,7 @@ module Gantree
       role = @env.split('-')[2]
       unless role == "app"
         puts "Deploying app as a #{role}"
-        role_cmd = IO.read("roles/#{role}")
+        role_cmd = IO.read("roles/#{role}").gsub("\n",'')
         docker = JSON.parse(IO.read(@dockerrun_file))
         docker["Cmd"] = role_cmd
         IO.write(@dockerrun_file,JSON.pretty_generate(docker))
