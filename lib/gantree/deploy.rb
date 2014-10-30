@@ -74,7 +74,7 @@ module Gantree
       puts "hash #{hash}"
       version = "#{@env}-#{hash}-#{unique_hash}"
       puts "version: #{version}"
-      auto_detect_app_role if @options[:autodetect_app_role] == true
+      #auto_detect_app_role if @options[:autodetect_app_role] == true
       set_tag_to_deploy if @options[:tag]
       unless ext?
         new_dockerrun = "#{version}-Dockerrun.aws.json"
