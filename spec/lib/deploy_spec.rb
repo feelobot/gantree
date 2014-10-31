@@ -29,11 +29,8 @@ describe "#Deploy" do
   describe ".auto_detect_app_role" do
     it "sets app roles if enabled" do
       options = { autodetect_app_role: true}
-      Dir.mkdir("roles") unless Dir.exist?("roles")
-      IO.write("roles/listener", "bundle exec rake:listener")
       deploy = Gantree::Deploy.new("stag-knarr-listener-s1",options)
-      puts deploy.instance_eval { auto_detect_app_role }
-      FileUtils.rm_r "roles"
+      puts deploy.instance_eval { autodetect_app_role }
     end
   end
 end
