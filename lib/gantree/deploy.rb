@@ -59,7 +59,8 @@ module Gantree
       begin
         @eb.update_environment({
           :environment_name => @env,
-          :version_label => @packeged_version
+          :version_label => @packeged_version,
+          :option_settings => autodetect_app_role
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
         puts "#{@env} doesn't exist"
@@ -95,15 +96,19 @@ module Gantree
       IO.write(@dockerrun_file,JSON.pretty_generate(docker))
     end
 
-    def auto_detect_app_role
-      role = @env.split('-')[2]
-      unless role == "app"
+    def autodetect_app_role
+      enabled = @options[:autodetect_app_role]
+      if enabled == true || enabled == "true"
+        role = @env.split('-')[2]
         puts "Deploying app as a #{role}"
-        role_cmd = IO.read("roles/#{role}").gsub("\n",'')
-        docker = JSON.parse(IO.read(@dockerrun_file))
-        docker["Cmd"] = role_cmd
-        IO.write(@dockerrun_file,JSON.pretty_generate(docker))
-        puts "Setting role cmd to '#{role_cmd}'"
+        #role_cmd = IO.read("roles/#{role}").gsub("\n",'')
+        #docker = JSON.parse(IO.read(@dockerrun_file))
+        #docker["Cmd"] = role_cmd
+        #IO.write(@dockerrun_file,JSON.pretty_generate(docker))
+        #puts "Setting role cmd to '#{role_cmd}'"
+        [{:option_name => "ROLE", :value => role, :namespace => "aws:elasticbeanstalk:application:environment" }]
+      else 
+        []
       end
     end
 
