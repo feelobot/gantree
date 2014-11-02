@@ -18,8 +18,9 @@ module Gantree
     end
 
     desc "init IMAGE", "create a dockerrun for your IMAGE"
-    method_option :user, :aliases => "-u", :desc => "user credentials for private repo"
-    method_option :port, :aliases => "-p", :desc => "port of running application"
+    method_option :user   , :aliases => "-u", :desc => "user credentials for private repo"
+    method_option :port   , :aliases => "-p", :desc => "port of running application"
+    method_option :bucket , :aliases => "-b", :desc => "set bucket name, default is 'docker-cfgs'"
     def init image
       Gantree::Init.new(image,options).run
     end
