@@ -27,7 +27,7 @@ module Gantree
     end
 
     def create_docker_config_folder
-      bucket = @s3.buckets.create(@bucket_name)
+      bucket = @s3.buckets.create(@bucket_name) unless @s3.buckets[@bucket_name].exists?
     end
 
     def dockerrun_object
