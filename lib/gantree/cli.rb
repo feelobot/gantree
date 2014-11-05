@@ -1,3 +1,4 @@
+require "pry"
 require 'thor'
 require 'aws-sdk-v1'
 require 'gantree/cli/help'
@@ -60,3 +61,4 @@ module Gantree
      end
   end
 end
+

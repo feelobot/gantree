@@ -96,3 +96,4 @@ describe Gantree::CLI do
     expect(out).to include "#{@app}-resources.cfn.json"
     end
 end
+
