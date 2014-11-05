@@ -89,7 +89,7 @@ gantre create your_app_name -e your_env_name
 Allow defaults for commands to be set in a json file 
 ```json
 {
-  "ebextensions" : "configs/.ebextensions",
+  "ebextensions" : "git@github.com:br/.ebextensions.git",
   "default_instance_size" : "m3.medium"
 }
 ```
