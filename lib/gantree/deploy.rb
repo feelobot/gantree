@@ -12,7 +12,7 @@ module Gantree
 
       @options = options
       @ext = @options[:ext]
-      @app = @options[:env] || default_app_name(app)
+      @app = @options[:env] || default_name(app)
       @env = app
     end
 

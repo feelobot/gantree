@@ -20,7 +20,7 @@ module Gantree
         require 'cloudformation-ruby-dsl/cfntemplate'
         require 'cloudformation-ruby-dsl/spotprice'
         require 'cloudformation-ruby-dsl/table'"
-      @env = options[:env] || default_app_name(stack_name)
+      @env = options[:env] || default_name(stack_name)
       additional_options = {
         instance_size: @size,
         stack_name: stack_name,

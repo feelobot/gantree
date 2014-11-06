@@ -1,8 +1,8 @@
 module Gantree
   class Base
     def check_credentials
-      raise "Please set your AWS Environment Variables" if ENV['AWS_SECRET_ACCESS_KEY'] == nil
-      raise "Please set your AWS Environment Variables" if ENV['AWS_ACCESS_KEY_ID'] == nil
+      raise "Please set your AWS Environment Variables" unless ENV['AWS_SECRET_ACCESS_KEY']
+      raise "Please set your AWS Environment Variables" unless ENV['AWS_ACCESS_KEY_ID']
     end
 
     def set_aws_keys
@@ -16,7 +16,7 @@ module Gantree
       @s3 ||= AWS::S3.new
     end
 
-    def default_app_name(app)
+    def default_name(app)
       [
        app.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1],
        app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1],
