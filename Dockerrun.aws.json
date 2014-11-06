@@ -1,0 +1,13 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "bleacher/cauldron:master",
+    "Update": true
+  },
+  "Logging": "/var/log/nginx",
+  "Ports": [
+    {
+      "ContainerPort": null
+    }
+  ]
+}

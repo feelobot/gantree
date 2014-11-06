@@ -42,11 +42,6 @@ module Gantree
       create_aws_cfn_stack unless @options[:dry_run]
     end
 
-    private
-    def stack_template
-      s3.buckets["#{@options[:cfn_bucket]}/#{env}"].objects["#{env}-master.cfn.json"]
-    end
-
     def update
       puts "Updating stack from local cfn repo"
       unless @options[:dry_run] then
@@ -67,6 +62,11 @@ module Gantree
       else
         puts "canceling..."
       end
+    end
+
+    private
+    def stack_template
+      s3.buckets["#{@options[:cfn_bucket]}/#{env}"].objects["#{env}-master.cfn.json"]
     end
 
     def create_cfn_if_needed
