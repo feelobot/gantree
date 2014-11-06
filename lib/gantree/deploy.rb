@@ -3,23 +3,22 @@ require 'archive/zip'
 require_relative 'notification'
 
 module Gantree
-  class Deploy
+  class Deploy < Base
+    attr_reader :app, :env
 
-    def initialize app,options
+    def initialize app, options
+      check_credentials
+      set_aws_keys
+
       @options = options
       @ext = @options[:ext]
-      AWS.config(
-        :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
-      @app = @options[:env] || app.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
+      @app = @options[:env] || default_app_name(app)
       @env = app
-      @eb = AWS::ElasticBeanstalk::Client.new
-      @s3 = AWS::S3.new
     end
 
     def run
       puts "Deploying #{@app}"
-      @packeged_version = create_version_files
+      @packaged_version = create_version_files
       upload_to_s3 if @options[:dry_run].nil?
       clean_up
       create_eb_version if @options[:dry_run].nil?
@@ -30,22 +29,25 @@ module Gantree
     end
 
     private
+    def eb
+      @eb ||= AWS::ElasticBeanstalk::Client.new
+    end
 
     def upload_to_s3
-      key = File.basename(@packeged_version)
+      key = File.basename(@packaged_version)
       check_version_bucket
-      puts "uploading #{@packeged_version} to #{@app}-versions"
-      @s3.buckets["#{@app}-versions"].objects[key].write(:file => @packeged_version)
+      puts "uploading #{@packaged_version} to #{@app}-versions"
+      s3.buckets["#{@app}-versions"].objects[key].write(:file => @packaged_version)
     end
 
     def create_eb_version
     begin
-      @eb.create_application_version({
+      eb.create_application_version({
         :application_name => @app,
-        :version_label => @packeged_version,
+        :version_label => @packaged_version,
         :source_bundle => {
           :s3_bucket => "#{@app}-versions",
-          :s3_key => @packeged_version
+          :s3_key => @packaged_version
         }
       })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
@@ -55,9 +57,9 @@ module Gantree
 
     def update_application
       begin
-        @eb.update_environment({
+        eb.update_environment({
           :environment_name => @env,
-          :version_label => @packeged_version
+          :version_label => @packaged_version
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
         puts "#{@env} doesn't exist"
@@ -144,14 +146,15 @@ module Gantree
 
     def check_version_bucket
       name = "#{@app}-versions"
-      bucket = @s3.buckets[name] # makes no request
-      @s3.buckets.create(name) unless bucket.exists?
+      bucket = s3.buckets[name] # makes no request
+      s3.buckets.create(name) unless bucket.exists?
     end
 
     def clean_up
-      FileUtils.rm_rf(@packeged_version)
+      FileUtils.rm_rf(@packaged_version)
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
       `rm -rf .ebextensions/` if ext?
     end
   end
 end
+

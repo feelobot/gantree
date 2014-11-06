@@ -2,16 +2,15 @@ require 'thor'
 require 'aws-sdk-v1'
 
 module Gantree
-  class Init
+  class Init < Base
     attr_reader :image, :options
 
     def initialize image, options
+      check_credentials
+      set_aws_keys
+
       @image = image
       @options = options
-      AWS.config(
-        :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
-      @s3 = AWS::S3.new
     end
 
     def run
@@ -25,7 +24,7 @@ module Gantree
 
     private
     def create_docker_config_folder
-      bucket = @s3.buckets.create("docker-cfgs")
+      bucket = s3.buckets.create("docker-cfgs")
     end
 
     def dockerrun_object
@@ -60,7 +59,7 @@ module Gantree
       filename = "#{ENV['HOME']}/#{options.user}.dockercfg"
       FileUtils.cp("#{ENV['HOME']}/.dockercfg", "#{ENV['HOME']}/#{options.user}.dockercfg")
       key = File.basename(filename)
-      @s3.buckets["docker-cfgs"].objects[key].write(:file => filename)
+      s3.buckets["docker-cfgs"].objects[key].write(:file => filename)
     end
   end
 end
