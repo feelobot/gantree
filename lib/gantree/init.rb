@@ -55,11 +55,15 @@ module Gantree
     end
 
     def upload_docker_config
-      raise "You need to run 'docker login' to generate a .dockercfg file" if File.exist?("#{ENV['HOME']}/.dockercfg") != true
+      raise "You need to run 'docker login' to generate a .dockercfg file" unless dockercfg_file_exist?
       filename = "#{ENV['HOME']}/#{options.user}.dockercfg"
       FileUtils.cp("#{ENV['HOME']}/.dockercfg", "#{ENV['HOME']}/#{options.user}.dockercfg")
       key = File.basename(filename)
       s3.buckets["docker-cfgs"].objects[key].write(:file => filename)
+    end
+
+    def dockercfg_file_exist?
+      File.exist?("#{ENV['HOME']}/.dockercfg")
     end
   end
 end
