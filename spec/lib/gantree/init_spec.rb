@@ -53,7 +53,10 @@ describe Gantree::Init do
     gi = Gantree::Init.new("bleacher/cauldron:master", @options)
 
     Gantree::Init.any_instance.stub(:dockercfg_file_exist?) { true }
-    FileUtils.stub(:cp).with("/Users/gantree_user/.dockercfg", "/Users/gantree_user/gantree_user.dockercfg") {"OK"}
+    FileUtils.stub(:cp).with(
+      "/Users/gantree_user/.dockercfg", 
+      "/Users/gantree_user/gantree_user.dockercfg"
+    ) {"OK"}
     AWS::S3::S3Object.any_instance.stub(:write).with(
       :file => "/Users/gantree_user/gantree_user.dockercfg"
     ) {"OK"}
