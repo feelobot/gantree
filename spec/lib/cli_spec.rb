@@ -17,23 +17,26 @@ describe Gantree::CLI do
 
   describe "init" do
     it "should create a new dockerrun for a private repo" do 
-      out = execute("bin/gantree init -u #{@user} #{@owner}/#{@repo}:#{@tag}")
+      out = execute("bin/gantree init -u #{@user} #{@owner}/#{@repo}:#{@tag} --dry-run")
       expect(out).to include "initialize image"
       expect(File.exist?("Dockerrun.aws.json")).to be true
       expect(IO.read("Dockerrun.aws.json").include? @user)
+      File.delete("Dockerrun.aws.json")
     end
 
     it "should create a new dockerrun for a public repo" do 
-      out = execute("bin/gantree init #{@owner}/#{@repo}:#{@tag}")
+      out = execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       expect(out).to include "initialize image"
       expect(File.exist?("Dockerrun.aws.json")).to be true
+      File.delete("Dockerrun.aws.json")
     end
   end
 
   describe "deploy" do
     it "should deploy images" do
+      execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       out = execute("bin/gantree deploy #{@env} --dry-run --silent")
-      expect(out).to include("Deploying")
+      expect(out).to include("Deploying knarr-stag-s1")
     end
     it "should deploy images with remote extensions" do
       out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions' --dry-run --silent")
@@ -94,5 +97,5 @@ describe Gantree::CLI do
     expect(out).to include "#{@app}-master.cfn.json"
     expect(out).to include "#{@app}-beanstalk.cfn.json"
     expect(out).to include "#{@app}-resources.cfn.json"
-    end
+  end
 end

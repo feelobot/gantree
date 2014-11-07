@@ -40,6 +40,10 @@ RSpec.configure do |c|
   #    example.run
   #  end if ENV['VCR'] == '1'
   #end
+  c.after(:all) do
+    FileUtils.rm_rf("Dockerrun.aws.json")
+    FileUtils.rm_rf("*.zip")
+  end
 end
 
 #VCR.configure do |config|

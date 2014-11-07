@@ -20,6 +20,7 @@ module Gantree
 
     def run
       puts "Deploying #{@app}"
+      return if @options[:dry_run]
       @packeged_version = create_version_files
       upload_to_s3 if @options[:dry_run].nil?
       clean_up

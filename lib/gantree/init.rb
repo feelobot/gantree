@@ -21,9 +21,9 @@ module Gantree
       puts "in bucket #{@bucket_name}"
 
       FileUtils.rm("Dockerrun.aws.json") if File.exist?("Dockerrun.aws.json")
-      create_docker_config_folder
+      create_docker_config_folder unless @options.dry_run?
       create_dockerrun
-      upload_docker_config if @options.user
+      upload_docker_config if @options.user && !@options.dry_run?
     end
 
     def create_docker_config_folder
@@ -64,6 +64,6 @@ module Gantree
       key = File.basename(filename)
       @s3.buckets[@bucket_name].objects[key].write(:file => filename)
     end
-
   end
 end
+
