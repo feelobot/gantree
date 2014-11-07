@@ -14,16 +14,14 @@ This tool is intended to help you setup a Dockerrun.aws.json which allows you to
 
 ## Installation
 
-You need to have your AWS_ACCES_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables set in order to use the tool as well as the proper aws permissions for Elastic Beanstalk, and S3 access. 
+You need to have your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables set in order to use the tool as well as the proper aws permissions for Elastic Beanstalk, and S3 access. 
 
 For the time being you also need to configure your github repo to auto build an image inside of Dockerhub (private or open). In order to do this you need to have a dockerhub account already, login, and select your profile/orginization to add a *Automated Build* to. Select the branch you want to build, location of the docker file and the tag to reference the image that will be built (this will hopefully be automated in the future via dockerhub api).
 
 Once you have your docker image created you will also need to install docker (if you haven't already)
 
-*MAC OSX*
-```
-brew install docker
-```
+*Install docker for MAC OSX*
+https://docs.docker.com/installation/mac/
 
 Generate your login credentials token:
 ```

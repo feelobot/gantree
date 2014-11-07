@@ -22,7 +22,15 @@ describe "#Deploy" do
     it "returns just the repo url" do 
       options = { ext: "git@github.com:br/.ebextensions:basic" }
       deploy = Gantree::Deploy.new(@env,options)
-      puts deploy.instance_eval { get_ext_repo } 
+      expect(deploy.instance_eval { get_ext_repo }).to eq "git@github.com:br/.ebextensions"
+    end
+  end
+
+  describe ".auto_detect_app_role" do
+    it "sets app roles if enabled" do
+      options = { autodetect_app_role: true}
+      deploy = Gantree::Deploy.new("stag-knarr-listener-s1",options)
+      puts deploy.instance_eval { autodetect_app_role }
     end
   end
 end

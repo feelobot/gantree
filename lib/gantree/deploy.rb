@@ -17,14 +17,17 @@ module Gantree
     end
 
     def run
-      puts "Deploying #{@app}"
+      puts "Deploying #{@env} on #{@app}"
+      print_options
+      return if @options[:dry_run]
       @packaged_version = create_version_files
       upload_to_s3 if @options[:dry_run].nil?
       clean_up
       create_eb_version if @options[:dry_run].nil?
       update_application if @options[:dry_run].nil?
       if @options[:slack]
-        Notification.new(@options[:slack]).say("hello") unless @options[:silent]
+        msg = "#{ENV['USER']} is deploying #{@packaged_version} to #{@app}"
+        Notification.new(@options[:slack]).say(msg) unless @options[:silent]
       end
     end
 
@@ -59,7 +62,8 @@ module Gantree
       begin
         eb.update_environment({
           :environment_name => @env,
-          :version_label => @packaged_version
+          :version_label => @packaged_version,
+          :option_settings => autodetect_app_role
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
         puts "#{@env} doesn't exist"
@@ -74,8 +78,8 @@ module Gantree
       puts "hash #{hash}"
       version = "#{@env}-#{hash}-#{unique_hash}"
       puts "version: #{version}"
-      dockerrun = "Dockerrun.aws.json"
-      set_tag_to_deploy(dockerrun) if @options[:tag]
+      #auto_detect_app_role if @options[:autodetect_app_role] == true
+      set_tag_to_deploy if @options[:tag]
       unless ext?
         new_dockerrun = "#{version}-Dockerrun.aws.json"
         FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
@@ -83,15 +87,32 @@ module Gantree
       else
         zip = "#{version}.zip"
         clone_repo if repo?
-        Archive::Zip.archive(zip, ['.ebextensions/', dockerrun])
+        Archive::Zip.archive(zip, ['.ebextensions/', @dockerrun_file])
         zip
       end
     end
 
-    def set_tag_to_deploy file
-      docker = JSON.parse(IO.read(file))
-      docker["Image"]["Name"].gsub!(/:(.*)$/, ":#{@options[:tag]}")
-      IO.write(file,JSON.pretty_generate(docker))
+    def set_tag_to_deploy
+      docker = JSON.parse(IO.read(@dockerrun_file))
+      image = docker["Image"]["Name"]
+      image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
+      IO.write(@dockerrun_file,JSON.pretty_generate(docker))
+    end
+
+    def autodetect_app_role
+      enabled = @options[:autodetect_app_role]
+      if enabled == true || enabled == "true"
+        role = @env.split('-')[2]
+        puts "Deploying app as a #{role}"
+        #role_cmd = IO.read("roles/#{role}").gsub("\n",'')
+        #docker = JSON.parse(IO.read(@dockerrun_file))
+        #docker["Cmd"] = role_cmd
+        #IO.write(@dockerrun_file,JSON.pretty_generate(docker))
+        #puts "Setting role cmd to '#{role_cmd}'"
+        [{:option_name => "ROLE", :value => role, :namespace => "aws:elasticbeanstalk:application:environment" }]
+      else 
+        []
+      end
     end
 
     def ext?

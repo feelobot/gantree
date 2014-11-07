@@ -3,7 +3,7 @@ require 'aws-sdk-v1'
 
 module Gantree
   class Init < Base
-    attr_reader :image, :options
+    attr_reader :image, :options, :bucket_name
 
     def initialize image, options
       check_credentials
@@ -11,20 +11,22 @@ module Gantree
 
       @image = image
       @options = options
+      @bucket_name  = @options.bucket || "docker-cfgs"
     end
 
     def run
-      puts "initialize image #{image}"
-      puts "with user #{options.user}" if options.user
+      puts "initialize image #{@image}"
+      print_options
+
       FileUtils.rm("Dockerrun.aws.json") if File.exist?("Dockerrun.aws.json")
-      create_docker_config_folder
+      create_docker_config_folder unless options[:dry_run]
       create_dockerrun
-      upload_docker_config if options.user
+      upload_docker_config if options.user && !options[:dry_run]
     end
 
     private
     def create_docker_config_folder
-      bucket = s3.buckets.create("docker-cfgs")
+      bucket = s3.buckets.create(bucket_name) unless s3.buckets[bucket_name].exists?
     end
 
     def dockerrun_object
@@ -43,7 +45,7 @@ module Gantree
       }
       if options.user
         docker["Authentication"] = {
-          Bucket: "docker-cfgs",
+          Bucket: bucket_name,
           Key: "#{options.user}.dockercfg"
         }
       end
@@ -59,7 +61,7 @@ module Gantree
       filename = "#{ENV['HOME']}/#{options.user}.dockercfg"
       FileUtils.cp("#{ENV['HOME']}/.dockercfg", "#{ENV['HOME']}/#{options.user}.dockercfg")
       key = File.basename(filename)
-      s3.buckets["docker-cfgs"].objects[key].write(:file => filename)
+      s3.buckets[bucket_name].objects[key].write(:file => filename)
     end
 
     def dockercfg_file_exist?

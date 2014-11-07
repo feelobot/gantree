@@ -5,6 +5,12 @@ module Gantree
       raise "put dat AWS_ACCESS_KEY_ID in yo ENV, son." unless ENV['AWS_ACCESS_KEY_ID']
     end
 
+    def print_options
+      @options.each do |param, value|
+        puts "#{param}: #{value}"
+      end
+    end
+
     def set_aws_keys
       AWS.config(
         :access_key_id => ENV['AWS_ACCESS_KEY_ID'],

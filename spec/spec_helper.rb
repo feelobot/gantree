@@ -6,6 +6,9 @@
 ENV['VCR'] ? ENV['VCR'] : ENV['VCR'] = '1'
 ENV['TEST'] = '1'
 ENV['CODECLIMATE_REPO_TOKEN'] = ENV['CODECLIMATE_GANTREE_TOKEN']
+ENV['AWS_SECRET_ACCESS_KEY'] = 'asdfasdf2394230434'
+ENV['AWS_ACCESS_KEY_ID'] = 'adsfasdf984443df'
+
 
 require "codeclimate-test-reporter"
 CodeClimate::TestReporter.start
@@ -40,6 +43,10 @@ RSpec.configure do |c|
   #    example.run
   #  end if ENV['VCR'] == '1'
   #end
+  c.after(:all) do
+    FileUtils.rm_rf("Dockerrun.aws.json")
+    FileUtils.rm_rf("*.zip")
+  end
 end
 
 #VCR.configure do |config|
