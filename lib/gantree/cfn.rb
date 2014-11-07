@@ -5,7 +5,7 @@ require_relative 'cfn/beanstalk'
 require_relative 'cfn/resources'
 
 module Gantree
-  class Stack
+  class Stack < Base
     def initialize stack_name,options
       check_credentials
       AWS.config(
@@ -40,10 +40,12 @@ module Gantree
 
     def create
       @options[:rds_enabled] = rds_enabled? if @options[:rds] 
+      print_options
+      return if @options[:dry_run]
       create_cfn_if_needed
       create_all_templates
-      upload_templates unless @options[:dry_run]
-      create_aws_cfn_stack unless @options[:dry_run]
+      upload_templates
+      create_aws_cfn_stack
     end
 
     def update
