@@ -3,7 +3,7 @@ require 'aws-sdk-v1'
 
 module Gantree
 
-  class Init
+  class Init < Base
     def initialize image,options
       @image        = image
       @options      = options
@@ -17,8 +17,7 @@ module Gantree
 
     def run
       puts "initialize image #{@image}"
-      puts "with user #{@options.user}" if @options.user
-      puts "in bucket #{@bucket_name}"
+      print_options
 
       FileUtils.rm("Dockerrun.aws.json") if File.exist?("Dockerrun.aws.json")
       create_docker_config_folder unless @options.dry_run?

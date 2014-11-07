@@ -3,7 +3,7 @@ require 'archive/zip'
 require_relative 'notification'
 
 module Gantree
-  class Deploy
+  class Deploy < Base
 
     def initialize app,options
       @options = options
@@ -19,7 +19,8 @@ module Gantree
     end
 
     def run
-      puts "Deploying #{@app}"
+      puts "Deploying #{@env} on #{@app}"
+      print_options
       return if @options[:dry_run]
       @packeged_version = create_version_files
       upload_to_s3 if @options[:dry_run].nil?
@@ -33,7 +34,6 @@ module Gantree
     end
 
     private
-
     def upload_to_s3
       key = File.basename(@packeged_version)
       check_version_bucket

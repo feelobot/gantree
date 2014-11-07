@@ -21,14 +21,17 @@ describe Gantree::CLI do
       expect(out).to include "initialize image"
       expect(File.exist?("Dockerrun.aws.json")).to be true
       expect(IO.read("Dockerrun.aws.json").include? @user)
-      File.delete("Dockerrun.aws.json")
     end
 
     it "should create a new dockerrun for a public repo" do 
       out = execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       expect(out).to include "initialize image"
       expect(File.exist?("Dockerrun.aws.json")).to be true
-      File.delete("Dockerrun.aws.json")
+    end
+
+    it "specifies the bucket" do
+      out = execute("bin/gantree init -u #{@user} -b my_bucket #{@owner}/#{@repo}:#{@tag} --dry-run")
+      expect(out).to include "bucket: my_bucket"
     end
   end
 
@@ -36,16 +39,25 @@ describe Gantree::CLI do
     it "should deploy images" do
       execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       out = execute("bin/gantree deploy #{@env} --dry-run --silent")
-      expect(out).to include("Deploying knarr-stag-s1")
+      expect(out).to include("Deploying stag-knarr-app-s1 on knarr-stag-s1")
+      expect(out).to include("dry_run: dry_run")
+      expect(out).to include("silent: silent")
     end
     it "should deploy images with remote extensions" do
       out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions' --dry-run --silent")
-      expect(out).to include("Deploying")
+      expect(out).to include("Deploying stag-knarr-app-s1 on knarr-stag-s1")
+      expect(out).to include("ext: git@github.com:br/.ebextensions")
+      expect(out).to include("dry_run: dry_run")
+      expect(out).to include("silent: silent")
     end
     it "should deploy images with remote extensions on a branch" do
       out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic' --dry-run --silent")
-      expect(out).to include("Deploying")
+      expect(out).to include("Deploying stag-knarr-app-s1 on knarr-stag-s1")
+      expect(out).to include("ext: git@github.com:br/.ebextensions:basic")
+      expect(out).to include("dry_run: dry_run")
+      expect(out).to include("silent: silent")
     end
+
     it "should notify slack of deploys" do 
       out = execute("bin/gantree deploy #{@env} --dry-run")
       expect(out).to include("Deploying")
