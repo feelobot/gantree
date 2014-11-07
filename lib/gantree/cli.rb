@@ -23,8 +23,6 @@ module Gantree
     method_option :bucket , :aliases => "-b", :desc => "set bucket name, default is 'docker-cfgs'"
     option :dry_run, :aliases => "-d", :desc => "do not actually upload to s3 bucket"
     def init image
-      puts "IMAGE: #{image}"
-      puts "OPTIONS: #{options}"
       Gantree::Init.new(image, options).run
     end
 
