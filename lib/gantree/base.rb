@@ -1,8 +1,8 @@
 module Gantree
   class Base
     def check_credentials
-      raise "put dat AWS_SECRET_ACCESS_KEY in yo ENV, son." unless ENV['AWS_SECRET_ACCESS_KEY']
-      raise "put dat AWS_ACCESS_KEY_ID in yo ENV, son." unless ENV['AWS_ACCESS_KEY_ID']
+      raise "Please set your AWS Environment Variables" unless ENV['AWS_SECRET_ACCESS_KEY']
+      raise "Please set your AWS Environment Variables" unless ENV['AWS_ACCESS_KEY_ID']
     end
 
     def print_options
