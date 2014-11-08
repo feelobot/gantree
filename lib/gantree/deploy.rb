@@ -72,12 +72,12 @@ module Gantree
     end
 
     def create_version_files
-      unique_hash = (0...8).map { (65 + rand(26)).chr }.join
+      time_stamp = Time.now.to_i
       branch = `git rev-parse --abbrev-ref HEAD`
       puts "branch: #{branch}"
       hash = `git rev-parse --verify --short #{branch}`.strip
       puts "hash #{hash}"
-      version = "#{@env}-#{hash}-#{unique_hash}"
+      version = "#{@env}-#{hash}-#{time_stamp}"
       puts "version: #{version}"
       #auto_detect_app_role if @options[:autodetect_app_role] == true
       set_tag_to_deploy if @options[:tag]
@@ -97,7 +97,7 @@ module Gantree
       docker = JSON.parse(IO.read(@dockerrun_file))
       image = docker["Image"]["Name"]
       image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
-      IO.write(@dockerrun_file,JSON.pretty_generate(docker))
+      IO.write(@dockerrun_file, JSON.pretty_generate(docker))
     end
 
     def autodetect_app_role
