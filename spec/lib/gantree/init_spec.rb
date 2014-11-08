@@ -3,17 +3,21 @@ require "pry"
 
 describe Gantree::Init do
   before(:all) do
-    ENV['AWS_ACCESS_KEY_ID'] = '123453244'
-    ENV['AWS_SECRET_ACCESS_KEY'] = '6789042335'
+    ENV['AWS_ACCESS_KEY_ID'] = 'FAKE_AWS_ACCESS_KEY'
+    ENV['AWS_SECRET_ACCESS_KEY'] = 'FAKE_AWS_SECRET_ACCESS_KEY'
+
     ENV["HOME"] = "/Users/gantree_user"
 
     @options = Thor::CoreExt::HashWithIndifferentAccess.new(
       "port" => "3000",
-      "user" => "gantree_user"
+      "user" => "gantree_user",
+      "bucket" => "bucket314159"
     )
+
+    @s3_bucket = AWS::S3::Bucket.new("bucket314159")
   end
 
-  it "initializes the variables properly" do
+ it "initializes the variables properly" do
    gi = Gantree::Init.new("bleacher/cauldron:master", @options)
 
     expect(gi.image).to eq("bleacher/cauldron:master")
@@ -21,10 +25,10 @@ describe Gantree::Init do
   end
 
   it "AWS gets the correct keys" do
-    gi = Gantree::Init.new("image_name", {})
+    gi = Gantree::Init.new("image_name", @options)
     expect(AWS).to receive(:config).with(
-        :access_key_id => '123453244',
-        :secret_access_key => '6789042335'
+        :access_key_id => 'FAKE_AWS_ACCESS_KEY',
+        :secret_access_key => 'FAKE_AWS_SECRET_ACCESS_KEY'
     )
     gi.set_aws_keys
   end
@@ -38,15 +42,24 @@ describe Gantree::Init do
       :Image=>{:Name=>"bleacher/cauldron:master", :Update=>true},
       :Logging=>"/var/log/nginx",
       :Ports=>[{:ContainerPort=>"3000"}],
-      "Authentication"=>{:Bucket=>"docker-cfgs", :Key=>"gantree_user.dockercfg"}
+      "Authentication"=>{:Bucket=>"bucket314159", :Key=>"gantree_user.dockercfg"}
     )
   end
 
-  it "creates docker config folder" do
+  it "creates docker config folder when s3 bucket already exists" do
     gi = Gantree::Init.new("bleacher/cauldron:master", @options)
-    AWS::S3::BucketCollection.any_instance.stub(:create).with("docker-cfgs") {"OK"}
+    AWS::S3::BucketCollection.any_instance.stub(:[]).with(anything()) {Existence}
+    AWS::S3::BucketCollection.stub(:create) {"OK"}
 
-    expect(gi.send(:create_docker_config_folder)).to eq("OK")
+    expect(gi.send(:create_docker_config_s3_bucket)).to eq(nil)
+  end
+
+  it "creates docker config folder when s3 bucket doesnt not exist" do
+    gi = Gantree::Init.new("bleacher/cauldron:master", @options)
+    AWS::S3::BucketCollection.any_instance.stub(:[]).with(anything()) {NonExistence}
+    AWS::S3::BucketCollection.any_instance.stub(:create).with(@options.bucket) {@s3_bucket}
+
+    expect(gi.send(:create_docker_config_s3_bucket)).to eq(@s3_bucket)
   end
 
   it "uploads docker config to s3" do

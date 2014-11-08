@@ -8,3 +8,4 @@ require "gantree/stack"
 module Gantree
   autoload :CLI, 'gantree/cli'
 end
+

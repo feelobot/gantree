@@ -19,13 +19,13 @@ module Gantree
       print_options
 
       FileUtils.rm("Dockerrun.aws.json") if File.exist?("Dockerrun.aws.json")
-      create_docker_config_folder unless options[:dry_run]
+      create_docker_config_s3_bucket unless options[:dry_run]
       create_dockerrun
       upload_docker_config if options.user && !options[:dry_run]
     end
 
     private
-    def create_docker_config_folder
+    def create_docker_config_s3_bucket
       bucket = s3.buckets.create(bucket_name) unless s3.buckets[bucket_name].exists?
     end
 
