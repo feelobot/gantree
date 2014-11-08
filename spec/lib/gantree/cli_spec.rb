@@ -7,6 +7,9 @@ require 'spec_helper'
 #   $ rake clean:vcr ; time rake
 describe Gantree::CLI do
   before(:all) do
+    ENV['AWS_ACCESS_KEY_ID'] = 'FAKE_AWS_ACCESS_KEY'
+    ENV['AWS_SECRET_ACCESS_KEY'] = 'FAKE_AWS_SECRET_ACCESS_KEY'
+
     @env = "stag-knarr-app-s1"
     @app = "knarr-stag-s1"
     @owner = "bleacher"
