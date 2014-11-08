@@ -14,6 +14,7 @@ module Gantree
       @ext = @options[:ext]
       @app = @options[:env] || default_name(app)
       @env = app
+      @dockerrun_file = "Dockerrun.aws.json"
     end
 
     def run
