@@ -29,7 +29,6 @@ module Gantree
 
     desc "create APP", "create a cfn stack"
     method_option :env, :aliases => "-e", :desc => "(optional) environment name"
-    method_option :user   , :aliases => "-u", :desc => "docker.hub login name"
     method_option :instance_size, :aliases => "-i", :desc => "(optional) set instance size"
     method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
