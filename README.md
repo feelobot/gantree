@@ -41,8 +41,9 @@ What this does is create a new Dockerrun.aws.json inside your repository and upl
 gantree init -u frodriguez -p 3000 bleacher/cauldron:master
 # this will upload your docker config files to a bucket called "frodrigeuz-docker-cgfs"
 ```
+If you don't have a docker.hub account, you can still use gantree without the `-u` flag, but you will have to explicitly specify the bucket for S3 storage since the default S3 bucket name is generated from the docker.hub login.
 
-Specify the bucket for to S3 store docker configuration
+##### Specify the bucket for to S3 store docker configuration
 ```
 # Since S3 bucket names are globally namespaced, the default bucket may be taken and unavailable
 # Gantree gives you the option to specify an S3 bucket name of your choice
