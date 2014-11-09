@@ -1,3 +1,4 @@
+require "pry"
 require 'thor'
 require 'aws-sdk-v1'
 require 'gantree/cli/help'
@@ -18,9 +19,9 @@ module Gantree
     end
 
     desc "init IMAGE", "create a dockerrun for your IMAGE"
-    method_option :user   , :aliases => "-u", :desc => "user credentials for private repo"
+    method_option :user   , :aliases => "-u", :desc => "user credentials for private dockerhub repo"
     method_option :port   , :aliases => "-p", :desc => "port of running application"
-    method_option :bucket , :aliases => "-b", :desc => "set bucket name, default is 'docker-cfgs'"
+    method_option :bucket , :aliases => "-b", :desc => "set bucket name, default is '<user>-docker-cfgs'"
     option :dry_run, :aliases => "-d", :desc => "do not actually upload to s3 bucket"
     def init image
       Gantree::Init.new(image, options).run
@@ -63,3 +64,4 @@ module Gantree
      end
   end
 end
+

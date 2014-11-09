@@ -12,5 +12,5 @@ class Notification
   def say(msg)
     @slack.say(msg)
   end
-
 end
+

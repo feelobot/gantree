@@ -4,17 +4,16 @@ require_relative 'notification'
 
 module Gantree
   class Deploy < Base
+    attr_reader :app, :env
 
-    def initialize app,options
+    def initialize app, options
+      check_credentials
+      set_aws_keys
+
       @options = options
       @ext = @options[:ext]
-      AWS.config(
-        :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY'])
-      @app = @options[:env] || app.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
+      @app = @options[:env] || default_name(app)
       @env = app
-      @eb = AWS::ElasticBeanstalk::Client.new
-      @s3 = AWS::S3.new
       @dockerrun_file = "Dockerrun.aws.json"
     end
 
@@ -22,33 +21,37 @@ module Gantree
       puts "Deploying #{@env} on #{@app}"
       print_options
       return if @options[:dry_run]
-      @packeged_version = create_version_files
+      @packaged_version = create_version_files
       upload_to_s3 if @options[:dry_run].nil?
       clean_up
       create_eb_version if @options[:dry_run].nil?
       update_application if @options[:dry_run].nil?
       if @options[:slack]
-        msg = "#{ENV['USER']} is deploying #{@packeged_version} to #{@app}"
+        msg = "#{ENV['USER']} is deploying #{@packaged_version} to #{@app}"
         Notification.new(@options[:slack]).say(msg) unless @options[:silent]
       end
     end
 
     private
+    def eb
+      @eb ||= AWS::ElasticBeanstalk::Client.new
+    end
+
     def upload_to_s3
-      key = File.basename(@packeged_version)
+      key = File.basename(@packaged_version)
       check_version_bucket
-      puts "uploading #{@packeged_version} to #{@app}-versions"
-      @s3.buckets["#{@app}-versions"].objects[key].write(:file => @packeged_version)
+      puts "uploading #{@packaged_version} to #{@app}-versions"
+      s3.buckets["#{@app}-versions"].objects[key].write(:file => @packaged_version)
     end
 
     def create_eb_version
     begin
-      @eb.create_application_version({
+      eb.create_application_version({
         :application_name => @app,
-        :version_label => @packeged_version,
+        :version_label => @packaged_version,
         :source_bundle => {
           :s3_bucket => "#{@app}-versions",
-          :s3_key => @packeged_version
+          :s3_key => @packaged_version
         }
       })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
@@ -58,9 +61,9 @@ module Gantree
 
     def update_application
       begin
-        @eb.update_environment({
+        eb.update_environment({
           :environment_name => @env,
-          :version_label => @packeged_version,
+          :version_label => @packaged_version,
           :option_settings => autodetect_app_role
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
@@ -69,12 +72,12 @@ module Gantree
     end
 
     def create_version_files
-      unique_hash = (0...8).map { (65 + rand(26)).chr }.join
+      time_stamp = Time.now.to_i
       branch = `git rev-parse --abbrev-ref HEAD`
       puts "branch: #{branch}"
       hash = `git rev-parse --verify --short #{branch}`.strip
       puts "hash #{hash}"
-      version = "#{@env}-#{hash}-#{unique_hash}"
+      version = "#{@env}-#{hash}-#{time_stamp}"
       puts "version: #{version}"
       #auto_detect_app_role if @options[:autodetect_app_role] == true
       set_tag_to_deploy if @options[:tag]
@@ -94,7 +97,7 @@ module Gantree
       docker = JSON.parse(IO.read(@dockerrun_file))
       image = docker["Image"]["Name"]
       image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
-      IO.write(@dockerrun_file,JSON.pretty_generate(docker))
+      IO.write(@dockerrun_file, JSON.pretty_generate(docker))
     end
 
     def autodetect_app_role
@@ -165,14 +168,15 @@ module Gantree
 
     def check_version_bucket
       name = "#{@app}-versions"
-      bucket = @s3.buckets[name] # makes no request
-      @s3.buckets.create(name) unless bucket.exists?
+      bucket = s3.buckets[name] # makes no request
+      s3.buckets.create(name) unless bucket.exists?
     end
 
     def clean_up
-      FileUtils.rm_rf(@packeged_version)
+      FileUtils.rm_rf(@packaged_version)
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
       `rm -rf .ebextensions/` if ext?
     end
   end
 end
+

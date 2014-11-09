@@ -14,3 +14,8 @@ gem "archive-zip"
 gem "json"
 gem "slackr"
 gem "highline"
+gem "pry"
+gem "vcr"
+gem "fakeweb"
+
+
