@@ -11,7 +11,7 @@ module Gantree
 
       @image = image
       @options = options
-      @bucket_name  = @options.bucket || "docker-cfgs"
+      @bucket_name  = @options.bucket || default_bucket_name
     end
 
     def run
@@ -25,6 +25,10 @@ module Gantree
     end
 
     private
+    def default_bucket_name
+      [@options.user, "docker", "cfgs"].compact.join("-")
+    end
+
     def create_docker_config_s3_bucket
       bucket = s3.buckets.create(bucket_name) unless s3.buckets[bucket_name].exists?
     end

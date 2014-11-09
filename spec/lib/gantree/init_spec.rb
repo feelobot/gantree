@@ -33,6 +33,21 @@ describe Gantree::Init do
     gi.set_aws_keys
   end
 
+  it "uses default bucket_name" do
+    options_no_bucket_name = Thor::CoreExt::HashWithIndifferentAccess.new(
+      "port" => "3000",
+      "user" => "gantree_user"
+    )
+    gi = Gantree::Init.new("image_name", options_no_bucket_name)
+    expect(gi.bucket_name).to eq("gantree_user-docker-cfgs")
+
+    options_no_bucket_name_or_user = Thor::CoreExt::HashWithIndifferentAccess.new(
+      "port" => "3000"
+    )
+    gi2 = Gantree::Init.new("image_name", options_no_bucket_name_or_user)
+    expect(gi2.bucket_name).to eq("docker-cfgs")
+  end
+
   it "generates a dockerrun object" do
     gi = Gantree::Init.new("bleacher/cauldron:master", @options)
 

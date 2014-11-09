@@ -34,16 +34,19 @@ gem install gantree
 ```
 
 ### Initialize
-
 What this does is create a new Dockerrun.aws.json inside your repository and uploads your docker login credentials to s3 (for private repo access) so you can do deploys. We need the -u to specify a username to rename your .dockercfg and reference it in the Dockerrun.aws.json
 
-For a public repo
 ```
-gantree init -p 3000 bleacher/cauldron:master
-```
-For a private repo
-```
+# the username here is your docker.hub login
 gantree init -u frodriguez -p 3000 bleacher/cauldron:master
+# this will upload your docker config files to a bucket called "frodrigeuz-docker-cgfs"
+```
+
+Specify the bucket for to S3 store docker configuration
+```
+# Since S3 bucket names are globally namespaced, the default bucket may be taken and unavailable
+# Gantree gives you the option to specify an S3 bucket name of your choice
+gantree init -u frodgriguez -p 3000 -b hopefully_this_bucket_name_is_available bleacher/cauldron:master
 ```
 
 ### Deploy
