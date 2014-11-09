@@ -41,7 +41,7 @@ module Gantree
       key = File.basename(@packaged_version)
       check_version_bucket
       puts "uploading #{@packaged_version} to #{@app}-versions"
-      s3.buckets["#{@app}-versions"].objects[key].write(:file => @packaged_version)
+      s3.buckets[bucket_name].objects[key].write(:file => @packaged_version)
     end
 
     def create_eb_version
@@ -167,8 +167,7 @@ module Gantree
     end
 
     def check_version_bucket
-      name = "#{@app}-versions"
-      bucket = s3.buckets[name] # makes no request
+      bucket = s3.buckets[bucket_name] # makes no request
       s3.buckets.create(name) unless bucket.exists?
     end
 
@@ -176,6 +175,17 @@ module Gantree
       FileUtils.rm_rf(@packaged_version)
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
       `rm -rf .ebextensions/` if ext?
+    end
+    
+    def bucket_name
+      [user_from_dockerrun_file, @app, "versions"].compact.join("-")
+    end
+
+    def user_from_dockerrun_file
+      docker = JSON.parse(IO.read(@dockerrun_file))
+      return nil unless auth_hash = docker["Authentication"]
+      return nil unless key = auth_hash["Key"]
+      key.split(".").first
     end
   end
 end

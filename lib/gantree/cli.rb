@@ -13,7 +13,7 @@ module Gantree
     method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
     option :silent, :aliases => "-s", :desc => "mute notifications"
-    option :autodetect_app_role, :desc => "use naming convention to determin role"
+    option :autodetect_app_role, :desc => "use naming convention to determine role"
     def deploy app
       Gantree::Deploy.new(app, merge_defaults(options)).run
     end
@@ -29,6 +29,7 @@ module Gantree
 
     desc "create APP", "create a cfn stack"
     method_option :env, :aliases => "-e", :desc => "(optional) environment name"
+    method_option :user   , :aliases => "-u", :desc => "docker.hub login name"
     method_option :instance_size, :aliases => "-i", :desc => "(optional) set instance size"
     method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
