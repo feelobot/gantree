@@ -1,5 +1,6 @@
 require 'json'
 require 'archive/zip'
+require 'highline/import'
 require_relative 'notification'
 
 module Gantree
@@ -18,6 +19,7 @@ module Gantree
     end
 
     def run
+      check_dir_name unless @options[:force]
       puts "Deploying #{@env} on #{@app}"
       print_options
       return if @options[:dry_run]
@@ -176,6 +178,18 @@ module Gantree
       FileUtils.rm_rf(@packaged_version)
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
       `rm -rf .ebextensions/` if ext?
+    end
+
+    def check_dir_name
+      dir_name = File.basename(Dir.getwd)
+      if @env.include?(dir_name) 
+        input = ask("Are you sure you want to deploy #{dir_name} to #{@env} on #{@app}? (y|n)")
+        if input == "y"
+          puts "Continuing with deploy..."
+        else
+          abort("Canceling deployment")
+        end
+      end
     end
   end
 end
