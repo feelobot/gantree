@@ -1,6 +1,6 @@
 require 'json'
 require 'archive/zip'
-require 'highline/import'
+require 'colorize'
 require_relative 'notification'
 
 module Gantree
@@ -182,14 +182,8 @@ module Gantree
 
     def check_dir_name
       dir_name = File.basename(Dir.getwd)
-      if @env.include?(dir_name) 
-        input = ask("Are you sure you want to deploy #{dir_name} to #{@env} on #{@app}? (y|n)")
-        if input == "y"
-          puts "Continuing with deploy..."
-        else
-          abort("Canceling deployment")
-        end
-      end
+      msg = "WARN: You are deploying from a repo that doesn't match #{@env}"
+      puts msg.yellow if @env.include?(dir_name) == false
     end
   end
 end
