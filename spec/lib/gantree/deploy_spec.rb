@@ -61,6 +61,17 @@ describe Gantree::Deploy do
     expect(gd.env).to eq("stag-cauldron-app-s1")
   end
 
+  it "builds bucket name correctly" do
+    gd = Gantree::Deploy.new(
+      "stag-cauldron-app-s1",
+      {}
+    )
+
+    hash = Digest::SHA2.hexdigest('FAKE_AWS_ACCESS_KEY')
+    bucket_name = "#{hash}-cauldron-stag-s1-versions"
+    expect(gd.send(:bucket_name)).to eq(bucket_name)
+  end
+
   it "raises an error when no aws keys in ENV" do
     ENV['AWS_ACCESS_KEY_ID'] = nil
     ENV['AWS_SECRET_ACCESS_KEY'] = nil

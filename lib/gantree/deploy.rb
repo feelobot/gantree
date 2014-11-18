@@ -1,3 +1,4 @@
+require "digest/sha2"
 require 'json'
 require 'archive/zip'
 require 'colorize'
@@ -41,9 +42,9 @@ module Gantree
 
     def upload_to_s3
       key = File.basename(@packaged_version)
-      check_version_bucket
+      create_version_bucket
       puts "uploading #{@packaged_version} to #{@app}-versions"
-      s3.buckets["#{@app}-versions"].objects[key].write(:file => @packaged_version)
+      s3.buckets[bucket_name].objects[key].write(:file => @packaged_version)
     end
 
     def create_eb_version
@@ -168,16 +169,23 @@ module Gantree
       end
     end
 
-    def check_version_bucket
-      name = "#{@app}-versions"
-      bucket = s3.buckets[name] # makes no request
-      s3.buckets.create(name) unless bucket.exists?
+    def create_version_bucket
+      bucket = s3.buckets[bucket_name] # makes no request
+      s3.buckets.create(bucket_name) unless bucket.exists?
     end
 
     def clean_up
       FileUtils.rm_rf(@packaged_version)
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
       `rm -rf .ebextensions/` if ext?
+    end
+
+    def bucket_name
+      [access_key_secure_hash, @app, "versions"].compact.join("-")
+    end
+
+    def access_key_secure_hash
+      Digest::SHA2.hexdigest ENV['AWS_ACCESS_KEY_ID']
     end
 
     def check_dir_name
