@@ -1,6 +1,7 @@
 require "digest/sha2"
 require 'json'
 require 'archive/zip'
+require 'colorize'
 require_relative 'notification'
 
 module Gantree
@@ -19,6 +20,7 @@ module Gantree
     end
 
     def run
+      check_dir_name unless @options[:force]
       puts "Deploying #{@env} on #{@app}"
       print_options
       return if @options[:dry_run]
@@ -177,13 +179,19 @@ module Gantree
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
       `rm -rf .ebextensions/` if ext?
     end
-    
+
     def bucket_name
       [access_key_secure_hash, @app, "versions"].compact.join("-")
     end
 
     def access_key_secure_hash
       Digest::SHA2.hexdigest ENV['AWS_ACCESS_KEY_ID']
+    end
+
+    def check_dir_name
+      dir_name = File.basename(Dir.getwd)
+      msg = "WARN: You are deploying from a repo that doesn't match #{@env}"
+      puts msg.yellow if @env.include?(dir_name) == false
     end
   end
 end
