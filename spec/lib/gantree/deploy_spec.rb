@@ -61,23 +61,15 @@ describe Gantree::Deploy do
     expect(gd.env).to eq("stag-cauldron-app-s1")
   end
 
-  it "parsers user name from Dockerrun file" do
-    IO.write("./Dockerrun.aws.json", JSON.pretty_generate({"Authentication" => {Key: "gantree_user.dockercfg"}}))
-     gd = Gantree::Deploy.new(
+  it "builds bucket name correctly" do
+    gd = Gantree::Deploy.new(
       "stag-cauldron-app-s1",
       {}
-     )
-     expect(gd.send(:user_from_dockerrun_file)).to eq("gantree_user")
-     expect(gd.send(:bucket_name)).to eq("gantree_user-cauldron-stag-s1-versions")
-  end
+    )
 
-  it "does not break if from Dockerrun file" do
-    IO.write("./Dockerrun.aws.json", JSON.pretty_generate({"Authentication" => {}}))
-     gd = Gantree::Deploy.new(
-      "stag-cauldron-app-s1",
-      {}
-     )
-     expect(gd.send(:user_from_dockerrun_file)).to eq(nil)
+    hash = Digest::SHA2.hexdigest('FAKE_AWS_ACCESS_KEY')
+    bucket_name = "#{hash}-cauldron-stag-s1-versions"
+    expect(gd.send(:bucket_name)).to eq(bucket_name)
   end
 
   it "raises an error when no aws keys in ENV" do

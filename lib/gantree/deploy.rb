@@ -1,3 +1,4 @@
+require "digest/sha2"
 require 'json'
 require 'archive/zip'
 require_relative 'notification'
@@ -178,14 +179,11 @@ module Gantree
     end
     
     def bucket_name
-      [user_from_dockerrun_file, @app, "versions"].compact.join("-")
+      [access_key_secure_hash, @app, "versions"].compact.join("-")
     end
 
-    def user_from_dockerrun_file
-      docker = JSON.parse(IO.read(@dockerrun_file))
-      return nil unless auth_hash = docker["Authentication"]
-      return nil unless key = auth_hash["Key"]
-      key.split(".").first
+    def access_key_secure_hash
+      Digest::SHA2.hexdigest ENV['AWS_ACCESS_KEY_ID']
     end
   end
 end
