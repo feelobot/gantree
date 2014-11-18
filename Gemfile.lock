@@ -14,6 +14,7 @@ GEM
     codeclimate-test-reporter (0.4.0)
       simplecov (>= 0.7.1, < 1.0.0)
     coderay (1.1.0)
+    colorize (0.7.3)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
     detabulator (0.1.0)
@@ -92,6 +93,7 @@ DEPENDENCIES
   aws-sdk-v1
   cloudformation-ruby-dsl
   codeclimate-test-reporter
+  colorize
   fakeweb
   guard
   guard-bundler
