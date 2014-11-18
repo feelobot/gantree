@@ -33,7 +33,8 @@ module Gantree
     method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
     option :docker_version, :desc => "set the version of docker to use as solution stack"
-    option :dupe, :desc => "use a local cfn folder"
+    option :dupe, :desc => "copy an existing template into a new template"
+    option :local, :desc => "use a local cfn nested template"
     def create app
       Gantree::Stack.new(app, merge_defaults(options)).create
     end
