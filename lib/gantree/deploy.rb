@@ -42,7 +42,7 @@ module Gantree
 
     def upload_to_s3
       key = File.basename(@packaged_version)
-      check_version_bucket
+      create_version_bucket
       puts "uploading #{@packaged_version} to #{@app}-versions"
       s3.buckets[bucket_name].objects[key].write(:file => @packaged_version)
     end
@@ -169,9 +169,9 @@ module Gantree
       end
     end
 
-    def check_version_bucket
+    def create_version_bucket
       bucket = s3.buckets[bucket_name] # makes no request
-      s3.buckets.create(name) unless bucket.exists?
+      s3.buckets.create(bucket_name) unless bucket.exists?
     end
 
     def clean_up
