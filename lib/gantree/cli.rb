@@ -52,6 +52,12 @@ module Gantree
       Gantree::Stack.new(app, merge_defaults(options)).delete
     end
 
+    desc "restart APP", "restart an eb app"
+    option :dry_run, :aliases => "-d", :desc => "do not actually restart"
+    def restart app
+      Gantree::App.new(app, merge_defaults(options)).restart
+    end
+
     protected
 
     def merge_defaults(options={})
