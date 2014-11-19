@@ -13,15 +13,12 @@ module Gantree
       set_aws_keys
 
       @cfm = AWS::CloudFormation.new
-      @size = options[:instance_size]
-      @size ||= "t2.medium"
       @requirements = "#!/usr/bin/env ruby
         require 'cloudformation-ruby-dsl/cfntemplate'
         require 'cloudformation-ruby-dsl/spotprice'
         require 'cloudformation-ruby-dsl/table'"
       @env = options[:env] || default_name(stack_name)
       additional_options = {
-        instance_size: @size,
         stack_name: stack_name,
         requirements: @requirements,
         cfn_bucket: "br-templates",
