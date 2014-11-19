@@ -89,9 +89,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  archive-zip
-  aws-sdk-v1
-  cloudformation-ruby-dsl
+  archive-zip (~> 0.7.0)
+  aws-sdk-v1 (~> 1.55.0)
+  cloudformation-ruby-dsl (= 0.4.6)
   codeclimate-test-reporter
   colorize
   fakeweb
@@ -103,6 +103,6 @@ DEPENDENCIES
   pry
   rake
   rspec
-  slackr
+  slackr (= 0.0.6)
   vcr
   webmock

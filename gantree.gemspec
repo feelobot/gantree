@@ -19,22 +19,22 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "thor"
-  spec.add_dependency "aws-sdk-v1"
+  spec.add_dependency "aws-sdk-v1", "~>1.55.0"
   spec.add_dependency "hashie"
   spec.add_dependency "colorize"
   spec.add_dependency "rubyzip"
-  spec.add_dependency "cloudformation-ruby-dsl"
-  spec.add_dependency "archive-zip"
+  spec.add_dependency "cloudformation-ruby-dsl","0.4.6"
+  spec.add_dependency "archive-zip","~>0.7.0"
   spec.add_dependency "json"
-  spec.add_dependency "slackr"
+  spec.add_dependency "slackr","0.0.6"
   spec.add_dependency "highline"
+  spec.add_dependency "pry"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "guard"
   spec.add_development_dependency "guard-bundler"
   spec.add_development_dependency "guard-rspec"
-  spec.add_development_dependency "pry"
   spec.add_development_dependency "vcr"
 end
 

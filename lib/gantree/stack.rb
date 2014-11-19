@@ -14,7 +14,7 @@ module Gantree
 
       @cfm = AWS::CloudFormation.new
       @size = options[:instance_size]
-      @size ||= "t1.micro"
+      @size ||= "t2.medium"
       @requirements = "#!/usr/bin/env ruby
         require 'cloudformation-ruby-dsl/cfntemplate'
         require 'cloudformation-ruby-dsl/spotprice'
