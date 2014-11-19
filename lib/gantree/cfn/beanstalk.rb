@@ -3,7 +3,7 @@ class BeanstalkTemplate
   def initialize params
     @stack_name = params[:stack_name]
     @docker_version = params[:docker_version] 
-    @docker_version ||= "64bit Amazon Linux 2014.09 v1.0.8 running Docker 1.2.0"
+    @docker_version ||= "64bit Amazon Linux 2014.09 v1.0.9 running Docker 1.2.0"
     @size = params[:instance_size]
     @rds = params[:rds]
     @env = params[:env]
@@ -70,7 +70,6 @@ class BeanstalkTemplate
       parameter 'InstanceType',
                 :Description => 'EC2 Instance Type',
                 :Type => 'String',
-                :AllowedValues => %w(t1.micro m1.small m3.medium m3.large m3.xlarge m3.2xlarge c3.large c3.xlarge c3.2xlarge c3.4xlarge c3.8xlarge),
                 :Default => '#{@size}'
 
       parameter 'ApplicationName',

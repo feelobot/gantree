@@ -29,7 +29,7 @@ module Gantree
 
     desc "create APP", "create a cfn stack"
     method_option :env, :aliases => "-e", :desc => "(optional) environment name"
-    method_option :instance_size, :aliases => "-i", :desc => "(optional) set instance size"
+    method_option :instance_size, :aliases => "-i", :desc => "(optional) set instance size", :default => "m3.medium"
     method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
     option :docker_version, :desc => "set the version of docker to use as solution stack"

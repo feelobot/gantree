@@ -72,7 +72,7 @@ describe Gantree::CLI do
   describe "create" do
     it "should create clusters" do
       out = execute("bin/gantree create #{@env} --dry-run")
-      expect(out).to include "instance_size: t1.micro"
+      expect(out).to include "instance_size: m3.medium"
       expect(out).to include "stack_name: stag-knarr-app-s1"
       expect(out).to include "cfn_bucket: br-templates"
       expect(out).to include "env: knarr-stag-s1"
