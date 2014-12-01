@@ -130,7 +130,11 @@ module Gantree
 
     def create_aws_cfn_stack
       puts "Creating stack on aws..."
-      stack = @cfm.stacks.create(@options[:stack_name], stack_template, :disable_rollback => true)
+      stack = @cfm.stacks.create(@options[:stack_name], stack_template, { 
+        :disable_rollback => true, 
+        :tags => [
+          { key: "StackName", value: @env },
+        ]})
     end
 
     def rds_enabled?
