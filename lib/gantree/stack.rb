@@ -176,7 +176,8 @@ module Gantree
         }
         #puts JSON.pretty_generate role
         beanstalk["Resources"]["#{name}".to_sym] = role
-        IO.write("cfn/#{@env}-beanstalk.cfn.json", JSON.pretty_generate(beanstalk))
+        IO.write("cfn/#{@env}-beanstalk.cfn.json", JSON.pretty_generate(beanstalk)) unless @options[:dry_run]
+        puts JSON.pretty_generate(beanstalk["Resources"].to_a.last) if @options[:dry_run]
         puts "Added new #{name} role".green
       else 
         puts "Role already exists".red
