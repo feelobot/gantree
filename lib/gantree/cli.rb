@@ -41,6 +41,7 @@ module Gantree
 
     desc "update APP", "update a cfn stack"
     option :dry_run, :aliases => "-d", :desc => "do not actually create the stack"
+    option :role, :aliases => "-r", :desc => "add an app role (worker|listner|scheduler)"
     def update app
       Gantree::Stack.new(app, merge_defaults(options)).update
     end

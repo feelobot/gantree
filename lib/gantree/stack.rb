@@ -41,8 +41,9 @@ module Gantree
 
     def update
       puts "Updating stack from local cfn repo"
+      add_role @options[:role] if @options[:role]
       unless @options[:dry_run] then
-        upload_templates 
+        upload_templates
         @cfm.stacks[@options[:stack_name]].update(:template => stack_template) 
       end
     end
@@ -151,6 +152,35 @@ module Gantree
         "stag"
       else
         ""
+      end
+    end
+
+    def add_role name
+      stack_name = @options[:stack_name].sub('app', name)
+      beanstalk = JSON.parse(IO.read("cfn/#{@env}-beanstalk.cfn.json"))
+      unless beanstalk["Resources"][name] then
+        role = {
+          "Type" => "AWS::ElasticBeanstalk::Environment",
+          "Properties"=> {
+            "ApplicationName" => "#{@env}",
+            "EnvironmentName" => "#{stack_name}",
+            "Description" => "#{name} Environment",
+            "VersionLabel" => {
+              "Ref" => "ApplicationVersion"
+            },
+            "TemplateName" => {
+              "Ref" => "ConfigurationTemplate"
+            },
+            "OptionSettings" => []
+          }
+        }
+        #puts JSON.pretty_generate role
+        beanstalk["Resources"]["#{name}".to_sym] = role
+        IO.write("cfn/#{@env}-beanstalk.cfn.json", JSON.pretty_generate(beanstalk)) unless @options[:dry_run]
+        puts JSON.pretty_generate(beanstalk["Resources"].to_a.last) if @options[:dry_run]
+        puts "Added new #{name} role".green
+      else 
+        puts "Role already exists".red
       end
     end
   end
