@@ -3,7 +3,7 @@ class BeanstalkTemplate
   def initialize params
     @stack_name = params[:stack_name]
     @docker_version = params[:docker_version] 
-    @docker_version ||= "64bit Amazon Linux 2014.09 v1.0.9 running Docker 1.2.0"
+    @docker_version ||= "64bit Amazon Linux 2014.09 v1.0.10 running Docker 1.3.2"
     @size = params[:instance_size]
     @rds = params[:rds]
     @env = params[:env]
