@@ -123,7 +123,7 @@ class BeanstalkTemplate
     resource 'HostRecord', :Type => 'AWS::Route53::RecordSet', :Properties => {
         :Comment => 'DNS name for my stack',
         :HostedZoneName => '#{@domain}',
-        :Name => join('.', ref('EnvironmentName'), '#{@domain}'),
+        :Name => join('.', '#{@env}', '#{@domain}'),
         :ResourceRecords => [ get_att('EbEnvironment', 'EndpointURL') ],
         :TTL => '60',
         :Type => 'CNAME',
