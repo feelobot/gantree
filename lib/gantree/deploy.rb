@@ -72,8 +72,8 @@ module Gantree
       check_dir_name unless @options[:force]
       return if @options[:dry_run]
       @packaged_version = create_version_files
-      upload_to_s3 if @options[:dry_run].nil?
-      clean_up
+      upload_to_s3 
+      clean_up 
       create_eb_version
       update_application(envs)
       if @options[:slack]
