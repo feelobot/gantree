@@ -21,10 +21,6 @@ class BeanstalkTemplate
 
       value :Description => '#{@stack_name} Service Parent Template (2014-08-15)'
 
-      mapping 'HostedZoneName',
-              :stag => { :name => '#{@stag_domain}' },
-              :prod => { :name => '#{@prod_domain}' }
-
       #{beanstalk_parmaters}
 
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
@@ -127,7 +123,7 @@ class BeanstalkTemplate
     resource 'HostRecord', :Type => 'AWS::Route53::RecordSet', :Properties => {
         :Comment => 'DNS name for my stack',
         :HostedZoneName => '#{@domain}',
-        :Name => join('.', ref('ApplicationName'), find_in_map('HostedZoneName', '#{@env_type}', 'name')),
+        :Name => join('.', ref('EnvironmentName'), '#{@domain}'),
         :ResourceRecords => [ get_att('EbEnvironment', 'EndpointURL') ],
         :TTL => '60',
         :Type => 'CNAME',
