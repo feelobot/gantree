@@ -34,8 +34,6 @@ module Gantree
       tags = @options[:stack_name].split("-")
       if tags.length == 3
         env = [tags[1],tags[0],"app",tags[2]].join('-')
-      elsif tags.length == 4
-        env = [tags[1],tags[0],"app",tags[2],tags[3]].join('-')
       else
         raise "Please Set Envinronment Name with -e"
       end
@@ -88,18 +86,28 @@ module Gantree
         orgin_stack_name = @options[:dupe]
         templates = ['master','resources','beanstalk']
         templates.each do |template|
-          FileUtils.cp("cfn/#{origin_env}-#{template}.cfn.json", "cfn/#{env}-#{template}.cfn.json")
+          FileUtils.cp("cfn/#{orgin_stack_name}-#{template}.cfn.json", "cfn/#{@options[:stack_name]}-#{template}.cfn.json")
           file = IO.read("cfn/#{@options[:stack_name]}-#{template}.cfn.json")
           file.gsub!(/#{escape_characters_in_string(orgin_stack_name)}/, @options[:stack_name])
-          file.gsub!(/#{escape_characters_in_string(origin_env)}/, @options[:env])
-          swap_out_roles(origin_env)
-          IO.write("cfn/#{env}-#{template}.cfn.json",file)
+          replace_env_references(file)
+          IO.write("cfn/#{@options[:stack_name]}-#{template}.cfn.json",file)
         end
       else
         puts "Generating templates from gantree"
         generate("master", MasterTemplate.new(@options).create)
         generate("beanstalk", BeanstalkTemplate.new(@options).create)
         generate("resources", ResourcesTemplate.new(@options).create)
+      end
+    end
+
+    def replace_env_references file
+      origin_tags = @options[:dupe].split("-")
+      new_tags = @options[:stack_name].split("-")
+      possible_roles = ["app","worker","listner","djay","scheduler"]
+      possible_roles.each do |role|
+        origin_env = [origin_tags[1],origin_tags[0],role,origin_tags[2]].join('-')
+        new_env = [new_tags[1],new_tags[0],role,new_tags[2]].join('-')
+        file.gsub!(/#{escape_characters_in_string(origin_env)}/, new_env)
       end
     end
 
@@ -171,14 +179,14 @@ module Gantree
     end
 
     def add_role name
-      stack_name = @options[:stack_name].sub('app', name)
-      beanstalk = JSON.parse(IO.read("cfn/#{@env}-beanstalk.cfn.json"))
+      env = @options[:env].sub('app', name)
+      beanstalk = JSON.parse(IO.read("cfn/#{@options[:stack_name]}-beanstalk.cfn.json"))
       unless beanstalk["Resources"][name] then
         role = {
           "Type" => "AWS::ElasticBeanstalk::Environment",
           "Properties"=> {
-            "ApplicationName" => "#{@env}",
-            "EnvironmentName" => "#{stack_name}",
+            "ApplicationName" => "#{env}",
+            "EnvironmentName" => "#{@options[:stack_name]}",
             "Description" => "#{name} Environment",
             "VersionLabel" => {
               "Ref" => "ApplicationVersion"
@@ -191,8 +199,8 @@ module Gantree
         }
         #puts JSON.pretty_generate role
         beanstalk["Resources"]["#{name}".to_sym] = role
-        IO.write("cfn/#{@options[:stack_name]}-beanstalk.cfn.json", JSON.pretty_generate(beanstalk)) unless @options[:dry_run]
-        puts JSON.pretty_generate(beanstalk["Resources"].to_a.last) if @options[:dry_run]
+        IO.write("cfn/#{@options[:stack_name]}-beanstalk.cfn.json", JSON.pretty_generate(beanstalk))
+        puts JSON.pretty_generate(beanstalk["Resources"].to_a.last)
         puts "Added new #{name} role".green
       else 
         puts "Role already exists".red
