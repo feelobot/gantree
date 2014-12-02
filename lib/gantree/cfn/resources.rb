@@ -15,14 +15,14 @@ class ResourcesTemplate
 
       value :AWSTemplateFormatVersion => '2010-09-09'
 
-      value :Description => '#{@env} Services Resources (2014-06-30)'
+      value :Description => '#{@stack_name} Services Resources (2014-06-30)'
 
       parameter 'ApplicationName',
                 :Type => 'String',
-                :Default => '#{@env}'
+                :Default => '#{@stack_name}'
 
       resource 'InstanceSecurityGroup', :Type => 'AWS::EC2::SecurityGroup', :Properties => {
-          :GroupDescription => join('', 'an EC2 instance security group created for #{@env}')
+          :GroupDescription => join('', 'an EC2 instance security group created for #{@stack_name}')
       }
 
       output 'InstanceSecurityGroup',

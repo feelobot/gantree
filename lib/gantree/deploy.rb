@@ -5,40 +5,82 @@ require_relative 'notification'
 
 module Gantree
   class Deploy < Base
-    attr_reader :app, :env
+    attr_reader :name
 
-    def initialize app, options
+    def initialize name, options
       check_credentials
       set_aws_keys
-
+      @name = name
       @options = options
       @ext = @options[:ext]
-      @app = @options[:env] || default_name(app)
-      @env = app
       @dockerrun_file = "Dockerrun.aws.json"
     end
 
     def run
-      check_dir_name unless @options[:force]
-      puts "Deploying #{@env} on #{@app}"
+      if application?
+        puts "Found Application: #{@name}".green
+        environments = eb.describe_environments({ :application_name => @app })[:environments]
+        if environments.length > 1
+          puts "WARN: Deploying to All Environments in the Application: #{@name}".yellow
+          sleep 3
+          envs = []
+          environments.each do |env|
+            envs << env[:environment_name]
+          end
+          puts "envs: #{envs}"
+          deploy(envs)
+        elsif environments.length == 1
+          env = environments.first[:environment_name]
+          puts "Found Environment: #{env}".green
+          deploy([env])
+        else
+          puts "ERROR: There are no environments in this application".red
+          exit 1
+        end
+      elsif environment?
+        puts "Found Environment: #{name}".green
+        deploy([name])
+      else
+        puts "You leave me with nothing to deploy".red
+        exit 1
+      end
+    end
+
+    def application?
+      results = eb.describe_applications({ application_names: ["#{@name}"]})
+      if results[:applications].length > 1
+        raise "There are more than 1 matching application names"
+      elsif results[:applications].length == 0
+        return false
+      else 
+        @app = results[:applications][0][:application_name]
+        return true
+      end
+    end
+
+    def environment?
+      results = eb.describe_environments({ environment_names: ["#{@name}"]})
+      if results.length == 0
+        puts "ERROR: Environment '#{name}' not found"
+        exit 1
+      else
+        return true
+      end
+    end
+    def deploy(envs)
       print_options
+      check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
       @packaged_version = create_version_files
-      upload_to_s3 if @options[:dry_run].nil?
-      clean_up
-      create_eb_version if @options[:dry_run].nil?
-      update_application if @options[:dry_run].nil?
+      upload_to_s3 
+      clean_up 
+      create_eb_version
+      update_application(envs)
       if @options[:slack]
         msg = "#{ENV['USER']} is deploying #{@packaged_version} to #{@app}"
         Notification.new(@options[:slack]).say(msg) unless @options[:silent]
       end
     end
-
-    private
-    def eb
-      @eb ||= AWS::ElasticBeanstalk::Client.new
-    end
-
     def upload_to_s3
       key = File.basename(@packaged_version)
       check_version_bucket
@@ -61,15 +103,18 @@ module Gantree
       end
     end
 
-    def update_application
-      begin
-        eb.update_environment({
-          :environment_name => @env,
-          :version_label => @packaged_version,
-          :option_settings => autodetect_app_role
-        })
-      rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
-        puts "#{@env} doesn't exist"
+    def update_application(envs)
+      envs.each do |env|
+        begin
+          eb.update_environment({
+            :environment_name => env,
+            :version_label => @packaged_version,
+            :option_settings => autodetect_app_role(env)
+          })
+          puts "Deployed #{@packaged_version} to #{env} on #{@app}".green
+        rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
+          puts "Error: Something went wrong durring the deploy to #{env}".red
+        end
       end
     end
 
@@ -79,7 +124,7 @@ module Gantree
       puts "branch: #{branch}"
       hash = `git rev-parse --verify --short #{branch}`.strip
       puts "hash #{hash}"
-      version = "#{@env}-#{hash}-#{time_stamp}"
+      version = "#{@app}-#{hash}-#{time_stamp}"
       puts "version: #{version}"
       #auto_detect_app_role if @options[:autodetect_app_role] == true
       set_tag_to_deploy if @options[:tag]
@@ -102,10 +147,10 @@ module Gantree
       IO.write(@dockerrun_file, JSON.pretty_generate(docker))
     end
 
-    def autodetect_app_role
+    def autodetect_app_role env
       enabled = @options[:autodetect_app_role]
       if enabled == true || enabled == "true"
-        role = @env.split('-')[2]
+        role = env.split('-')[2]
         puts "Deploying app as a #{role}"
         #role_cmd = IO.read("roles/#{role}").gsub("\n",'')
         #docker = JSON.parse(IO.read(@dockerrun_file))
@@ -180,10 +225,10 @@ module Gantree
       `rm -rf .ebextensions/` if ext?
     end
 
-    def check_dir_name
+    def check_dir_name envs
       dir_name = File.basename(Dir.getwd)
-      msg = "WARN: You are deploying from a repo that doesn't match #{@env}"
-      puts msg.yellow if @env.include?(dir_name) == false
+      msg = "WARN: You are deploying from a repo that doesn't match #{@app}"
+      puts msg.yellow if envs.any? { |env| env.include?(dir_name) }
     end
   end
 end

@@ -22,12 +22,8 @@ module Gantree
       @s3 ||= AWS::S3.new
     end
 
-    def default_name(app)
-      [
-       app.match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1],
-       app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1],
-       app.match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
-      ].join("-")
+    def eb
+      @eb ||= AWS::ElasticBeanstalk::Client.new
     end
   end
 end

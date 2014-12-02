@@ -14,8 +14,8 @@ module Gantree
     option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :autodetect_app_role, :desc => "use naming convention to determin role"
-    def deploy app
-      Gantree::Deploy.new(app, merge_defaults(options)).run
+    def deploy name
+      Gantree::Deploy.new(name, merge_defaults(options)).run
     end
 
     desc "init IMAGE", "create a dockerrun for your IMAGE"

@@ -14,11 +14,8 @@ This tool is intended to help you setup a Dockerrun.aws.json which allows you to
 
 ## Installation
 
+### Prerequisites 
 You need to have your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables set in order to use the tool as well as the proper aws permissions for Elastic Beanstalk, and S3 access. 
-
-For the time being you also need to configure your github repo to auto build an image inside of Dockerhub (private or open). In order to do this you need to have a dockerhub account already, login, and select your profile/orginization to add a *Automated Build* to. Select the branch you want to build, location of the docker file and the tag to reference the image that will be built (this will hopefully be automated in the future via dockerhub api).
-
-Once you have your docker image created you will also need to install docker (if you haven't already)
 
 *Install docker for MAC OSX*
 https://docs.docker.com/installation/mac/
@@ -27,13 +24,12 @@ Generate your login credentials token:
 ```
 docker login
 ```
-
-Install the gem
+### Setup
 ```
 gem install gantree
 ```
 
-### Initialize
+### Initialize a new Repo
 What this does is create a new Dockerrun.aws.json inside your repository and uploads your docker login credentials to s3 (for private repo access) so you can do deploys. We need the -u to specify a username to rename your .dockercfg and reference it in the Dockerrun.aws.json
 
 ```
@@ -55,7 +51,7 @@ gantree init -u frodgriguez -p 3000 -b hopefully_this_bucket_name_is_available b
 This command renames your Dockerrun.aws.json temporarily to NAME_OF_ENV-GITHUB_HASH-Dockerrun.aws.json, uploads it to a NAME_OF_APP-versions bucket, creates a new elastic beanstalk version, and asks the specified elastic beanstalk environment to update to that new version.
 
 ```
-gantree deploy stag-cauldron-app-s1
+gantree deploy cauldron-stag-s1
 ```
 By default this will check for the environment cauldron-stag-s1 and deploy to the app stag-cauldron-app. You can also specify an environment name directly using -e.
 
