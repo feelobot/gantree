@@ -188,6 +188,9 @@ module Gantree
             "ApplicationName" => "#{env}",
             "EnvironmentName" => "#{@options[:stack_name]}",
             "Description" => "#{name} Environment",
+            "VersionLabel" => {
+              "Ref" => "ApplicationVersion"
+            },
             "TemplateName" => {
               "Ref" => "ConfigurationTemplate"
             },
