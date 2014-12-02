@@ -69,7 +69,7 @@ module Gantree
     end
     def deploy(envs)
       print_options
-      check_dir_name unless @options[:force]
+      check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
       @packaged_version = create_version_files
       upload_to_s3 
@@ -109,7 +109,7 @@ module Gantree
           eb.update_environment({
             :environment_name => env,
             :version_label => @packaged_version,
-            :option_settings => autodetect_app_role
+            :option_settings => autodetect_app_role(env)
           })
           puts "Deployed #{@packaged_version} to #{env} on #{@app}".green
         rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
@@ -147,10 +147,10 @@ module Gantree
       IO.write(@dockerrun_file, JSON.pretty_generate(docker))
     end
 
-    def autodetect_app_role
+    def autodetect_app_role env
       enabled = @options[:autodetect_app_role]
       if enabled == true || enabled == "true"
-        role = @env.split('-')[2]
+        role = env.split('-')[2]
         puts "Deploying app as a #{role}"
         #role_cmd = IO.read("roles/#{role}").gsub("\n",'')
         #docker = JSON.parse(IO.read(@dockerrun_file))
@@ -225,10 +225,10 @@ module Gantree
       `rm -rf .ebextensions/` if ext?
     end
 
-    def check_dir_name
+    def check_dir_name envs
       dir_name = File.basename(Dir.getwd)
       msg = "WARN: You are deploying from a repo that doesn't match #{@app}"
-      puts msg.yellow if @app.include?(dir_name) == false
+      puts msg.yellow if envs.any? { |env| env.include?(dir_name) }
     end
   end
 end

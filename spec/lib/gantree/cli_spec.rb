@@ -7,11 +7,9 @@ require 'spec_helper'
 #   $ rake clean:vcr ; time rake
 describe Gantree::CLI do
   before(:all) do
-    ENV['AWS_ACCESS_KEY_ID'] = 'FAKE_AWS_ACCESS_KEY'
-    ENV['AWS_SECRET_ACCESS_KEY'] = 'FAKE_AWS_SECRET_ACCESS_KEY'
 
-    @env = "stag-knarr-app-s1"
-    @app = "knarr-stag-s1"
+    @app = "stag-knarr-app-s1"
+    @env = "knarr-stag-s1"
     @owner = "bleacher"
     @repo = "cauldron"
     @tag =  "master"
@@ -42,14 +40,14 @@ describe Gantree::CLI do
     it "should deploy images" do
       execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       out = execute("bin/gantree deploy #{@env} --dry-run --silent")
-      expect(out).to include("Deploying stag-knarr-app-s1 on knarr-stag-s1")
+      expect(out).to include("Found Environment: knarr-stag-s1")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
     end
 
     it "should deploy images with remote extensions" do
-      out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions' --dry-run --silent")
-      expect(out).to include("Deploying stag-knarr-app-s1 on knarr-stag-s1")
+      out = execute("bin/gantree deploy #{@app} -x 'git@github.com:br/.ebextensions' --dry-run --silent")
+      expect(out).to include("Found Environment: stag-knarr-app-s1")
       expect(out).to include("ext: git@github.com:br/.ebextensions")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
@@ -57,7 +55,7 @@ describe Gantree::CLI do
 
     it "should deploy images with remote extensions on a branch" do
       out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic' --dry-run --silent")
-      expect(out).to include("Deploying stag-knarr-app-s1 on knarr-stag-s1")
+      expect(out).to include("Found Environment: knarr-stag-s1")
       expect(out).to include("ext: git@github.com:br/.ebextensions:basic")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
@@ -65,7 +63,7 @@ describe Gantree::CLI do
 
     it "should notify slack of deploys" do 
       out = execute("bin/gantree deploy #{@env} --dry-run")
-      expect(out).to include("Deploying")
+      expect(out).to include("Found Environment: knarr-stag-s1")
     end
   end
 
@@ -73,12 +71,8 @@ describe Gantree::CLI do
     it "should create clusters" do
       out = execute("bin/gantree create #{@env} --dry-run")
       expect(out).to include "instance_size: m3.medium"
-      expect(out).to include "stack_name: stag-knarr-app-s1"
+      expect(out).to include "stack_name: knarr-stag-s1"
       expect(out).to include "cfn_bucket: br-templates"
-      expect(out).to include "env: knarr-stag-s1"
-      expect(out).to include "env_type: stag"
-      expect(out).to include "stag_domain: sbleacherreport.com"
-      expect(out).to include "prod_domain: bleacherreport.com"
     end
 
     it "should create clusters with any docker version" do
@@ -93,8 +87,8 @@ describe Gantree::CLI do
     end
 
     it "should create dupliacte clusters from local cfn" do 
-      out = execute("bin/gantree create stag-knarr-app-s2 --dupe #{@env} --dry-run")
-      expect(out).to include "dupe: stag-knarr-app-s1"
+      out = execute("bin/gantree create knarr-stag-s2 --dupe #{@env} --dry-run")
+      expect(out).to include "dupe: knarr-stag-s1"
     end
   end
 

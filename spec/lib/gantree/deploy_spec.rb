@@ -6,7 +6,8 @@ describe Gantree::Deploy do
     ENV['AWS_ACCESS_KEY_ID'] = 'FAKE_AWS_ACCESS_KEY'
     ENV['AWS_SECRET_ACCESS_KEY'] = 'FAKE_AWS_SECRET_ACCESS_KEY'
 
-    @env = "knarr-stag-s1"
+    @stack_name = "knarr-stag-s1"
+    @env = "stag-knarr-app-s1"
     @owner = "bleacher"
     @repo = "cauldron"
     @tag =  "master"
@@ -28,7 +29,7 @@ describe Gantree::Deploy do
   it "sets app roles if enabled" do
     options = { autodetect_app_role: true}
     deploy = Gantree::Deploy.new("stag-knarr-listener-s1", options)
-    expect(deploy.send(:autodetect_app_role)).to eq([{:option_name=>"ROLE", :value=>"listener", :namespace=>"aws:elasticbeanstalk:application:environment"}])
+    expect(deploy.send(:autodetect_app_role, "stag-knarr-listener-s1")).to eq([{:option_name=>"ROLE", :value=>"listener", :namespace=>"aws:elasticbeanstalk:application:environment"}])
   end
 
   it "AWS gets the correct keys" do
