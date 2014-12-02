@@ -11,23 +11,34 @@ module Gantree
     def initialize stack_name,options
       check_credentials
       set_aws_keys
-
+      
       @cfm = AWS::CloudFormation.new
       @requirements = "#!/usr/bin/env ruby
         require 'cloudformation-ruby-dsl/cfntemplate'
         require 'cloudformation-ruby-dsl/spotprice'
         require 'cloudformation-ruby-dsl/table'"
-      @env = options[:env] || default_name(stack_name)
+
       additional_options = {
         stack_name: stack_name,
         requirements: @requirements,
         cfn_bucket: "br-templates",
-        env: @env,
-        stag_domain: "sbleacherreport.com",
-        prod_domain: "bleacherreport.com",
-        env_type: env_type,
+        domain: "brenv.net.",
+        stack_hash: (0...8).map { (65 + rand(26)).chr }.join
       }
       @options = options.merge(additional_options)
+      @options[:env] ||= create_default_env
+      @options[:env_type] ||= env_type
+    end
+
+    def create_default_env
+      tags = @options[:stack_name].split("-")
+      if tags.length == 3
+        env = [tags[1],tags[0],"app",tags[2]].join('-')
+      elsif tags.length == 4
+        env = [tags[1],tags[0],"app",tags[2],tags[3]].join('-')
+      else
+        raise "Please Set Envinronment Name with -e"
+      end
     end
 
     def create
@@ -64,7 +75,7 @@ module Gantree
 
     private
     def stack_template
-      s3.buckets["#{@options[:cfn_bucket]}/#{env}"].objects["#{env}-master.cfn.json"]
+      s3.buckets["#{@options[:cfn_bucket]}/#{@options[:stack_name]}"].objects["#{@options[:stack_name]}-master.cfn.json"]
     end
 
     def create_cfn_if_needed
@@ -75,13 +86,13 @@ module Gantree
       if @options[:dupe]
         puts "Duplicating cluster"
         orgin_stack_name = @options[:dupe]
-        origin_env = @options[:dupe].match(/^[a-zA-Z]*\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + "-" + env_from_dupe = @options[:dupe].match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[1] + '-' + env_from_dupe = @options[:dupe].match(/^([a-zA-Z]*)\-([a-zA-Z]*)\-[a-zA-Z]*\-([a-zA-Z]*\d*)/)[3]
         templates = ['master','resources','beanstalk']
         templates.each do |template|
           FileUtils.cp("cfn/#{origin_env}-#{template}.cfn.json", "cfn/#{env}-#{template}.cfn.json")
-          file = IO.read("cfn/#{env}-#{template}.cfn.json")
+          file = IO.read("cfn/#{@options[:stack_name]}-#{template}.cfn.json")
           file.gsub!(/#{escape_characters_in_string(orgin_stack_name)}/, @options[:stack_name])
           file.gsub!(/#{escape_characters_in_string(origin_env)}/, @options[:env])
+          swap_out_roles(origin_env)
           IO.write("cfn/#{env}-#{template}.cfn.json",file)
         end
       else
@@ -101,7 +112,7 @@ module Gantree
       IO.write("cfn/#{template_name}.rb", template)
       json = `ruby cfn/#{template_name}.rb expand`
       Dir.mkdir 'cfn' rescue Errno::ENOENT
-      template_file_name = "#{env}-#{template_name}.cfn.json"
+      template_file_name = "#{@options[:stack_name]}-#{template_name}.cfn.json"
       IO.write("cfn/#{template_file_name}", json)
       puts "Created #{template_file_name} in the cfn directory"
       FileUtils.rm("cfn/#{template_name}.rb")
@@ -111,19 +122,19 @@ module Gantree
       check_template_bucket
       templates = ['master','resources','beanstalk']
       templates.each do |template|
-        filename = "cfn/#{env}-#{template}.cfn.json"
+        filename = "cfn/#{@options[:stack_name]}-#{template}.cfn.json"
         key = File.basename(filename)
-        s3.buckets["#{@options[:cfn_bucket]}/#{env}"].objects[key].write(:file => filename)
+        s3.buckets["#{@options[:cfn_bucket]}/#{@options[:stack_name]}"].objects[key].write(:file => filename)
       end
       puts "templates uploaded"
     end
 
     def check_template_bucket
-      bucket_name = "#{@options[:cfn_bucket]}/#{env}"
+      bucket_name = "#{@options[:cfn_bucket]}/#{@options[:stack_name]}"
       if s3.buckets[bucket_name].exists?
-        puts "uploading cfn templates to #{@options[:cfn_bucket]}/#{env}"
+        puts "uploading cfn templates to #{@options[:cfn_bucket]}/#{@options[:stack_name]}"
       else
-        puts "creating bucket #{@options[:cfn_bucket]}/#{env} to upload templates"
+        puts "creating bucket #{@options[:cfn_bucket]}/#{@options[:stack_name]} to upload templates"
         s3.buckets.create(bucket_name) 
       end
     end
@@ -133,7 +144,7 @@ module Gantree
       stack = @cfm.stacks.create(@options[:stack_name], stack_template, { 
         :disable_rollback => true, 
         :tags => [
-          { key: "StackName", value: @env },
+          { key: "StackName", value: @options[:stack_name] },
         ]})
     end
 
@@ -150,9 +161,9 @@ module Gantree
     end
 
     def env_type
-      if env.include?("prod")
+      if @options[:env].include?("prod")
         "prod"
-      elsif env.include?("stag")
+      elsif @options[:env].include?("stag")
         "stag"
       else
         ""
@@ -180,7 +191,7 @@ module Gantree
         }
         #puts JSON.pretty_generate role
         beanstalk["Resources"]["#{name}".to_sym] = role
-        IO.write("cfn/#{@env}-beanstalk.cfn.json", JSON.pretty_generate(beanstalk)) unless @options[:dry_run]
+        IO.write("cfn/#{@options[:stack_name]}-beanstalk.cfn.json", JSON.pretty_generate(beanstalk)) unless @options[:dry_run]
         puts JSON.pretty_generate(beanstalk["Resources"].to_a.last) if @options[:dry_run]
         puts "Added new #{name} role".green
       else 

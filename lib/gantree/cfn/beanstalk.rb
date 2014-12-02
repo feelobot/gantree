@@ -7,8 +7,7 @@ class BeanstalkTemplate
     @size = params[:instance_size]
     @rds = params[:rds]
     @env = params[:env]
-    @prod_domain = params[:prod_domain]
-    @stag_domain = params[:stag_domain]
+    @domain = params[:domain]
     @requirements = params[:requirements]
     @rds_enabled = params[:rds?]
     @env_type = params[:env_type]
@@ -20,11 +19,7 @@ class BeanstalkTemplate
 
       value :AWSTemplateFormatVersion => '2010-09-09'
 
-      value :Description => '#{@env} Service Parent Template (2014-08-15)'
-
-      mapping 'LongName',
-              :stag => { :name => 'staging' },
-              :prod => { :name => 'production' }
+      value :Description => '#{@stack_name} Service Parent Template (2014-08-15)'
 
       mapping 'HostedZoneName',
               :stag => { :name => '#{@stag_domain}' },
@@ -33,17 +28,8 @@ class BeanstalkTemplate
       #{beanstalk_parmaters}
 
       resource 'Application', :Type => 'AWS::ElasticBeanstalk::Application', :Properties => {
-          :Description => '#{@env}',
-          :ApplicationName => '#{@env}',
-      }
-
-      resource 'ApplicationVersion', :Type => 'AWS::ElasticBeanstalk::ApplicationVersion', :Properties => {
-          :ApplicationName => ref('Application'),
-          :Description => 'Initial Version',
-          :SourceBundle => {
-              :S3Bucket => 'elasticbeanstalk-samples-us-east-1',
-              :S3Key => 'docker-sample.zip',
-          },
+          :Description => '#{@stack_name}',
+          :ApplicationName => '#{@stack_name}',
       }
 
       #{configuration_template}
@@ -75,11 +61,11 @@ class BeanstalkTemplate
       parameter 'ApplicationName',
                 :Description => 'The name of the Elastic Beanstalk Application',
                 :Type => 'String',
-                :Default =>  '#{@env}'
+                :Default =>  '#{@stack_name}'
 
       parameter 'Environment',
                 :Type => 'String',
-                :Default => 'stag'
+                :Default => '#{@env_type}'
 
       parameter 'IamInstanceProfile',
                 :Type => 'String',
@@ -99,11 +85,6 @@ class BeanstalkTemplate
                 :Namespace => 'aws:elasticbeanstalk:application:environment',
                 :OptionName => 'AWS_REGION',
                 :Value => aws_region,
-            },
-            {
-                :Namespace => 'aws:elasticbeanstalk:application:environment',
-                :OptionName => 'RACK_ENV',
-                :Value => find_in_map('LongName', '#{@env_type}', 'name'),
             },
             {
                 :Namespace => 'aws:autoscaling:launchconfiguration',
@@ -136,17 +117,16 @@ class BeanstalkTemplate
 
   def resources
     "resource 'EbEnvironment', :Type => 'AWS::ElasticBeanstalk::Environment', :Properties => {
-        :ApplicationName => '#{@env}',
-        :EnvironmentName => '#{@stack_name}',
+        :ApplicationName => '#{@stack_name}',
+        :EnvironmentName => '#{@env}',
         :Description => 'Default Environment',
-        :VersionLabel => ref('ApplicationVersion'),
         :TemplateName => ref('ConfigurationTemplate'),
         :OptionSettings => [],
     }
 
     resource 'HostRecord', :Type => 'AWS::Route53::RecordSet', :Properties => {
         :Comment => 'DNS name for my stack',
-        :HostedZoneName => join('', find_in_map('HostedZoneName', '#{@env_type}', 'name'), '.'),
+        :HostedZoneName => '#{@domain}',
         :Name => join('.', ref('ApplicationName'), find_in_map('HostedZoneName', '#{@env_type}', 'name')),
         :ResourceRecords => [ get_att('EbEnvironment', 'EndpointURL') ],
         :TTL => '60',

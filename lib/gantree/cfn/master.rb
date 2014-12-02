@@ -18,12 +18,12 @@ class MasterTemplate
       parameter 'ResourcesTemplate',
                 :Description => 'The key of the template for the resources required to run the app',
                 :Type => 'String',
-                :Default => '#{@env}-resources.cfn.json'
+                :Default => '#{@stack_name}-resources.cfn.json'
 
       parameter 'AppTemplate',
                 :Description => 'The key of the template for the EB app/env substack',
                 :Type => 'String',
-                :Default => '#{@env}-beanstalk.cfn.json'
+                :Default => '#{@stack_name}-beanstalk.cfn.json'
 
       parameter 'KeyName',
                 :Type => 'String',
@@ -31,7 +31,7 @@ class MasterTemplate
 
       parameter 'ApplicationName',
                 :Type => 'String',
-                :Default => '#{@env}'
+                :Default => '#{@stack_name}'
 
       parameter 'Environment',
                 :Type => 'String',
@@ -42,12 +42,12 @@ class MasterTemplate
                 :Default => 'EbApp'
 
       resource 'AppResources', :Type => 'AWS::CloudFormation::Stack', :Properties => {
-          :TemplateURL => join('/', 'http://s3.amazonaws.com', '#{@bucket}', '#{@env}', ref('ResourcesTemplate')),
+          :TemplateURL => join('/', 'http://s3.amazonaws.com', '#{@bucket}', '#{@stack_name}', ref('ResourcesTemplate')),
           :Parameters => { :ApplicationName => ref('ApplicationName') },
       }
 
       resource 'App', :Type => 'AWS::CloudFormation::Stack', :Properties => {
-          :TemplateURL => join('/', 'http://s3.amazonaws.com','#{@bucket}', '#{@env}', ref('AppTemplate')),
+          :TemplateURL => join('/', 'http://s3.amazonaws.com','#{@bucket}', '#{@stack_name}', ref('AppTemplate')),
           :Parameters => {
               :KeyName => ref('KeyName'),
               :InstanceSecurityGroup => get_att('AppResources', 'Outputs.InstanceSecurityGroup'),

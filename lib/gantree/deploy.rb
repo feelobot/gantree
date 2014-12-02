@@ -34,11 +34,6 @@ module Gantree
       end
     end
 
-    private
-    def eb
-      @eb ||= AWS::ElasticBeanstalk::Client.new
-    end
-
     def upload_to_s3
       key = File.basename(@packaged_version)
       check_version_bucket
