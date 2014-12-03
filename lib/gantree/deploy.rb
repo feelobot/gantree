@@ -64,6 +64,7 @@ module Gantree
         puts "ERROR: Environment '#{name}' not found"
         exit 1
       else
+        @app = results[:environments][0][:application_name]
         return true
       end
     end
