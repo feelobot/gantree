@@ -230,7 +230,7 @@ module Gantree
     def check_dir_name envs
       dir_name = File.basename(Dir.getwd)
       msg = "WARN: You are deploying from a repo that doesn't match #{@app}"
-      puts msg.yellow if envs.any? { |env| env.include?(dir_name) }
+      puts msg.yellow if envs.any? { |env| env.include?(dir_name) } == false
     end
   end
 end
