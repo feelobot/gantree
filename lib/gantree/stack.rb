@@ -53,7 +53,7 @@ module Gantree
       add_role @options[:role] if @options[:role]
       unless @options[:dry_run] then
         upload_templates
-        @cfm.stacks[@options[:stack_name]].update(:template => stack_template) 
+        @cfm.stacks[@options[:stack_name]].update(:template => stack_template)
       end
     end
 
@@ -185,12 +185,9 @@ module Gantree
         role = {
           "Type" => "AWS::ElasticBeanstalk::Environment",
           "Properties"=> {
-            "ApplicationName" => "#{env}",
-            "EnvironmentName" => "#{@options[:stack_name]}",
+            "ApplicationName" => "#{@options[:stack_name]}",
+            "EnvironmentName" => "#{env}",
             "Description" => "#{name} Environment",
-            "VersionLabel" => {
-              "Ref" => "ApplicationVersion"
-            },
             "TemplateName" => {
               "Ref" => "ConfigurationTemplate"
             },
