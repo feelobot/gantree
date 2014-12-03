@@ -59,12 +59,12 @@ module Gantree
     end
 
     def environment?
-      results = eb.describe_environments({ environment_names: ["#{@name}"]})
+      results = eb.describe_environments({ environment_names: ["#{@name}"]})[:environments]
       if results.length == 0
         puts "ERROR: Environment '#{name}' not found"
         exit 1
       else
-        @app = results[:environments][0][:application_name]
+        @app = results[0][:application_name]
         return true
       end
     end
@@ -78,7 +78,8 @@ module Gantree
       create_eb_version
       update_application(envs)
       if @options[:slack]
-        msg = "#{ENV['USER']} is deploying #{@packaged_version} to #{@app}"
+        msg = "#{ENV['USER']} is deploying #{@packaged_version} to #{@app} "
+        msg += "Tag: #{@options[:tag]}" if @options[:tag]
         Notification.new(@options[:slack]).say(msg) unless @options[:silent]
       end
     end

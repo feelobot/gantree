@@ -8,12 +8,13 @@ require 'spec_helper'
 describe Gantree::CLI do
   before(:all) do
 
-    @app = "stag-knarr-app-s1"
-    @env = "knarr-stag-s1"
+    @app = "stag-cms-app-s2"
+    @env = "cms-stag-s2"
     @owner = "bleacher"
     @repo = "cauldron"
     @tag =  "master"
     @user = "feelobot"
+    @new_env = "cms-stag-s3"
   end 
 
   describe "init" do
@@ -40,14 +41,14 @@ describe Gantree::CLI do
     it "should deploy images" do
       execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       out = execute("bin/gantree deploy #{@env} --dry-run --silent")
-      expect(out).to include("Found Environment: knarr-stag-s1")
+      expect(out).to include("Found Application: #{@env}")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
     end
 
     it "should deploy images with remote extensions" do
       out = execute("bin/gantree deploy #{@app} -x 'git@github.com:br/.ebextensions' --dry-run --silent")
-      expect(out).to include("Found Environment: stag-knarr-app-s1")
+      expect(out).to include("Found Environment: #{@app}")
       expect(out).to include("ext: git@github.com:br/.ebextensions")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
@@ -55,7 +56,7 @@ describe Gantree::CLI do
 
     it "should deploy images with remote extensions on a branch" do
       out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic' --dry-run --silent")
-      expect(out).to include("Found Environment: knarr-stag-s1")
+      expect(out).to include("Found Application: #{@env}")
       expect(out).to include("ext: git@github.com:br/.ebextensions:basic")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
@@ -63,7 +64,7 @@ describe Gantree::CLI do
 
     it "should notify slack of deploys" do 
       out = execute("bin/gantree deploy #{@env} --dry-run")
-      expect(out).to include("Found Environment: knarr-stag-s1")
+      expect(out).to include("Found Application: #{@env}")
     end
   end
 
@@ -71,7 +72,7 @@ describe Gantree::CLI do
     it "should create clusters" do
       out = execute("bin/gantree create #{@env} --dry-run")
       expect(out).to include "instance_size: m3.medium"
-      expect(out).to include "stack_name: knarr-stag-s1"
+      expect(out).to include "stack_name: #{@env}"
       expect(out).to include "cfn_bucket: br-templates"
     end
 
@@ -87,8 +88,8 @@ describe Gantree::CLI do
     end
 
     it "should create dupliacte clusters from local cfn" do 
-      out = execute("bin/gantree create knarr-stag-s2 --dupe #{@env} --dry-run")
-      expect(out).to include "dupe: knarr-stag-s1"
+      out = execute("bin/gantree create #{@new_env} --dupe #{@env} --dry-run")
+      expect(out).to include "dupe: #{@env}"
     end
   end
 
