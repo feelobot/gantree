@@ -59,6 +59,12 @@ module Gantree
       Gantree::App.new(app, merge_defaults(options)).restart
     end
 
+    desc "build", "build and tag a docker application"
+    option :dry_run, :aliases => "-d", :desc => "do not actually do the things"
+    def build
+      Gantree::Docker.new(merge_defaults(options)).build
+    end
+
     protected
 
     def merge_defaults(options={})

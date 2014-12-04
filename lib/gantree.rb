@@ -5,6 +5,7 @@ require "gantree/deploy"
 require "gantree/init"
 require "gantree/stack"
 require "gantree/app"
+require "gantree/docker"
 
 module Gantree
   autoload :CLI, 'gantree/cli'
