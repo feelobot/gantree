@@ -22,6 +22,7 @@ module Gantree
       else
         puts "Error: Image was not built successfully".red
         puts "#{output}"
+      end
       puts "docker push #{@hub}/#{@repo}:#{@origin}-#{@branch}-#{@hash}"
       puts "gantree deploy app_name -t #{@origin}-#{@branch}-#{@hash}"
     end
