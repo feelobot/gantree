@@ -59,6 +59,23 @@ module Gantree
       Gantree::App.new(app, merge_defaults(options)).restart
     end
 
+    desc "build", "build and tag a docker application"
+    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    def build
+      Gantree::Docker.new(merge_defaults(options)).build
+    end
+
+    desc "push", "build and tag a docker application"
+    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    def push
+      Gantree::Docker.new(merge_defaults(options)).push
+    end
+
+    desc "tag", "tag a docker application"
+    def tag
+      puts Gantree::Docker.new(merge_defaults(options)).tag
+    end
+
     protected
 
     def merge_defaults(options={})
