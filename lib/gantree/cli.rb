@@ -60,9 +60,20 @@ module Gantree
     end
 
     desc "build", "build and tag a docker application"
-    option :dry_run, :aliases => "-d", :desc => "do not actually do the things"
+    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
     def build
       Gantree::Docker.new(merge_defaults(options)).build
+    end
+
+    desc "push", "build and tag a docker application"
+    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    def push
+      Gantree::Docker.new(merge_defaults(options)).push
+    end
+
+    desc "tag", "tag a docker application"
+    def tag
+      puts Gantree::Docker.new(merge_defaults(options)).tag
     end
 
     protected
