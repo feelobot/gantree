@@ -16,8 +16,12 @@ module Gantree
 
     def build 
       puts "Building..."
-      `docker build -t #{@hub}/#{@repo}:#{@origin}-#{@branch}-#{@hash} .`
-      puts "Image Built: #{@hub}/#{@repo}:#{@origin}-#{@branch}-#{@hash}".green if $?.success?
+      output = `docker build -t #{@hub}/#{@repo}:#{@origin}-#{@branch}-#{@hash} .`
+      if $?.success?
+        puts "Image Built: #{@hub}/#{@repo}:#{@origin}-#{@branch}-#{@hash}".green 
+      else
+        puts "Error: Image was not built successfully".red
+        puts "#{output}"
       puts "docker push #{@hub}/#{@repo}:#{@origin}-#{@branch}-#{@hash}"
       puts "gantree deploy app_name -t #{@origin}-#{@branch}-#{@hash}"
     end
