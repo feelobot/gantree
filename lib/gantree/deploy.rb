@@ -68,6 +68,7 @@ module Gantree
         return true
       end
     end
+
     def deploy(envs)
       print_options
       check_dir_name(envs) unless @options[:force]
@@ -83,6 +84,7 @@ module Gantree
         Notification.new(@options[:slack]).say(msg) unless @options[:silent]
       end
     end
+
     def upload_to_s3
       key = File.basename(@packaged_version)
       check_version_bucket
