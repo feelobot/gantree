@@ -25,6 +25,13 @@ module Gantree
     def eb
       @eb ||= AWS::ElasticBeanstalk::Client.new
     end
+
+    def tag
+      origin = `git remote show origin | grep "Push" | cut -f1 -d"/" | cut -d":" -f3`.strip
+      branch = `git rev-parse --abbrev-ref HEAD`.strip
+      hash = `git rev-parse --verify --short #{branch}`.strip
+      "#{origin}-#{branch}-#{hash}"
+    end
   end
 end
 

@@ -9,7 +9,6 @@ module Gantree
     desc "deploy APP", "deploy specified APP"
     option :branch, :desc => 'branch to deploy'
     method_option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
-    method_option :env, :aliases => "-e", :desc => "elastic beanstalk environment"
     method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
     option :silent, :aliases => "-s", :desc => "mute notifications"
@@ -60,6 +59,7 @@ module Gantree
     end
 
     desc "build", "build and tag a docker application"
+    option :tag, :aliases => "-t", :desc => "set docker tag to build"
     option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
     def build
       Gantree::Docker.new(merge_defaults(options)).build
@@ -67,6 +67,7 @@ module Gantree
 
     desc "push", "build and tag a docker application"
     option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    option :tag, :aliases => "-t", :desc => "set docker tag to push"
     def push
       Gantree::Docker.new(merge_defaults(options)).push
     end
@@ -74,6 +75,22 @@ module Gantree
     desc "tag", "tag a docker application"
     def tag
       puts Gantree::Docker.new(merge_defaults(options)).tag
+    end
+
+    desc "shipit", "tag a docker application"
+    option :branch, :desc => 'branch to deploy'
+    option :tag, :aliases => "-t", :desc => "set docker tag to deploy", :default => Gantree::Base.new.tag
+    option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
+    option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
+    option :silent, :aliases => "-s", :desc => "mute notifications"
+    option :autodetect_app_role, :desc => "use naming convention to determin role"
+    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    option :hush, :desc => "quite puts messages", :default => true
+    def shipit server
+      docker = Gantree::Docker.new(merge_defaults(options))
+      docker.build
+      docker.push
+      Gantree::Deploy.new(server, merge_defaults(options)).run
     end
 
     protected
