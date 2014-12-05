@@ -18,5 +18,3 @@ gem "pry"
 gem "vcr"
 gem "fakeweb"
 gem "colorize"
-
-

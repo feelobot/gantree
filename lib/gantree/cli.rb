@@ -9,7 +9,6 @@ module Gantree
     desc "deploy APP", "deploy specified APP"
     option :branch, :desc => 'branch to deploy'
     method_option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
-    method_option :env, :aliases => "-e", :desc => "elastic beanstalk environment"
     method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
     option :silent, :aliases => "-s", :desc => "mute notifications"
@@ -74,6 +73,21 @@ module Gantree
     desc "tag", "tag a docker application"
     def tag
       puts Gantree::Docker.new(merge_defaults(options)).tag
+    end
+
+    desc "shipit", "tag a docker application"
+    option :branch, :desc => 'branch to deploy'
+    option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
+    option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
+    option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
+    option :silent, :aliases => "-s", :desc => "mute notifications"
+    option :autodetect_app_role, :desc => "use naming convention to determin role"
+    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    option :hush, :desc => "quite puts messages"
+    def shipit server
+      Gantree::Docker.new(merge_defaults(options)).build
+      Gantree::Docker.new(merge_defaults(options)).push
+      Gantree::Deploy.new(server, merge_defaults(options)).run
     end
 
     protected

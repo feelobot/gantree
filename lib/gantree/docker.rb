@@ -20,8 +20,8 @@ module Gantree
       output = `docker build -t #{@hub}/#{@repo}:#{@origin}-#{@branch}-#{@hash} .`
       if $?.success?
         puts "Image Built: #{@hub}/#{@repo}:#{tag}".green 
-        puts "docker push #{@hub}/#{@repo}:#{tag}"
-        puts "gantree deploy app_name -t #{tag}"
+        puts "docker push #{@hub}/#{@repo}:#{tag}" unless @options[:hush]
+        puts "gantree deploy app_name -t #{tag}" unless @options[:hush]
       else
         puts "Error: Image was not built successfully".red
         puts "#{output}"
@@ -33,7 +33,7 @@ module Gantree
       output = `docker push #{@hub}/#{@repo}:#{tag}`
       if $?.success?
         puts "Image Pushed: #{@hub}/#{@repo}:#{tag}".green 
-        puts "gantree deploy app_name -t #{tag}"
+        puts "gantree deploy app_name -t #{tag}" unless @options[:hush]
       else
         puts "Error: Image was not pushed successfully".red
         puts "#{output}"
@@ -41,7 +41,7 @@ module Gantree
     end
 
     def tag
-      "#{@origin}-#{@branch}-#{@hash}"
+      @options[:tag] ||= "#{@origin}-#{@branch}-#{@hash}"
     end
   end
 end
