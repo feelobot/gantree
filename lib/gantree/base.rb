@@ -27,7 +27,7 @@ module Gantree
     end
 
     def tag
-      origin = `git remote show origin | grep "Push" | cut -f1 -d"/" | cut -d":" -f3`.strip
+      origin = `git config --get remote.origin.url`.strip
       branch = `git rev-parse --abbrev-ref HEAD`.strip
       hash = `git rev-parse --verify --short #{branch}`.strip
       "#{origin}-#{branch}-#{hash}"
