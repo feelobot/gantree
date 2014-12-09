@@ -53,13 +53,7 @@ EOL
 <<-EOL
 Examples:
 
-$ gantree update APPLICATION
-
-$ gantree update linguist-stag-s1
-
-$ gantree update APPLICATION -e ENVIRONMENT
-
-$ gantree update linguist-stag-s1 -e linguist-stag-app-s1
+$ gantree update stag-linguist-app-s1
 EOL
         end
 
