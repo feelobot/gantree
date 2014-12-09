@@ -39,11 +39,13 @@ Examples:
 
 $ gantree create APPLICATION
 
-$ gantree create stag-linguist-s1
+$ gantree create linguist-stag-s1
 
 $ gantree create APPLICATION -e ENVIRONMENT
 
-$ gantree create stag-linguist-s1 -e stag-linguist-app-s1
+$ gantree create linguist-stag-s1 -e linguist-stag-app-s1
+
+$ gantree create --dupe=rails-stag-s1 rails-stag-s3 
 EOL
         end
 
@@ -53,11 +55,11 @@ Examples:
 
 $ gantree update APPLICATION
 
-$ gantree create stag-linguist-s1
+$ gantree update linguist-stag-s1
 
-$ gantree create APPLICATION -e ENVIRONMENT
+$ gantree update APPLICATION -e ENVIRONMENT
 
-$ gantree create stag-linguist-s1 -e stag-linguist-app-s1
+$ gantree update linguist-stag-s1 -e linguist-stag-app-s1
 EOL
         end
 
@@ -67,7 +69,7 @@ Builds and tags a docker application.
 
 Examples:
 
-$ gantree build -i quay.io/tongueroo/rails:deploy
+$ gantree build -i bleacher/rails:built
 
 $ gantree build -t deploy
 EOL
