@@ -165,11 +165,6 @@ module Gantree
       if enabled == true || enabled == "true"
         role = env.split('-')[2]
         puts "Deploying app as a #{role}"
-        #role_cmd = IO.read("roles/#{role}").gsub("\n",'')
-        #docker = JSON.parse(IO.read(@dockerrun_file))
-        #docker["Cmd"] = role_cmd
-        #IO.write(@dockerrun_file,JSON.pretty_generate(docker))
-        #puts "Setting role cmd to '#{role_cmd}'"
         [{:option_name => "ROLE", :value => role, :namespace => "aws:elasticbeanstalk:application:environment" }]
       else 
         []
