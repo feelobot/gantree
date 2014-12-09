@@ -44,6 +44,12 @@ describe Gantree::Deploy do
     gd.set_aws_keys
   end
 
+  it "allows you to change the image path dynamically" do 
+    options = { image_path: "quay.io/bleacherreport/cms" }
+    deploy = Gantree::Deploy.new(@env,options)
+    expect(deploy.send(:set_image_path)).to eq("quay.io/bleacherreport/cms")
+  end
+
   it "raises an error when no aws keys in ENV" do
     ENV['AWS_ACCESS_KEY_ID'] = nil
     ENV['AWS_SECRET_ACCESS_KEY'] = nil

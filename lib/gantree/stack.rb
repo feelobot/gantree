@@ -103,7 +103,7 @@ module Gantree
     def replace_env_references file
       origin_tags = @options[:dupe].split("-")
       new_tags = @options[:stack_name].split("-")
-      possible_roles = ["app","worker","listener","djay","scheduler"]
+      possible_roles = ["app","worker","listener","djay","scheduler","sched"]
       possible_roles.each do |role|
         origin_env = [origin_tags[1],origin_tags[0],role,origin_tags[2]].join('-')
         new_env = [new_tags[1],new_tags[0],role,new_tags[2]].join('-')
