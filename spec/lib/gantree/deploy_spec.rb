@@ -44,6 +44,13 @@ describe Gantree::Deploy do
     gd.set_aws_keys
   end
 
+  it "the image path is dynamic" do 
+    options = { image_path: "quay.io/bleacherreport/cms" }
+    deploy = Gantree::Deploy.new(@env,options)
+    image_path = deploy.instance_variable_get("@options")[:image_path]
+    expect(image_path).to eq("quay.io/bleacherreport/cms")
+  end
+
   it "raises an error when no aws keys in ENV" do
     ENV['AWS_ACCESS_KEY_ID'] = nil
     ENV['AWS_SECRET_ACCESS_KEY'] = nil
@@ -54,3 +61,20 @@ describe Gantree::Deploy do
   end
 end
 
+def dockerrun
+'
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "bleacher/cms",
+    "Update": true
+  },
+  "Logging": "/var/log/nginx",
+  "Ports": [
+    {
+      "ContainerPort": "300"
+    }
+  ]
+}
+'
+end

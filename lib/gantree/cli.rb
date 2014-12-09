@@ -12,6 +12,7 @@ module Gantree
     method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
     option :silent, :aliases => "-s", :desc => "mute notifications"
+    option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :autodetect_app_role, :desc => "use naming convention to determin role"
     def deploy name
       Gantree::Deploy.new(name, merge_defaults(options)).run
@@ -59,14 +60,14 @@ module Gantree
     end
 
     desc "build", "build and tag a docker application"
+    option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :tag, :aliases => "-t", :desc => "set docker tag to build"
-    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
     def build
       Gantree::Docker.new(merge_defaults(options)).build
     end
 
     desc "push", "build and tag a docker application"
-    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :tag, :aliases => "-t", :desc => "set docker tag to push"
     def push
       Gantree::Docker.new(merge_defaults(options)).push
@@ -77,16 +78,16 @@ module Gantree
       puts Gantree::Docker.new(merge_defaults(options)).tag
     end
 
-    desc "shipit", "tag a docker application"
+    desc "ship", "tag a docker application"
     option :branch, :desc => 'branch to deploy'
     option :tag, :aliases => "-t", :desc => "set docker tag to deploy", :default => Gantree::Base.new.tag
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :dry_run, :aliases => "-d", :desc => "do not actually deploy the app"
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :autodetect_app_role, :desc => "use naming convention to determin role"
-    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    option :image_path, :aliases => "-i", :desc => "hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :hush, :desc => "quite puts messages", :default => true
-    def shipit server
+    def ship server
       docker = Gantree::Docker.new(merge_defaults(options))
       docker.build
       docker.push
