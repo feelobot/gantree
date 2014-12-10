@@ -7,18 +7,17 @@ module Gantree
       check_credentials
       set_aws_keys
       @options = options
-      @hub = @options[:hub]
-      raise "Please provide a hub name in your .gantreecfg ex { hub : 'bleacher' }" unless @hub
-      @repo = `basename $(git rev-parse --show-toplevel)`.strip
+      @image_path = @options[:image_path]
+      raise "Please provide an image path name in .gantreecfg ex. { 'image_path' : 'bleacher/cms' }" unless @image_path
       @tag = @options[:tag] ||= tag
     end
 
     def build 
       puts "Building..."
-      output = `docker build -t #{@hub}/#{@repo}:#{@tag} .`
+      output = `docker build -t #{@image_path}:#{@tag} .`
       if $?.success?
-        puts "Image Built: #{@hub}/#{@repo}:#{@tag}".green 
-        puts "docker push #{@hub}/#{@repo}:#{@tag}" unless @options[:hush]
+        puts "Image Built: #{@image_path}:#{@tag}".green 
+        puts "gantree push --image-path #{@image_path} -t #{@tag}" unless @options[:hush]
         puts "gantree deploy app_name -t #{@tag}" unless @options[:hush]
       else
         puts "Error: Image was not built successfully".red
@@ -28,10 +27,10 @@ module Gantree
     end
 
     def push 
-      puts "Pushing..."
-      output = `docker push #{@hub}/#{@repo}:#{@tag}`
+      puts "Pushing to #{@image_path}:#{@tag} ..."
+      output = `docker push #{@image_path}:#{@tag}`
       if $?.success?
-        puts "Image Pushed: #{@hub}/#{@repo}:#{@tag}".green 
+        puts "Image Pushed: #{@image_path}:#{@tag}".green 
         puts "gantree deploy app_name -t #{@tag}" unless @options[:hush]
       else
         puts "Error: Image was not pushed successfully".red

@@ -14,6 +14,7 @@ module Gantree
     method_option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
     method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :silent, :aliases => "-s", :desc => "mute notifications"
+    option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :autodetect_app_role, :desc => "use naming convention to determin role"
     def deploy name
       Gantree::Deploy.new(name, merge_defaults(options)).run
@@ -60,15 +61,16 @@ module Gantree
 
     desc "build", "build and tag a docker application"
     long_desc Help.build
+    option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :tag, :aliases => "-t", :desc => "set docker tag to build"
-    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
     def build
       Gantree::Docker.new(merge_defaults(options)).build
     end
 
-    desc "push", "push docker tag to hub"
+    desc "push", "build and tag a docker application"
     long_desc Help.push
     option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :tag, :aliases => "-t", :desc => "set docker tag to push"
     def push
       Gantree::Docker.new(merge_defaults(options)).push
@@ -86,13 +88,19 @@ module Gantree
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :autodetect_app_role, :desc => "use naming convention to determin role"
-    option :hub, :aliases => "-h", :desc => "hub (docker|quay)"
+    option :image_path, :aliases => "-i", :desc => "hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :hush, :desc => "quite puts messages", :default => true
     def ship server
       docker = Gantree::Docker.new(merge_defaults(options))
       docker.build
       docker.push
       Gantree::Deploy.new(server, merge_defaults(options)).run
+    end
+
+    map "-v" => :version
+    desc "version", "gantree version"
+    def version
+      puts VERSION
     end
 
     protected

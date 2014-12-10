@@ -132,6 +132,7 @@ module Gantree
       version = "#{@app}-#{hash}-#{time_stamp}"
       puts "version: #{version}"
       #auto_detect_app_role if @options[:autodetect_app_role] == true
+      set_image_path if @options[:image_path]
       set_tag_to_deploy if @options[:tag]
       unless ext?
         new_dockerrun = "#{version}-Dockerrun.aws.json"
@@ -152,16 +153,19 @@ module Gantree
       IO.write(@dockerrun_file, JSON.pretty_generate(docker))
     end
 
+    def set_image_path
+      docker = JSON.parse(IO.read(@dockerrun_file))
+      image = docker["Image"]["Name"]
+      image.gsub!(/(.*):/, "#{@options[:image_path]}:")
+      IO.write(@dockerrun_file, JSON.pretty_generate(docker))
+      image
+    end
+
     def autodetect_app_role env
       enabled = @options[:autodetect_app_role]
       if enabled == true || enabled == "true"
         role = env.split('-')[2]
         puts "Deploying app as a #{role}"
-        #role_cmd = IO.read("roles/#{role}").gsub("\n",'')
-        #docker = JSON.parse(IO.read(@dockerrun_file))
-        #docker["Cmd"] = role_cmd
-        #IO.write(@dockerrun_file,JSON.pretty_generate(docker))
-        #puts "Setting role cmd to '#{role_cmd}'"
         [{:option_name => "ROLE", :value => role, :namespace => "aws:elasticbeanstalk:application:environment" }]
       else 
         []

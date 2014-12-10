@@ -1,11 +1,16 @@
 language: ruby
 cache: bundler
 rvm:
-- 2.1.2
-before_script: echo "{"https://index.docker.io/v1/":{"auth":"ZmVlbG9ib3Q6azF6a2F6a29udHIwbDF0","email":"felix.a.rod@gmail.com"}"
+- 2.1.3
+before_script:
+- echo "{"https://index.docker.io/v1/":{"auth":"$DOCKER_TOKEN","email":"$DOCKER_EMAIL"}"
   > $HOME/.dockercfg
 env:
   global:
   - secure: OoLMnBOcoXTPOimdyh4ju8yW2YpLBXEOdljN1gVQzjIIv24cQ0BxWAAktjExntkYAjnRpxzTKK5ZkWadXm8NK7TtzFU80padk+WYVzuE1Xngxw/OhS1Z6NYL8+D3ortSANqoOB6r/Z13Sb5XClYDWlj5/GGzf4AerY5xgh2nJQc=
   - secure: MCPnXXEMJkamb3HuYS0H+YeMDKORYAekCfB8YMrtUeMR3QTSe2yQ6eMaNC/I2D5g8cNw60mRagaMyDMadZ4aVQ4sUK1YOHexs/vPJrVrIJU8ZGFsueQyboJun1NZLGvKAIAok7yAEEfwftCd+svYrtrTtV88fk9deOnBLs4o3gM=
   - secure: QZ00MAXO+Lblk/6Q0Bi+YQQLJtJYVHqMattxjIi72q5aOPQOSMT8UjDvOhDF2D/Le0wGBqVQxpxbpP/5cSGCLxtAfBijTyIirnkqV2td4hiXNfyQn3a+KnOifquJ8Vmo1tp/vvKGN16PIrLQCi5ARlcTj8QxfOFIihsrpelg9Ik=
+  - secure: hs4c8HbrCmZzS1o1FFwymGKVgHDXahuh5h3Kp7mweHiGBV/QJsUy6sJq5oJMCZLPw6cqZ03NcpNaj+zwrt9pKkPnawyInLus6qrdv/OshMRRzFtXRT5HKt1u21KE3Qotg3+Cw8mPHCKHxi+Q2g57SyhM9ETZ74u83iqtBBLPXL8=
+  - secure: DRrSBPqc17MxNAU7H57dDNp25c0NzsPZEk3LwGtkNTSBQaJVqDM52BESRgcjUMpW9yO4qg3KEVxyip/fYB2wjMRO8tXIgb86HJktOHv3flKE4OSKni+lfzTW02Pm02bRJJ4TbDvwk1NGrPar5mHcSpHQiCibmjlcv9gDXTd9ZRs=
+  - secure: ovEq5bbK10ubB7PBiw+hN63L82Z0Azi8rGih5pnSI9VdHIViECKUM6FPciVFADA5xl+C4H/9oVxLaeDKqAsYvm1BsqBSnw4i8/0gmOa5twK4GpBPo4xkCMr9T5hA0xDGgN39AAEijJZVVmi+ecUpojHxVoxtEbjMK77Ud44mSMc=
+  - secure: hpE4SKYumT1GAo5Q56DZ7q0DK7CT4rKp0MpnZLZnO7ob0TPy6UCQZViOaIRuLQ7aj5wzWToHdOPkzBIyE5H8DfV84lvsBYktFac5TLoiU+nxl/aSzO11tfIY0gneKEyjSjWIS0zgNXE7F7zTC6R46dPGpq8nnW7dEyZwDKmy8jw=
