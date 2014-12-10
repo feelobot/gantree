@@ -85,7 +85,9 @@ build, push and deploy docker image to elastic beanstalk
 
 Examples:
 
-$ gantree ship -t TAG stag-cauldron-s1 -x "git@github.com:br/.ebextensions.git:master"
+$ gantree ship -i bleacher/cms -x "git@github.com:br/.ebextensions.git:master" cms-stag-s1
+
+$ gantree ship -i bleacher/cms -t built -x "git@github.com:br/.ebextensions.git:master" cms-stag-s1
 EOL
         end
 
