@@ -94,6 +94,12 @@ module Gantree
       Gantree::Deploy.new(server, merge_defaults(options)).run
     end
 
+    map "-v" => :version
+    desc "version", "gantree version"
+    def version
+      puts VERSION
+    end
+
     protected
 
     def merge_defaults(options={})
