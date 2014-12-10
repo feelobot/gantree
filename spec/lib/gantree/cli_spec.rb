@@ -106,5 +106,17 @@ describe Gantree::CLI do
       expect(out).to include "Deleting"
     end
   end
+
+  describe "#version" do
+    it "should output gantree version" do
+      out = execute("bin/gantree version")
+      expect(out).to match /\d\.\d\.\d/
+    end
+
+    it "should output gantree version using alias" do
+      out = execute("bin/gantree -v")
+      expect(out).to match /\d\.\d\.\d/
+    end
+  end
 end
 
