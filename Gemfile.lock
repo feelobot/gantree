@@ -102,7 +102,6 @@ DEPENDENCIES
   guard-rspec
   highline
   json
-  pry
   rake
   rspec
   slackr (= 0.0.6)

@@ -1,6 +1,5 @@
 class ResourcesTemplate
-
-  def initialize params
+  def initialize(params)
     @stack_name = params[:stack_name]
     @rds = params[:rds]
     @env = params[:env]

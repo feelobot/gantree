@@ -1,13 +1,13 @@
-require 'json'
-require 'archive/zip'
-require 'colorize'
-require_relative 'notification'
+require "json"
+require "archive/zip"
+require "colorize"
+require_relative "notification"
 
 module Gantree
   class Deploy < Base
     attr_reader :name
 
-    def initialize name, options
+    def initialize(name, options)
       check_credentials
       set_aws_keys
       @name = name
@@ -18,48 +18,48 @@ module Gantree
 
     def run
       if application?
-        puts "Found Application: #{@name}".green
-        environments = eb.describe_environments({ :application_name => @app })[:environments]
+        puts "Found application: #{@name}".green
+        environments = eb.describe_environments(application_name: @app)[:environments]
         if environments.length > 1
-          puts "WARN: Deploying to All Environments in the Application: #{@name}".yellow
+          puts "WARN: Deploying to all environments in application: #{@name}".yellow
           sleep 3
           envs = []
           environments.each do |env|
             envs << env[:environment_name]
           end
-          puts "envs: #{envs}"
+          puts "Environments: #{envs}"
           deploy(envs)
         elsif environments.length == 1
           env = environments.first[:environment_name]
-          puts "Found Environment: #{env}".green
+          puts "Found environment: #{env}".green
           deploy([env])
         else
-          puts "ERROR: There are no environments in this application".red
+          puts "ERROR: There are no environments in application".red
           exit 1
         end
       elsif environment?
-        puts "Found Environment: #{name}".green
+        puts "Found environment: #{name}".green
         deploy([name])
       else
-        puts "You leave me with nothing to deploy".red
+        puts "No application/environments to deploy".red
         exit 1
       end
     end
 
     def application?
-      results = eb.describe_applications({ application_names: ["#{@name}"]})
+      results = eb.describe_applications(application_names: ["#{@name}"])
       if results[:applications].length > 1
         raise "There are more than 1 matching application names"
       elsif results[:applications].length == 0
         return false
-      else 
+      else
         @app = results[:applications][0][:application_name]
         return true
       end
     end
 
     def environment?
-      results = eb.describe_environments({ environment_names: ["#{@name}"]})[:environments]
+      results = eb.describe_environments(environment_names: ["#{@name}"])[:environments]
       if results.length == 0
         puts "ERROR: Environment '#{name}' not found"
         exit 1
@@ -74,8 +74,8 @@ module Gantree
       check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
       @packaged_version = create_version_files
-      upload_to_s3 
-      clean_up 
+      upload_to_s3
+      clean_up
       create_eb_version
       update_application(envs)
       if @options[:slack]
@@ -88,36 +88,36 @@ module Gantree
     def upload_to_s3
       key = File.basename(@packaged_version)
       check_version_bucket
-      puts "uploading #{@packaged_version} to #{@app}-versions"
-      s3.buckets["#{@app}-versions"].objects[key].write(:file => @packaged_version)
+      puts "Uploading #{@packaged_version} to #{@app}-versions"
+      s3.buckets["#{@app}-versions"].objects[key].write(file: @packaged_version)
     end
 
     def create_eb_version
-    begin
-      eb.create_application_version({
-        :application_name => @app,
-        :version_label => @packaged_version,
-        :source_bundle => {
-          :s3_bucket => "#{@app}-versions",
-          :s3_key => @packaged_version
-        }
-      })
+      begin
+        eb.create_application_version(
+          application_name: @app,
+          version_label: @packaged_version,
+          source_bundle: {
+            s3_bucket: "#{@app}-versions",
+            s3_key: @packaged_version
+          }
+        )
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
-        puts "No Application named #{@app} found #{e}"
+        puts "#{@app} not found #{e}"
       end
     end
 
     def update_application(envs)
       envs.each do |env|
         begin
-          eb.update_environment({
-            :environment_name => env,
-            :version_label => @packaged_version,
-            :option_settings => autodetect_app_role(env)
-          })
+          eb.update_environment(
+            environment_name: env,
+            version_label: @packaged_version,
+            option_settings: autodetect_app_role(env)
+          )
           puts "Deployed #{@packaged_version} to #{env} on #{@app}".green
         rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
-          puts "Error: Something went wrong during the deploy to #{env}".red
+          puts "ERROR: Something went wrong during the deploy to #{env}".red
         end
       end
     end
@@ -130,7 +130,6 @@ module Gantree
       puts "hash #{hash}"
       version = "#{@app}-#{hash}-#{time_stamp}"
       puts "version: #{version}"
-      #auto_detect_app_role if @options[:autodetect_app_role] == true
       set_image_path if @options[:image_path]
       set_tag_to_deploy if @options[:tag]
       unless ext?
@@ -140,7 +139,7 @@ module Gantree
       else
         zip = "#{version}.zip"
         clone_repo if repo?
-        Archive::Zip.archive(zip, ['.ebextensions/', @dockerrun_file])
+        Archive::Zip.archive(zip, [".ebextensions/", @dockerrun_file])
         zip
       end
     end
@@ -160,23 +159,19 @@ module Gantree
       image
     end
 
-    def autodetect_app_role env
+    def autodetect_app_role(env)
       enabled = @options[:autodetect_app_role]
       if enabled == true || enabled == "true"
         role = env.split('-')[2]
         puts "Deploying app as a #{role}"
-        [{:option_name => "ROLE", :value => role, :namespace => "aws:elasticbeanstalk:application:environment" }]
-      else 
+        [{ option_name: "ROLE", value: role, namespace: "aws:elasticbeanstalk:application:environment" }]
+      else
         []
       end
     end
 
     def ext?
-      if @ext
-        true
-      else
-        false
-      end
+      @ext ? true : false
     end
 
     def repo?
@@ -193,32 +188,20 @@ module Gantree
     end
 
     def get_ext_repo
-      if ext_branch?
-        repo = @ext.sub(":#{get_ext_branch}", '')
-      else
-        @ext
-      end
+      ext_branch? ? repo = @ext.sub(":#{get_ext_branch}", '') : @ext
     end
 
     def ext_branch?
-      if @ext.count(":") == 2
-        true
-      else
-        false
-      end
+      @ext.count(":") == 2 ? true : false
     end
 
     def get_ext_branch
       branch = @ext.match(/:.*(:.*)$/)[1]
-      branch.tr(':','')
+      branch.tr(":", "")
     end
 
     def clone_repo
-      if ext_branch?
-        `git clone -b #{get_ext_branch} #{get_ext_repo}`
-      else
-        `git clone #{get_ext_repo}`
-      end
+      ext_branch? ? `git clone -b #{get_ext_branch} #{get_ext_repo}` : `git clone #{get_ext_repo}`
     end
 
     def check_version_bucket
@@ -233,11 +216,10 @@ module Gantree
       `rm -rf .ebextensions/` if ext?
     end
 
-    def check_dir_name envs
+    def check_dir_name(envs)
       dir_name = File.basename(Dir.getwd)
-      msg = "WARN: You are deploying from a repo that doesn't match #{@app}"
+      msg = "WARN: Deploying from a repo that doesn't match #{@app}"
       puts msg.yellow if envs.any? { |env| env.include?(dir_name) } == false
     end
   end
 end
-

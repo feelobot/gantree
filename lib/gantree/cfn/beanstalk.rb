@@ -1,8 +1,7 @@
 class BeanstalkTemplate
-
-  def initialize params
+  def initialize(params)
     @stack_name = params[:stack_name]
-    @docker_version = params[:docker_version] 
+    @docker_version = params[:docker_version]
     @docker_version ||= "64bit Amazon Linux 2014.09 v1.0.10 running Docker 1.3.2"
     @size = params[:instance_size]
     @rds = params[:rds]
@@ -46,29 +45,28 @@ class BeanstalkTemplate
                 :Type => 'String',
                 :Default => 'default'
 
-      parameter 'InstanceSecurityGroup',
-                :Type => 'String'
+    parameter 'InstanceSecurityGroup',
+              :Type => 'String'
 
-      parameter 'InstanceType',
-                :Description => 'EC2 Instance Type',
-                :Type => 'String',
-                :Default => '#{@size}'
+    parameter 'InstanceType',
+              :Description => 'EC2 Instance Type',
+              :Type => 'String',
+              :Default => '#{@size}'
 
-      parameter 'ApplicationName',
-                :Description => 'The name of the Elastic Beanstalk Application',
-                :Type => 'String',
-                :Default =>  '#{@stack_name}'
+    parameter 'ApplicationName',
+              :Description => 'The name of the Elastic Beanstalk Application',
+              :Type => 'String',
+              :Default =>  '#{@stack_name}'
 
-      parameter 'Environment',
-                :Type => 'String',
-                :Default => '#{@env_type}'
+    parameter 'Environment',
+              :Type => 'String',
+              :Default => '#{@env_type}'
 
-      parameter 'IamInstanceProfile',
-                :Type => 'String',
-                :Default => 'EbApp'
+    parameter 'IamInstanceProfile',
+              :Type => 'String',
+              :Default => 'EbApp'
 
-      #{"parameter 'RDSHostURLPass', :Type => 'String'" if @rds_enabled }"
-
+    #{"parameter 'RDSHostURLPass', :Type => 'String'" if @rds_enabled }"
   end
 
   def configuration_template
@@ -129,6 +127,7 @@ class BeanstalkTemplate
         :Type => 'CNAME',
     }"
   end
+
   def set_rds_parameters
     "{
       :Namespace => 'aws:elasticbeanstalk:application:environment',

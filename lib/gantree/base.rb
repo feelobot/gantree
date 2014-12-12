@@ -1,8 +1,8 @@
 module Gantree
   class Base
     def check_credentials
-      raise "Please set your AWS Environment Variables" unless ENV['AWS_SECRET_ACCESS_KEY']
-      raise "Please set your AWS Environment Variables" unless ENV['AWS_ACCESS_KEY_ID']
+      raise "Please set your AWS environment variables" unless ENV["AWS_ACCESS_KEY_ID"]
+      raise "Please set your AWS environment variables" unless ENV["AWS_SECRET_ACCESS_KEY"]
     end
 
     def print_options
@@ -13,8 +13,8 @@ module Gantree
 
     def set_aws_keys
       AWS.config(
-        :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY']
+        access_key_id: ENV["AWS_ACCESS_KEY_ID"],
+        secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"]
       )
     end
 
@@ -34,4 +34,3 @@ module Gantree
     end
   end
 end
-

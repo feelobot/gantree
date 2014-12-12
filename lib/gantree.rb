@@ -8,6 +8,5 @@ require "gantree/app"
 require "gantree/docker"
 
 module Gantree
-  autoload :CLI, 'gantree/cli'
+  autoload :CLI, "gantree/cli"
 end
-

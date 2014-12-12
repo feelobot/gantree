@@ -6,7 +6,7 @@ require 'gantree/version'
 Gem::Specification.new do |spec|
   spec.name          = "gantree"
   spec.version       = Gantree::VERSION
-  spec.authors       = ["Felix"]
+  spec.authors       = ["Felix Rodriguez"]
   spec.email         = ["felix.a.rod@gmail.com"]
   spec.description   = "cli tool for automating docker deploys to elastic beanstalk"
   spec.summary       = "This tool is intended to help you setup a Dockerrun.aws.json which allows you to deploy a prebuilt image of your application to Elastic Beanstalk. This also allows you to do versioned deploys to your Elastic Beanstalk application and create an archive of every versioned Dockerrun.aws.json in amazons s3 bucket service."

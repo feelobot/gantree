@@ -1,9 +1,8 @@
-require 'colorize'
+require "colorize"
 
 module Gantree
   class Docker < Base
-
-    def initialize options
+    def initialize(options)
       check_credentials
       set_aws_keys
       @options = options
@@ -12,32 +11,31 @@ module Gantree
       @tag = @options[:tag] ||= tag
     end
 
-    def build 
+    def build
       puts "Building..."
       output = `docker build -t #{@image_path}:#{@tag} .`
       if $?.success?
-        puts "Image Built: #{@image_path}:#{@tag}".green 
+        puts "Image built: #{@image_path}:#{@tag}".green
         puts "gantree push --image-path #{@image_path} -t #{@tag}" unless @options[:hush]
         puts "gantree deploy app_name -t #{@tag}" unless @options[:hush]
       else
-        puts "Error: Image was not built successfully".red
+        puts "ERROR: Image was not successfully built".red
         puts "#{output}"
         exit 1
       end
     end
 
-    def push 
+    def push
       puts "Pushing to #{@image_path}:#{@tag} ..."
       output = `docker push #{@image_path}:#{@tag}`
       if $?.success?
-        puts "Image Pushed: #{@image_path}:#{@tag}".green 
+        puts "Image pushed: #{@image_path}:#{@tag}".green
         puts "gantree deploy app_name -t #{@tag}" unless @options[:hush]
       else
-        puts "Error: Image was not pushed successfully".red
+        puts "ERROR: Image was not successfully pushed".red
         puts "#{output}"
         exit 1
       end
     end
   end
 end
-

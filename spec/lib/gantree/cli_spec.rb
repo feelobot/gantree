@@ -1,13 +1,7 @@
-require 'spec_helper'
+require "spec_helper"
 
-# to run specs with what's remembered from vcr
-#   $ rake
-# 
-# to run specs with new fresh data from aws api calls
-#   $ rake clean:vcr ; time rake
 describe Gantree::CLI do
   before(:all) do
-
     @app = "stag-cms-app-s2"
     @env = "cms-stag-s2"
     @owner = "bleacher"
@@ -15,17 +9,17 @@ describe Gantree::CLI do
     @tag =  "master"
     @user = "feelobot"
     @new_env = "cms-stag-s3"
-  end 
+  end
 
   describe "init" do
-    it "should create a new dockerrun for a private repo" do 
+    it "should create a new dockerrun for a private repo" do
       out = execute("bin/gantree init -u #{@user} #{@owner}/#{@repo}:#{@tag} --dry-run")
       expect(out).to include "initialize image"
       expect(File.exist?("Dockerrun.aws.json")).to be true
       expect(IO.read("Dockerrun.aws.json").include? @user)
     end
 
-    it "should create a new dockerrun for a public repo" do 
+    it "should create a new dockerrun for a public repo" do
       out = execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       expect(out).to include "initialize image"
       expect(File.exist?("Dockerrun.aws.json")).to be true
@@ -41,14 +35,14 @@ describe Gantree::CLI do
     it "should deploy images" do
       execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       out = execute("bin/gantree deploy #{@env} --dry-run --silent")
-      expect(out).to include("Found Application: #{@env}")
+      expect(out).to include("Found application: #{@env}")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
     end
 
     it "should deploy images with remote extensions" do
       out = execute("bin/gantree deploy #{@app} -x 'git@github.com:br/.ebextensions' --dry-run --silent")
-      expect(out).to include("Found Environment: #{@app}")
+      expect(out).to include("Found environment: #{@app}")
       expect(out).to include("ext: git@github.com:br/.ebextensions")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
@@ -56,15 +50,15 @@ describe Gantree::CLI do
 
     it "should deploy images with remote extensions on a branch" do
       out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic' --dry-run --silent")
-      expect(out).to include("Found Application: #{@env}")
+      expect(out).to include("Found application: #{@env}")
       expect(out).to include("ext: git@github.com:br/.ebextensions:basic")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
     end
 
-    it "should notify slack of deploys" do 
+    it "should notify slack of deploys" do
       out = execute("bin/gantree deploy #{@env} --dry-run")
-      expect(out).to include("Found Application: #{@env}")
+      expect(out).to include("Found application: #{@env}")
     end
   end
 
@@ -87,7 +81,7 @@ describe Gantree::CLI do
       expect(out).to include "rds_enabled: true"
     end
 
-    it "should create dupliacte clusters from local cfn" do 
+    it "should create dupliacte clusters from local cfn" do
       out = execute("bin/gantree create #{@new_env} --dupe #{@env} --dry-run")
       expect(out).to include "dupe: #{@env}"
     end
@@ -119,4 +113,3 @@ describe Gantree::CLI do
     end
   end
 end
-

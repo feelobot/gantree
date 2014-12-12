@@ -1,14 +1,13 @@
-require 'thor'
-require 'aws-sdk-v1'
+require "thor"
+require "aws-sdk-v1"
 
 module Gantree
   class Init < Base
     attr_reader :image, :options, :bucket_name
 
-    def initialize image, options
+    def initialize(image, options)
       check_credentials
       set_aws_keys
-
       @image = image
       @options = options
       @bucket_name  = @options.bucket || default_bucket_name
@@ -17,7 +16,6 @@ module Gantree
     def run
       puts "initialize image #{@image}"
       print_options
-
       FileUtils.rm("Dockerrun.aws.json") if File.exist?("Dockerrun.aws.json")
       create_docker_config_s3_bucket unless options[:dry_run]
       create_dockerrun
@@ -25,6 +23,7 @@ module Gantree
     end
 
     private
+
     def default_bucket_name
       [@options.user, "docker", "cfgs"].compact.join("-")
     end
@@ -61,11 +60,11 @@ module Gantree
     end
 
     def upload_docker_config
-      raise "You need to run 'docker login' to generate a .dockercfg file" unless dockercfg_file_exist?
+      raise "Run 'docker login' to generate a .dockercfg file" unless dockercfg_file_exist?
       filename = "#{ENV['HOME']}/#{options.user}.dockercfg"
       FileUtils.cp("#{ENV['HOME']}/.dockercfg", "#{ENV['HOME']}/#{options.user}.dockercfg")
       key = File.basename(filename)
-      s3.buckets[bucket_name].objects[key].write(:file => filename)
+      s3.buckets[bucket_name].objects[key].write(file: filename)
     end
 
     def dockercfg_file_exist?
@@ -73,4 +72,3 @@ module Gantree
     end
   end
 end
-
