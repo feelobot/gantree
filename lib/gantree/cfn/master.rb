@@ -1,6 +1,5 @@
 class MasterTemplate
-
-  def initialize params
+  def initialize(params)
     @stack_name = params[:stack_name]
     @rds = params[:rds]
     @rds_enabled = params[:rds?]
@@ -11,7 +10,7 @@ class MasterTemplate
 
   def create
     "#{@requirements}
-    template do 
+    template do
       value :AWSTemplateFormatVersion => '2010-09-09'
       value :Description => '#{@stack_name} Master Template'
 

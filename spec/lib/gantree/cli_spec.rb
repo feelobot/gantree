@@ -41,14 +41,14 @@ describe Gantree::CLI do
     it "should deploy images" do
       execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       out = execute("bin/gantree deploy #{@env} --dry-run --silent")
-      expect(out).to include("Found Application: #{@env}")
+      expect(out).to include("Found application: #{@env}")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
     end
 
     it "should deploy images with remote extensions" do
       out = execute("bin/gantree deploy #{@app} -x 'git@github.com:br/.ebextensions' --dry-run --silent")
-      expect(out).to include("Found Environment: #{@app}")
+      expect(out).to include("Found environment: #{@app}")
       expect(out).to include("ext: git@github.com:br/.ebextensions")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
@@ -56,7 +56,7 @@ describe Gantree::CLI do
 
     it "should deploy images with remote extensions on a branch" do
       out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic' --dry-run --silent")
-      expect(out).to include("Found Application: #{@env}")
+      expect(out).to include("Found application: #{@env}")
       expect(out).to include("ext: git@github.com:br/.ebextensions:basic")
       expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
@@ -64,7 +64,7 @@ describe Gantree::CLI do
 
     it "should notify slack of deploys" do 
       out = execute("bin/gantree deploy #{@env} --dry-run")
-      expect(out).to include("Found Application: #{@env}")
+      expect(out).to include("Found application: #{@env}")
     end
   end
 
