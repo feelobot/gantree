@@ -116,8 +116,9 @@ module Gantree
             :option_settings => autodetect_app_role(env)
           })
           puts "Deployed #{@packaged_version} to #{env} on #{@app}".green
-        rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue
+        rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
           puts "Error: Something went wrong during the deploy to #{env}".red
+          puts "#{e.message}"
         end
       end
     end
