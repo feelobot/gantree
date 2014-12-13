@@ -24,11 +24,15 @@ $ gantree deploy -t latest stag-cauldon-app-s1
 
 $ gantree deploy -t TAG APPLICATION
 
-$ gantree deploy -t TAG stag-cauldron-s1
+$ gantree deploy -t TAG cauldron-stag-s1
 
-# add ebextensions
+# add remote .ebextensions
 
-$ gantree deploy -t TAG stag-cauldron-s1 -x "git@github.com:br/.ebextensions.git:master"
+$ gantree deploy -t TAG stag-cauldron-s1 -x "git@github.com:br/.ebextensions.git"
+
+# add remote .ebextensions branch
+
+$ gantree deploy -t TAG stag-cauldron-s1 -x "git@github.com:br/.ebextensions:feature_branch"
 
 EOL
         end
@@ -53,7 +57,11 @@ EOL
 <<-EOL
 Examples:
 
+# Update a cloudformation stack
 $ gantree update linguist-stag-s1
+
+# Add an app role to an existing stack
+$ gantree update linguist-stag-s1 -r worker
 EOL
         end
 

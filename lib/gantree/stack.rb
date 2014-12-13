@@ -51,6 +51,7 @@ module Gantree
     def update
       puts "Updating stack from local cfn repo"
       add_role @options[:role] if @options[:role]
+      change_solution_stack if @options[:solution]
       unless @options[:dry_run] then
         upload_templates
         @cfm.stacks[@options[:stack_name]].update(:template => stack_template)
@@ -176,6 +177,25 @@ module Gantree
       else
         ""
       end
+    end
+
+    def change_solution_stack 
+      beanstalk = JSON.parse(IO.read("cfn/#{@options[:stack_name]}-beanstalk.cfn.json"))
+      solution_stack = set_solution_stack
+      beanstalk["Resources"]["ConfigurationTemplate"]["Properties"]["SolutionStackName"] = solution_stack
+      beanstalk["Resources"]["ConfigurationTemplate"]["Properties"]["Description"] = solution_stack
+      IO.write("cfn/#{@options[:stack_name]}-beanstalk.cfn.json",JSON.pretty_generate(beanstalk))
+    end
+
+    def set_solution_stack
+      @options[:solution] == "latest" ? get_latest_docker_solution : @options[:solution]
+    end
+
+    def get_latest_docker_solution
+      result = eb.list_available_solution_stacks
+      solutions = result[:solution_stacks]
+      docker_solutions = solutions.select { |s|  s.include? "running Docker"}
+      docker_solutions.first
     end
 
     def add_role name

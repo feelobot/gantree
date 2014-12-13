@@ -44,6 +44,7 @@ module Gantree
     desc "update APP", "update a cfn stack"
     long_desc Help.update
     option :role, :aliases => "-r", :desc => "add an app role (worker|listner|scheduler)"
+    option :solution, :aliases => "-s", :desc => "change solution stack"
     def update app
       Gantree::Stack.new(app, merge_defaults(options)).update
     end
