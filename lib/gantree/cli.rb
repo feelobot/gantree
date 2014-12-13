@@ -6,7 +6,7 @@ require 'gantree/cli/help'
 module Gantree
   class CLI < Thor
 
-    class_option :dry_run, :aliases => "-d", :desc => "dry run mode"
+    class_option :dry_run, :aliases => "-d", :desc => "dry run mode", :default => false
 
     desc "deploy APP", "deploy specified APP"
     long_desc Help.deploy

@@ -52,10 +52,9 @@ module Gantree
       puts "Updating stack from local cfn repo"
       add_role @options[:role] if @options[:role]
       change_solution_stack if @options[:solution]
-      unless @options[:dry_run] then
-        upload_templates
-        @cfm.stacks[@options[:stack_name]].update(:template => stack_template)
-      end
+      return if @options[:dry_run]
+      upload_templates
+      puts "Stack Updated".green if @cfm.stacks[@options[:stack_name]].update(:template => stack_template)
     end
 
     def delete
