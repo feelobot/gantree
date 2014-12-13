@@ -62,6 +62,10 @@ $ gantree update linguist-stag-s1
 
 # Add an app role to an existing stack
 $ gantree update linguist-stag-s1 -r worker
+
+# Update docker solution starck version
+$ gantree update linguist-stag-s1 -s latest
+$ gantree update linguist-stag-s1 -s "64bit Amazon Linux 2014.09 v1.0.11 running Docker 1.3.3"
 EOL
         end
 
@@ -71,19 +75,32 @@ Builds and tags a docker application.
 
 Examples:
 
-$ gantree build -i bleacher/rails:built
+# Automatically tag a build
+$ gantree build
 
-$ gantree build -t deploy
+# Add custom tag to a build 
+$ gantree build -t deploy 
+
+# Override image path to point to another hub
+$ gantree build -i quay.io/bleacherreport/cms
+
 EOL
         end
 
         def push
 <<-EOL
-Pushs docker image tag to hub
+Push docker image tag to hub
 
 Examples:
 
-$ gantree push bleacher/cms:deploy
+# Push automatically tagged build
+$ gantree push
+
+# Push custom tagged build
+$ gantree push -t deploy 
+
+# Push to another hub/acocunt/repo
+$ gantree push -i quay.io/bleacherreport/cms
 EOL
         end
 
@@ -93,6 +110,10 @@ build, push and deploy docker image to elastic beanstalk
 
 Examples:
 
+# Automatically tag a build, push that build and deploy to elastic beanstalk
+$ gantree ship cms-stag-s1
+
+# Override defaults
 $ gantree ship -i bleacher/cms -x "git@github.com:br/.ebextensions.git:master" cms-stag-s1
 
 $ gantree ship -i bleacher/cms -t built -x "git@github.com:br/.ebextensions.git:master" cms-stag-s1
