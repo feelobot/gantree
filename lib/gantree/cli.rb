@@ -11,8 +11,8 @@ module Gantree
     desc "deploy APP", "deploy specified APP"
     long_desc Help.deploy
     option :branch, :desc => 'branch to deploy'
-    method_option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
-    method_option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
+    option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
+    option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :autodetect_app_role, :desc => "use naming convention to determin role"
@@ -31,14 +31,16 @@ module Gantree
 
     desc "create APP", "create a cfn stack"
     long_desc Help.create
-    method_option :env, :aliases => "-e", :desc => "(optional) environment name"
-    method_option :instance_size, :aliases => "-i", :desc => "(optional) set instance size", :default => "m3.medium"
-    method_option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
+    option :cfn_bucket, :desc => "s3 bucket to store cfn templates"
+    option :domain, :desc => "route53 domain"
+    option :env, :aliases => "-e", :desc => "(optional) environment name"
+    option :instance_size, :aliases => "-i", :desc => "(optional) set instance size", :default => "m3.medium"
+    option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
     option :docker_version, :desc => "set the version of docker to use as solution stack"
-    option :dupe, :desc => "copy an existing template into a new template"
-    option :local, :desc => "use a local cfn nested template"
+    option :dupe, :alias => "-d", :desc => "copy an existing template into a new template"
+    option :local, :alias => "-l", :desc => "use a local cfn nested template"
     def create app
-      Gantree::Stack.new(app, merge_defaults(options)).create
+      Gantree::Create.new(app, merge_defaults(options)).run
     end
 
     desc "update APP", "update a cfn stack"
@@ -46,13 +48,13 @@ module Gantree
     option :role, :aliases => "-r", :desc => "add an app role (worker|listner|scheduler)"
     option :solution, :aliases => "-s", :desc => "change solution stack"
     def update app
-      Gantree::Stack.new(app, merge_defaults(options)).update
+      Gantree::Update.new(app, merge_defaults(options)).run
     end
 
     desc "delete APP", "delete a cfn stack"
-    option :force, :desc => "do not prompt"
+    option :force, :desc => "do not prompt", :default => false
     def delete app
-      Gantree::Stack.new(app, merge_defaults(options)).delete
+      Gantree::Delete.new(app, merge_defaults(options)).run
     end
 
     desc "restart APP", "restart an eb app"

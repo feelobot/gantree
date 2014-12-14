@@ -5,38 +5,26 @@ require_relative 'cfn/beanstalk'
 require_relative 'cfn/resources'
 
 module Gantree
-  class Stack < Base
-    attr_reader :env
+  class Create < Base
+    attr_reader :env, :stack_name
 
     def initialize stack_name,options
       check_credentials
       set_aws_keys
-      
-      @cfm = AWS::CloudFormation.new
+
       @requirements = "#!/usr/bin/env ruby
         require 'cloudformation-ruby-dsl/cfntemplate'
         require 'cloudformation-ruby-dsl/spotprice'
         require 'cloudformation-ruby-dsl/table'"
 
       additional_options = {
-        stack_name: stack_name,
         requirements: @requirements,
-        cfn_bucket: "br-templates",
-        domain: "brenv.net.",
+        stack_name: stack_name,
         stack_hash: (0...8).map { (65 + rand(26)).chr }.join
       }
       @options = options.merge(additional_options)
       @options[:env] ||= create_default_env
       @options[:env_type] ||= env_type
-    end
-
-    def create_default_env
-      tags = @options[:stack_name].split("-")
-      if tags.length == 3
-        env = [tags[1],tags[0],"app",tags[2]].join('-')
-      else
-        raise "Please Set Envinronment Name with -e"
-      end
     end
 
     def create
@@ -46,29 +34,6 @@ module Gantree
       create_all_templates unless @options[:local]
       upload_templates unless @options[:dry_run]
       create_aws_cfn_stack unless @options[:dry_run]
-    end
-
-    def update
-      puts "Updating stack from local cfn repo"
-      add_role @options[:role] if @options[:role]
-      change_solution_stack if @options[:solution]
-      return if @options[:dry_run]
-      upload_templates
-      puts "Stack Updated".green if @cfm.stacks[@options[:stack_name]].update(:template => stack_template)
-    end
-
-    def delete
-      if @options[:force]
-        input = "y"
-      else
-        input = ask "Are you sure? (y|n)"
-      end
-      if input == "y" || @options[:force]
-        puts "Deleting stack from aws"
-        @cfm.stacks[@options[:stack_name]].delete unless @options[:dry_run]
-      else
-        puts "canceling..."
-      end
     end
 
     private
@@ -168,15 +133,7 @@ module Gantree
       end
     end
 
-    def env_type
-      if @options[:env].include?("prod")
-        "prod"
-      elsif @options[:env].include?("stag")
-        "stag"
-      else
-        ""
-      end
-    end
+    
 
     def change_solution_stack 
       beanstalk = JSON.parse(IO.read("cfn/#{@options[:stack_name]}-beanstalk.cfn.json"))

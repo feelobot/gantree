@@ -26,12 +26,37 @@ module Gantree
       @eb ||= AWS::ElasticBeanstalk::Client.new
     end
 
+    def cfm
+      @cfm ||= AWS::CloudFormation.new
+    end
+
+
     def tag
       origin = `git config --get remote.origin.url`.match(":(.*)\/")[1]
       branch = `git rev-parse --abbrev-ref HEAD`.strip
       hash = `git rev-parse --verify --short #{branch}`.strip
       "#{origin}-#{branch}-#{hash}"
     end
+
+    def create_default_env
+      tags = @stack_name.split("-")
+      if tags.length == 3
+        env = [tags[1],tags[0],"app",tags[2]].join('-')
+      else
+        raise "Please Set Envinronment Name with -e"
+      end
+    end
+
+    def env_type(env)
+      if env.include?("prod")
+        "prod"
+      elsif env.include?("stag")
+        "stag"
+      else
+        ""
+      end
+    end
+
   end
 end
 
