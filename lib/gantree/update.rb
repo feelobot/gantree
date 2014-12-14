@@ -9,7 +9,7 @@ module Gantree
       @options = options
       @options[:stack_name] = stack_name 
       @options[:env] ||= create_default_env
-      @options[:env_type] ||= env_type(@options[:env])
+      @options[:env_type] ||= env_type
     end
 
     def run
@@ -73,6 +73,7 @@ module Gantree
       beanstalk["Resources"]["ConfigurationTemplate"]["Properties"]["SolutionStackName"] = solution_stack
       beanstalk["Resources"]["ConfigurationTemplate"]["Properties"]["Description"] = solution_stack
       IO.write("cfn/#{@options[:stack_name]}-beanstalk.cfn.json",JSON.pretty_generate(beanstalk))
+      puts "Updated solution to #{solution_stack}".green
     end
 
     def set_solution_stack

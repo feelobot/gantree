@@ -47,10 +47,10 @@ module Gantree
       end
     end
 
-    def env_type env
-      if env.include?("prod")
+    def env_type
+      if @options[:env].include?("prod")
         "prod"
-      elsif env.include?("stag")
+      elsif @options[:env].include?("stag")
         "stag"
       else
         ""
