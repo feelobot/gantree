@@ -39,7 +39,7 @@ module Gantree
     end
 
     def create_default_env
-      tags = @stack_name.split("-")
+      tags = @options[:stack_name].split("-")
       if tags.length == 3
         env = [tags[1],tags[0],"app",tags[2]].join('-')
       else
@@ -47,7 +47,7 @@ module Gantree
       end
     end
 
-    def env_type(env)
+    def env_type env
       if env.include?("prod")
         "prod"
       elsif env.include?("stag")

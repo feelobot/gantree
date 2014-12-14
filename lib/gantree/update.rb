@@ -2,15 +2,15 @@ require 'colorize'
 
 module Gantree
   class Update < Base
-    attr_reader :stack_name
 
     def initialize stack_name,options
       check_credentials
       set_aws_keys
+      @options = options
+      @options[:stack_name] = stack_name 
       @options[:env] ||= create_default_env
-      @options[:env_type] ||= env_type(env)
+      @options[:env_type] ||= env_type(@options[:env])
     end
-
 
     def run
       puts "Updating stack from local cfn repo"
@@ -64,16 +64,6 @@ module Gantree
         true
       else
         raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
-      end
-    end
-
-    def env_type
-      if @options[:env].include?("prod")
-        "prod"
-      elsif @options[:env].include?("stag")
-        "stag"
-      else
-        ""
       end
     end
 
