@@ -68,23 +68,7 @@ module Gantree
         IO.write("cfn/#{@options[:stack_name]}-#{template}.cfn.json",file)
       end
     end
-
-    def replace_env_references file
-      origin_tags = @options[:dupe].split("-")
-      new_tags = @options[:stack_name].split("-")
-      possible_roles = ["app","worker","listener","djay","scheduler","sched"]
-      possible_roles.each do |role|
-        origin_env = [origin_tags[1],origin_tags[0],role,origin_tags[2]].join('-')
-        new_env = [new_tags[1],new_tags[0],role,new_tags[2]].join('-')
-        file.gsub!(/#{escape_characters_in_string(origin_env)}/, new_env)
-      end
-    end
-
-    def escape_characters_in_string(string)
-      pattern = /(\'|\"|\.|\*|\/|\-|\\)/
-      string.gsub(pattern){|match|"\\"  + match} # <-- Trying to take the currently found match and add a \ before it I have no idea how to do that).
-    end
-
+    
     def generate(template_name, template)
       IO.write("cfn/#{template_name}.rb", template)
       json = `ruby cfn/#{template_name}.rb expand`
