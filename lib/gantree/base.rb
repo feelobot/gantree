@@ -57,6 +57,12 @@ module Gantree
       end
     end
 
+    def get_latest_docker_solution
+      result = eb.list_available_solution_stacks
+      solutions = result[:solution_stacks]
+      docker_solutions = solutions.select { |s|  s.include? "running Docker"}
+      docker_solutions.first
+    end
   end
 end
 

@@ -70,10 +70,10 @@ describe Gantree::CLI do
 
   describe "create" do
     it "should create clusters" do
-      out = execute("bin/gantree create #{@env} --dry-run")
+      out = execute("bin/gantree create #{@env} --dry-run --cfn-bucket templates")
       expect(out).to include "instance_size: m3.medium"
       expect(out).to include "stack_name: #{@env}"
-      expect(out).to include "cfn_bucket: br-templates"
+      expect(out).to include "cfn_bucket: templates"
     end
 
     it "should create clusters with any docker version" do

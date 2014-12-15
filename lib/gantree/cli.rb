@@ -36,7 +36,7 @@ module Gantree
     option :env, :aliases => "-e", :desc => "(optional) environment name"
     option :instance_size, :aliases => "-i", :desc => "(optional) set instance size", :default => "m3.medium"
     option :rds, :aliases => "-r", :desc => "(optional) set database type [pg,mysql]"
-    option :docker_version, :desc => "set the version of docker to use as solution stack"
+    option :solution, :aliases => "-s", :desc => "change solution stack"
     option :dupe, :alias => "-d", :desc => "copy an existing template into a new template"
     option :local, :alias => "-l", :desc => "use a local cfn nested template"
     def create app
