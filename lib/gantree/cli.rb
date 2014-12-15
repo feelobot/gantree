@@ -109,14 +109,24 @@ module Gantree
     protected
 
     def merge_defaults(options={})
-       if File.exist?(".gantreecfg")
-         defaults = JSON.parse(File.open(".gantreecfg").read)
-         hash = defaults.merge(options)
-         Hash[hash.map{ |k, v| [k.to_sym, v] }]
-       else
-         Hash[options.map{ |k, v| [k.to_sym, v] }]
-       end
-     end
+      home_cfg = "#{ENV['HOME']}/.gantreecfg"
+      local_cfg = ".gantreecfg"
+      if File.exist?(home_cfg) && File.exist?(local_cfg)
+        home_opts = JSON.parse(File.open(home_cfg).read)
+        local_opts = JSON.parse(File.open(local_cfg).read)
+        defaults = home_opts.merge(local_opts)
+        hash = defaults.merge(options)
+      elsif File.exist?(local_cfg)
+        defaults = JSON.parse(File.open(local_cfg).read)
+        hash = defaults.merge(options)
+      elsif File.exist?(home_cfg)
+        defaults = JSON.parse(File.open(home_cfg).read)
+        hash = defaults.merge(options)
+      else
+        hash = options
+      end
+      Hash[hash.map{ |k, v| [k.to_sym, v] }]
+    end
   end
 end
 

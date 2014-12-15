@@ -25,9 +25,10 @@ module Gantree
       @options = options.merge(additional_options)
       @options[:env] ||= create_default_env
       @options[:env_type] ||= env_type
+      @templates = ['master','resources','beanstalk']
     end
 
-    def create
+    def run
       @options[:rds_enabled] = rds_enabled? if @options[:rds] 
       print_options
       create_cfn_if_needed
@@ -36,7 +37,6 @@ module Gantree
       create_aws_cfn_stack unless @options[:dry_run]
     end
 
-    private
     def stack_template
       s3.buckets["#{@options[:cfn_bucket]}/#{@options[:stack_name]}"].objects["#{@options[:stack_name]}-master.cfn.json"]
     end
@@ -46,22 +46,25 @@ module Gantree
     end
 
     def create_all_templates
-      if @options[:dupe]
-        puts "Duplicating cluster"
-        orgin_stack_name = @options[:dupe]
-        templates = ['master','resources','beanstalk']
-        templates.each do |template|
-          FileUtils.cp("cfn/#{orgin_stack_name}-#{template}.cfn.json", "cfn/#{@options[:stack_name]}-#{template}.cfn.json")
-          file = IO.read("cfn/#{@options[:stack_name]}-#{template}.cfn.json")
-          file.gsub!(/#{escape_characters_in_string(orgin_stack_name)}/, @options[:stack_name])
-          replace_env_references(file)
-          IO.write("cfn/#{@options[:stack_name]}-#{template}.cfn.json",file)
-        end
-      else
-        puts "Generating templates from gantree"
-        generate("master", MasterTemplate.new(@options).create)
-        generate("beanstalk", BeanstalkTemplate.new(@options).create)
-        generate("resources", ResourcesTemplate.new(@options).create)
+      @options[:dupe] ? duplicate_stack : generate_all_templates
+    end
+
+    def generate_all_templates
+      puts "Generating templates from gantree"
+      generate("master", MasterTemplate.new(@options).create)
+      generate("beanstalk", BeanstalkTemplate.new(@options).create)
+      generate("resources", ResourcesTemplate.new(@options).create)
+    end
+
+    def duplicate_stack
+      puts "Duplicating cluster"
+      orgin_stack_name = @options[:dupe]
+      @templates.each do |template|
+        FileUtils.cp("cfn/#{orgin_stack_name}-#{template}.cfn.json", "cfn/#{@options[:stack_name]}-#{template}.cfn.json")
+        file = IO.read("cfn/#{@options[:stack_name]}-#{template}.cfn.json")
+        file.gsub!(/#{escape_characters_in_string(orgin_stack_name)}/, @options[:stack_name])
+        replace_env_references(file)
+        IO.write("cfn/#{@options[:stack_name]}-#{template}.cfn.json",file)
       end
     end
 
@@ -93,8 +96,7 @@ module Gantree
 
     def upload_templates
       check_template_bucket
-      templates = ['master','resources','beanstalk']
-      templates.each do |template|
+      @templates.each do |template|
         filename = "cfn/#{@options[:stack_name]}-#{template}.cfn.json"
         key = File.basename(filename)
         s3.buckets["#{@options[:cfn_bucket]}/#{@options[:stack_name]}"].objects[key].write(:file => filename)

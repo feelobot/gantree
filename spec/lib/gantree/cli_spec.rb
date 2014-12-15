@@ -70,26 +70,26 @@ describe Gantree::CLI do
 
   describe "create" do
     it "should create clusters" do
-      #out = execute("bin/gantree create #{@env} --dry-run")
-      #expect(out).to include "instance_size: m3.medium"
-      #expect(out).to include "stack_name: #{@env}"
-      #expect(out).to include "cfn_bucket: br-templates"
+      out = execute("bin/gantree create #{@env} --dry-run")
+      expect(out).to include "instance_size: m3.medium"
+      expect(out).to include "stack_name: #{@env}"
+      expect(out).to include "cfn_bucket: br-templates"
     end
 
     it "should create clusters with any docker version" do
-      #out = execute("bin/gantree create #{@env} --dry-run --docker-version '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0'")
-      #expect(out).to include "docker_version: 64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0"
+      out = execute("bin/gantree create #{@env} --dry-run --docker-version '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0'")
+      expect(out).to include "docker_version: 64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0"
     end
 
     it "should create clusters with databases" do
-      #out = execute("bin/gantree create #{@env} --dry-run --rds pg")
-      #expect(out).to include "rds: pg"
-      #expect(out).to include "rds_enabled: true"
+      out = execute("bin/gantree create #{@env} --dry-run --rds pg")
+      expect(out).to include "rds: pg"
+      expect(out).to include "rds_enabled: true"
     end
 
     it "should create dupliacte clusters from local cfn" do 
-      #out = execute("bin/gantree create #{@new_env} --dupe #{@env} --dry-run")
-      #expect(out).to include "dupe: #{@env}"
+      out = execute("bin/gantree create #{@new_env} --dupe #{@env} --dry-run")
+      expect(out).to include "dupe: #{@env}"
     end
   end
 

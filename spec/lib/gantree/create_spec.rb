@@ -14,7 +14,7 @@ describe Gantree::Update do
     @user = "feelobot"
   end
 
-  it "performs a cloudformation stack update"
+  it "performs a cloudformation stack create"
   it "can add an application role to the stack template"
   it "can update to a specific solution stack"
   it "can update to the latest solution stack automatically"
