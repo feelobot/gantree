@@ -34,9 +34,7 @@ describe Gantree::Update do
   describe "add_role" do
     let(:update) { Gantree::Update.new(@stack_name,{:role => "worker", :dry_run => true})}
     it "can add an worker role to the stack template with --role" do
-      expect{ update.add_role "worker"}.to output("\e[0;31;49mRole already exists\e[0m\n").to_stdout || output("\e[0;31;49mCreated new worker role\e[0m\n").to_stdout
-      
-      #puts update.send(:add_role, "worker")   
+      expect{ update.add_role "worker"}.to_not output("\e[0;31;49mRole already exists\e[0m\n").to_stdout 
     end
   end
 end
