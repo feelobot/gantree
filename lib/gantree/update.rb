@@ -25,48 +25,6 @@ module Gantree
       s3.buckets["#{@options[:cfn_bucket]}/#{@stack_name}"].objects["#{@stack_name}-master.cfn.json"]
     end
 
-    def upload_templates
-      check_template_bucket
-      templates = ['master','resources','beanstalk']
-      templates.each do |template|
-        filename = "cfn/#{@options[:stack_name]}-#{template}.cfn.json"
-        key = File.basename(filename)
-        s3.buckets["#{@options[:cfn_bucket]}/#{@options[:stack_name]}"].objects[key].write(:file => filename)
-      end
-      puts "templates uploaded"
-    end
-
-    def check_template_bucket
-      bucket_name = "#{@options[:cfn_bucket]}/#{@options[:stack_name]}"
-      if s3.buckets[bucket_name].exists?
-        puts "uploading cfn templates to #{@options[:cfn_bucket]}/#{@options[:stack_name]}"
-      else
-        puts "creating bucket #{@options[:cfn_bucket]}/#{@options[:stack_name]} to upload templates"
-        s3.buckets.create(bucket_name) 
-      end
-    end
-
-    def create_aws_cfn_stack
-      puts "Creating stack on aws..."
-      stack = @cfm.stacks.create(@options[:stack_name], stack_template, { 
-        :disable_rollback => true, 
-        :tags => [
-          { key: "StackName", value: @options[:stack_name] },
-        ]})
-    end
-
-    def rds_enabled?
-      if @options[:rds] == nil
-        puts "RDS is not enabled, no DB created"
-        false
-      elsif @options[:rds] == "pg" || @rds == "mysql"
-        puts "RDS is enabled, creating DB"
-        true
-      else
-        raise "The --rds option you passed is not supported please use 'pg' or 'mysql'"
-      end
-    end
-
     def change_solution_stack 
       beanstalk = JSON.parse(IO.read("cfn/#{@options[:stack_name]}-beanstalk.cfn.json"))
       solution_stack = set_solution_stack

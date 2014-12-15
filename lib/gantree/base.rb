@@ -64,10 +64,30 @@ module Gantree
       docker_solutions.first
     end
 
-    
+
     def escape_characters_in_string(string)
       pattern = /(\'|\"|\.|\*|\/|\-|\\)/
       string.gsub(pattern){|match|"\\"  + match} # <-- Trying to take the currently found match and add a \ before it I have no idea how to do that).
+    end
+
+    def upload_templates
+      check_template_bucket
+      @templates.each do |template|
+        filename = "cfn/#{@options[:stack_name]}-#{template}.cfn.json"
+        key = File.basename(filename)
+        s3.buckets["#{@options[:cfn_bucket]}/#{@options[:stack_name]}"].objects[key].write(:file => filename)
+      end
+      puts "templates uploaded"
+    end
+
+    def check_template_bucket
+      bucket_name = "#{@options[:cfn_bucket]}/#{@options[:stack_name]}"
+      if s3.buckets[bucket_name].exists?
+        puts "uploading cfn templates to #{@options[:cfn_bucket]}/#{@options[:stack_name]}"
+      else
+        puts "creating bucket #{@options[:cfn_bucket]}/#{@options[:stack_name]} to upload templates"
+        s3.buckets.create(bucket_name) 
+      end
     end
 
   end
