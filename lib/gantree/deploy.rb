@@ -14,58 +14,22 @@ module Gantree
       @options = options
       @ext = @options[:ext]
       @dockerrun_file = "Dockerrun.aws.json"
+      print_options
     end
 
     def run
       if application?
-        puts "Found Application: #{@name}".green
-        @environments = eb.describe_environments({ :application_name => @app })[:environments]
-        if multiple_environments?
-          deploy_to_all
-        elsif environment_found?
-          deploy_to_one
-        else
-          puts "ERROR: There are no environments in this application".red
-          exit 1
-        end
+        DeployApplication.new.run
       elsif environment?
         puts "Found Environment: #{name}".green
         deploy([name])
       else
-        puts "You leave me with nothing to deploy".red
-        exit 1
+        error_msg "You leave me with nothing to deploy"
       end
-    end
-
-    def application?
-      results = eb.describe_applications({ application_names: ["#{@name}"]})
-      if results[:applications].length > 1
-        raise "There are more than 1 matching application names"
-      elsif results[:applications].length == 0
-        return false
-      else 
-        @app = results[:applications][0][:application_name]
-        return true
-      end
-    end
-
-    def multiple_environments?
-      @environments.length > 1 ? true : false
     end
 
     def environment_found?
       @environments.length >=1 ? true : false
-    end
-
-    def deploy_to_all
-      puts "WARN: Deploying to All Environments in the Application: #{@name}".yellow
-      sleep 3
-      envs = []
-      @environments.each do |env|
-        envs << env[:environment_name]
-      end
-      puts "envs: #{envs}"
-      deploy(envs)
     end
 
     def deploy_to_one
@@ -86,7 +50,6 @@ module Gantree
     end
 
     def deploy(envs)
-      print_options
       check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
       @packaged_version = create_version_files
@@ -239,7 +202,7 @@ module Gantree
     end
 
     def check_version_bucket
-      name = "#{@app}-versions"
+      name = @options[:deploy_bucket]
       bucket = s3.buckets[name] # makes no request
       s3.buckets.create(name) unless bucket.exists?
     end

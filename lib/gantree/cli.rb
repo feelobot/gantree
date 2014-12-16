@@ -16,6 +16,7 @@ module Gantree
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :autodetect_app_role, :desc => "use naming convention to determin role (true|false)", :type => :boolean, :default => true
+    option :deploy_bucket, :default => "gantree-deploy-bucket"
     def deploy name
       Gantree::Deploy.new(name, merge_defaults(options)).run
     end
