@@ -10,6 +10,7 @@ module Gantree
       @options[:stack_name] = stack_name 
       @options[:env] ||= create_default_env
       @options[:env_type] ||= env_type
+      raise "Set Bucket to Upload Templates with --cfn-bucket" unless @options[:cfn_bucket]
     end
 
     def run

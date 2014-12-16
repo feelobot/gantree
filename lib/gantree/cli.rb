@@ -31,7 +31,7 @@ module Gantree
 
     desc "create APP", "create a cfn stack"
     long_desc Help.create
-    option :cfn_bucket, :desc => "s3 bucket to store cfn templates", :required => true
+    option :cfn_bucket, :desc => "s3 bucket to store cfn templates"
     option :domain, :desc => "route53 domain"
     option :env, :aliases => "-e", :desc => "(optional) environment name"
     option :instance_size, :aliases => "-i", :desc => "(optional) set instance size", :default => "m3.medium"
@@ -45,7 +45,7 @@ module Gantree
 
     desc "update APP", "update a cfn stack"
     long_desc Help.update
-    option :cfn_bucket, :desc => "s3 bucket to store cfn templates", :required => true
+    option :cfn_bucket, :desc => "s3 bucket to store cfn templates"
     option :role, :aliases => "-r", :desc => "add an app role (worker|listner|scheduler)"
     option :solution, :aliases => "-s", :desc => "change solution stack"
     def update app

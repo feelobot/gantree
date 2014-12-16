@@ -27,6 +27,8 @@ module Gantree
       @options[:env_type] ||= env_type
       @options[:solution] ||= get_latest_docker_solution
       @templates = ['master','resources','beanstalk']
+      puts "DEBUG: #{@options[:cfn_bucket]}"
+      raise "Set Bucket to Upload Templates with --cfn-bucket" unless @options[:cfn_bucket]
     end
 
     def run
@@ -72,7 +74,7 @@ module Gantree
     def replace_env_references file
       origin_tags = @options[:dupe].split("-")
       new_tags = @options[:stack_name].split("-")
-      possible_roles = ["app","worker","listener","djay","scheduler","sched"]
+      possible_roles = ["app","worker","listener","djay","scheduler","sched","list","lisnr","listnr"]
       possible_roles.each do |role|
         origin_env = [origin_tags[1],origin_tags[0],role,origin_tags[2]].join('-')
         new_env = [new_tags[1],new_tags[0],role,new_tags[2]].join('-')
@@ -92,7 +94,7 @@ module Gantree
 
     def create_aws_cfn_stack
       puts "Creating stack on aws..."
-      stack = @cfm.stacks.create(@options[:stack_name], stack_template, { 
+      stack = cfm.stacks.create(@options[:stack_name], stack_template, { 
         :disable_rollback => true, 
         :tags => [
           { key: "StackName", value: @options[:stack_name] },
