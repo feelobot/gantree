@@ -27,8 +27,6 @@ module Gantree
       @options[:env_type] ||= env_type
       @options[:solution] ||= get_latest_docker_solution
       @templates = ['master','resources','beanstalk']
-      puts "DEBUG: #{@options[:cfn_bucket]}"
-      raise "Set Bucket to Upload Templates with --cfn-bucket" unless @options[:cfn_bucket]
     end
 
     def run

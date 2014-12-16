@@ -81,6 +81,8 @@ module Gantree
     end
 
     def check_template_bucket
+      puts "DEBUG: #{@options[:cfn_bucket]}"
+      raise "Set Bucket to Upload Templates with --cfn-bucket" unless @options[:cfn_bucket]
       bucket_name = "#{@options[:cfn_bucket]}/#{@options[:stack_name]}"
       if s3.buckets[bucket_name].exists?
         puts "uploading cfn templates to #{@options[:cfn_bucket]}/#{@options[:stack_name]}"
