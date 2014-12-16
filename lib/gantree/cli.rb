@@ -6,7 +6,7 @@ require 'gantree/cli/help'
 module Gantree
   class CLI < Thor
 
-    class_option :dry_run, :aliases => "-d", :desc => "dry run mode", :default => false
+    class_option :dry_run, :aliases => "-d", :desc => "dry run mode", :default => false, :type => :boolean
 
     desc "deploy APP", "deploy specified APP"
     long_desc Help.deploy
@@ -15,7 +15,7 @@ module Gantree
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
-    option :autodetect_app_role, :desc => "use naming convention to determin role"
+    option :autodetect_app_role, :desc => "use naming convention to determin role", :type => :boolean, :default => true
     def deploy name
       Gantree::Deploy.new(name, merge_defaults(options)).run
     end
@@ -31,7 +31,7 @@ module Gantree
 
     desc "create APP", "create a cfn stack"
     long_desc Help.create
-    option :cfn_bucket, :desc => "s3 bucket to store cfn templates"
+    option :cfn_bucket, :desc => "s3 bucket to store cfn templates", :required => true
     option :domain, :desc => "route53 domain"
     option :env, :aliases => "-e", :desc => "(optional) environment name"
     option :instance_size, :aliases => "-i", :desc => "(optional) set instance size", :default => "m3.medium"
@@ -45,6 +45,7 @@ module Gantree
 
     desc "update APP", "update a cfn stack"
     long_desc Help.update
+    option :cfn_bucket, :desc => "s3 bucket to store cfn templates", :required => true
     option :role, :aliases => "-r", :desc => "add an app role (worker|listner|scheduler)"
     option :solution, :aliases => "-s", :desc => "change solution stack"
     def update app
@@ -90,7 +91,7 @@ module Gantree
     option :tag, :aliases => "-t", :desc => "set docker tag to deploy", :default => Gantree::Base.new.tag
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :silent, :aliases => "-s", :desc => "mute notifications"
-    option :autodetect_app_role, :desc => "use naming convention to determin role"
+    option :autodetect_app_role, :desc => "use naming convention to determin role", :type => :boolean
     option :image_path, :aliases => "-i", :desc => "hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :hush, :desc => "quite puts messages", :default => true
     def ship server

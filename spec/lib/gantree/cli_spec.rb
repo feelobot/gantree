@@ -42,7 +42,6 @@ describe Gantree::CLI do
       execute("bin/gantree init #{@owner}/#{@repo}:#{@tag} --dry-run")
       out = execute("bin/gantree deploy #{@env} --dry-run --silent")
       expect(out).to include("Found Application: #{@env}")
-      expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
     end
 
@@ -50,7 +49,6 @@ describe Gantree::CLI do
       out = execute("bin/gantree deploy #{@app} -x 'git@github.com:br/.ebextensions' --dry-run --silent")
       expect(out).to include("Found Environment: #{@app}")
       expect(out).to include("ext: git@github.com:br/.ebextensions")
-      expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
     end
 
@@ -58,7 +56,6 @@ describe Gantree::CLI do
       out = execute("bin/gantree deploy #{@env} -x 'git@github.com:br/.ebextensions:basic' --dry-run --silent")
       expect(out).to include("Found Application: #{@env}")
       expect(out).to include("ext: git@github.com:br/.ebextensions:basic")
-      expect(out).to include("dry_run: dry_run")
       expect(out).to include("silent: silent")
     end
 
@@ -77,25 +74,25 @@ describe Gantree::CLI do
     end
 
     it "should create clusters with any docker version" do
-      out = execute("bin/gantree create #{@env} --dry-run --solution '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0'")
+      out = execute("bin/gantree create #{@env} --dry-run --solution '64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0' --cfn-bucket template")
       expect(out).to include "solution: 64bit Amazon Linux 2014.03 v1.0.1 running Docker 1.0.0"
     end
 
     it "should create clusters with databases" do
-      out = execute("bin/gantree create #{@env} --dry-run --rds pg")
+      out = execute("bin/gantree create #{@env} --dry-run --rds pg --cfn-bucket template")
       expect(out).to include "rds: pg"
       expect(out).to include "rds_enabled: true"
     end
 
     it "should create dupliacte clusters from local cfn" do 
-      out = execute("bin/gantree create #{@new_env} --dupe #{@env} --dry-run")
+      out = execute("bin/gantree create #{@new_env} --dupe #{@env} --dry-run --cfn-bucket template")
       expect(out).to include "dupe: #{@env}"
     end
   end
 
   describe "update" do
     it "should update existing clusters" do
-      out = execute("bin/gantree update #{@env} --dry-run")
+      out = execute("bin/gantree update #{@env} --dry-run --cfn-bucket template")
       expect(out).to include "Updating"
     end
   end
