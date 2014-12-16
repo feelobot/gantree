@@ -15,7 +15,7 @@ module Gantree
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
-    option :autodetect_app_role, :desc => "use naming convention to determin role", :type => :boolean, :default => true
+    option :autodetect_app_role, :desc => "use naming convention to determin role (true|false)", :type => :boolean, :default => true
     def deploy name
       Gantree::Deploy.new(name, merge_defaults(options)).run
     end
@@ -91,7 +91,7 @@ module Gantree
     option :tag, :aliases => "-t", :desc => "set docker tag to deploy", :default => Gantree::Base.new.tag
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :silent, :aliases => "-s", :desc => "mute notifications"
-    option :autodetect_app_role, :desc => "use naming convention to determin role", :type => :boolean
+    option :autodetect_app_role, :desc => "use naming convention to determin role (true|flase)", :type => :boolean
     option :image_path, :aliases => "-i", :desc => "hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :hush, :desc => "quite puts messages", :default => true
     def ship server
