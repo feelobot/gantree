@@ -65,6 +65,7 @@ You can also specify a new image tag to use for the deploy
 gantree deploy -t latest stag-cauldon-app-s1
 ```
 
+
 ### Create Stacks
 
 Gantree allows you to leverage the power of aws cloud formation to create your entire elastic beanstalk stack, rds, caching layer etc all while maintaining a set naming convention. This does the following: 
@@ -83,6 +84,97 @@ In the elastic beanstalk console you will now see an application called
 You can modify the name of the environment if this does not fit your naming convention:
 ```
 gantre create your_app_name -e your_env_name
+```
+
+
+### Ship 
+
+This command does three things:
+
+1) Builds the image (with an auto generated tag (origin-branch-hash) or custom tag using the -t flag
+2) Uploads the image based on the --image-path flag or gantree.cfg (ie. hub.docker, quay.io)
+3) Deploys the image to elastic beanstalk based on command line arguments and cfn files.
+
+```
+# assuming you already ran 'gantree init' and generated the Dockerrun.aws.json file
+gantree ship linguist-stag-s2 -t branch-with-features-and-bug-fixes
+```
+
+##### Autodetecting environment roles
+
+Let's say your linguist app consists of both an app and a worker. The Gantree ship command has an autodetect-app-role flag which will automatically detect the environment's role (app, worker, listener, etc.) by matching the environment name's third dash-delimited string and inject that as a `$ROLE` variable inside the Docker containers.
+
+For example, suppose this is the cfn.json file:
+
+```json
+"Properties":{
+  "ApplicationName": "linguist-stag-s2",
+  "EnvironmentName": "stag-linguist-app-s2",
+  ...
+}
+
+"Properties":{
+  "ApplicationName": "linguist-stag-s2",
+  "EnvironmentName": "stag-linguist-worker-s2",
+  ...
+}
+```
+
+You can call gantree ship with the autodetect flag
+
+```
+gantree ship linguist-stag-s2 --autodetect-app-role=true -t branch-with-features-and-bug-fixes
+```
+
+Now every environment's Docker container will have the `$ROLE` variable:
+
+```
+# Inside stag-linguist-app-s2 Docker container
+root@adfd4543$ echo $ROLE
+app
+
+# Inside stag-linguist-worker-s2 Docker container
+root@afklji231$ echo $ROLE
+worker
+```
+
+As of Gantree version 0.4.9, the autodetect flag default is always on but if your env naming convention doesnt follow the stag-linguist-app-s2 convention, you should turn this off to avoid setting the wrong role variable in the Docker container.
+
+## Update and Create
+As mentioned earlier, Gantree leverages the power of aws cloud formation.  The gantree commands `update` and `create` are cloud formation specific gantree commands.
+
+### Update
+We use gantree's `update` command to change an application name, environment name, or other cloud formation changes.
+```
+# after making changes in your /cfn/*cfn.json files, you want to update the stack
+gantree update linguist-stag-s1
+```
+
+```
+# You can use the -r flag to easily add a new role to the cnf template
+# Note the dry-run flag is used so we actually don't update the stack, but just changing the cfn files locally
+gantree update linguist-prod-s1 -r worker --dry-run
+```
+
+### Create
+The gantree `create` command does three things: 
+
+1) Creates cfn templates
+2) Sends them to s3
+3) Creates the stack
+
+```
+gantree create linguist-prod-s1
+
+# you can use the --local flag to skip the first step
+gantree create linguist-prod-s1 --local
+```
+
+We use gantree's `create` command to create a new cfn template from an existing cfn template
+
+```
+# we already have linguist-prod-s1, and we want to create linguist-prod-s2
+gantree create linguist-prod-s2 --dupe linguist-prod-s1
 ```
 
 ### .gantreecfg
