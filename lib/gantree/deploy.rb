@@ -18,6 +18,7 @@ module Gantree
     end
 
     def run
+      check_eb_bucket
       if application?
         DeployApplication.new(@name,@options).run
       elsif environment?
@@ -71,10 +72,9 @@ module Gantree
     end
 
     def upload_to_s3
-      key = File.basename(@packaged_version)
       check_version_bucket
       puts "uploading #{@packaged_version} to #{@app}-versions"
-      s3.buckets["#{@app}-versions"].objects[key].write(:file => @packaged_version)
+      s3.buckets["#{@options[:eb_bucket]}"].objects["#{@app}-versions"].write(:file => @packaged_version)
     end
 
     def create_eb_version
@@ -223,6 +223,12 @@ module Gantree
       dir_name = File.basename(Dir.getwd)
       msg = "WARN: You are deploying from a repo that doesn't match #{@app}"
       puts msg.yellow if envs.any? { |env| env.include?(dir_name) } == false
+    end
+
+    def check_eb_bucket
+      raise "Need to specify an 'eb_bucket' to store elastic beanstalk versions" unless @options[:eb_bucket]
+      bucket_name = "#{@options[:eb_bucket]}"
+      s3.buckets.create(bucket_name) unless s3.buckets[bucket_name].exists?
     end
   end
 end
