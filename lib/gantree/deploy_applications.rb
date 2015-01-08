@@ -5,11 +5,13 @@ require_relative 'notification'
 
 module Gantree
   class DeployApplication < Deploy
-    attr_reader :name
+    attr_accessor :options
 
     def initialize name, options
+      @options = options
+      @name = name
       puts "Found Application: #{@name}".green
-      @environments = eb.describe_environments({ :application_name => @app })[:environments]
+      @environments = eb.describe_environments({ :application_name => @name })[:environments]
     end
 
     def run

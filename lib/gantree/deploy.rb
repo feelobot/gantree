@@ -19,12 +19,12 @@ module Gantree
 
     def run
       if application?
-        DeployApplication.new.run
+        DeployApplication.new(@name,@options).run
       elsif environment?
         puts "Found Environment: #{name}".green
         deploy([name])
       else
-        error_msg "You leave me with nothing to deploy"
+        error_msg "You leave me with nothing to deploy".red
       end
     end
 
@@ -37,6 +37,12 @@ module Gantree
       puts "Found Environment: #{env}".green
       deploy([env])
     end
+
+    def application?
+      results = eb.describe_applications({ application_names: ["#{@name}"]})
+      results[:applications].length == 1 ? true : false
+    end
+
 
     def environment?
       results = eb.describe_environments({ environment_names: ["#{@name}"]})[:environments]
