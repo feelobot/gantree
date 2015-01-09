@@ -7,7 +7,8 @@ module Gantree
   class DeployVersion < Deploy
 
     def initialize options
-     @options = options
+      @options = options
+      @ext = @options[:ext]
     end
 
     def run
