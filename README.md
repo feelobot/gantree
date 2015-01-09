@@ -1,6 +1,6 @@
 # Gantree
 
-[![Build Status](https://travis-ci.org/feelobot/gantree.svg)](https://travis-ci.org/feelobot/gantree)
+[![Build Status](https://travis-ci.org/feelobot/gantree.svg?branch=master)](https://travis-ci.org/feelobot/gantree)
 [![Test Coverage](https://codeclimate.com/github/feelobot/gantree/badges/coverage.svg)](https://codeclimate.com/github/feelobot/gantree)
 [![Code Climate](https://codeclimate.com/github/feelobot/gantree/badges/gpa.svg)](https://codeclimate.com/github/feelobot/gantree)
 [![Gem Version](https://badge.fury.io/rb/gantree.svg)](http://badge.fury.io/rb/gantree)
