@@ -6,16 +6,8 @@ require_relative 'notification'
 module Gantree
   class DeployVersion < Deploy
 
-    def initialize
-      time_stamp = Time.now.to_i
-      branch = `git rev-parse --abbrev-ref HEAD`
-      puts "branch: #{branch}"
-      hash = `git rev-parse --verify --short #{branch}`.strip
-      puts "hash #{hash}"
-      version = "#{@app}-#{hash}-#{time_stamp}"
-      puts "version: #{version}"
-      set_image_path if @options[:image_path]
-      set_tag_to_deploy if @options[:tag]
+    def initialize options
+     @options = options
     end
 
     def run
@@ -40,6 +32,48 @@ module Gantree
       image = docker["Image"]["Name"]
       image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
       IO.write(@dockerrun_file, JSON.pretty_generate(docker))
+    end
+
+    def set_image_path
+      docker = JSON.parse(IO.read(@dockerrun_file))
+      image = docker["Image"]["Name"]
+      image.gsub!(/(.*):/, "#{@options[:image_path]}:")
+      IO.write(@dockerrun_file, JSON.pretty_generate(docker))
+      image
+    end
+
+    def autodetect_app_role env
+      enabled = @options[:autodetect_app_role]
+      if enabled == true || enabled == "true"
+        role = env.split('-')[2]
+        puts "Deploying app as a #{role}"
+        [{:option_name => "ROLE", :value => role, :namespace => "aws:elasticbeanstalk:application:environment" }]
+      else 
+        []
+      end
+    end
+
+    def create_version_files
+      time_stamp = Time.now.to_i
+      branch = `git rev-parse --abbrev-ref HEAD`
+      puts "branch: #{branch}"
+      hash = `git rev-parse --verify --short #{branch}`.strip
+      puts "hash #{hash}"
+      version = "#{@app}-#{hash}-#{time_stamp}"
+      puts "version: #{version}"
+      #auto_detect_app_role if @options[:autodetect_app_role] == true
+      set_image_path if @options[:image_path]
+      set_tag_to_deploy if @options[:tag]
+      unless ext?
+        new_dockerrun = "#{version}-Dockerrun.aws.json"
+        FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
+        new_dockerrun
+      else
+        zip = "#{version}.zip"
+        clone_repo if repo?
+        Archive::Zip.archive(zip, ['.ebextensions/', @dockerrun_file])
+        zip
+      end
     end
 
     def ext?
@@ -96,6 +130,12 @@ module Gantree
       name = "#{@app}-versions"
       bucket = s3.buckets[name] # makes no request
       s3.buckets.create(name) unless bucket.exists?
+    end
+    
+    def clean_up
+      FileUtils.rm_rf(@packaged_version)
+      `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
+      `rm -rf .ebextensions/` if ext?
     end
   end
 end
