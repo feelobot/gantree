@@ -75,7 +75,7 @@ Gantree allows you to leverage the power of aws cloud formation to create your e
 
 To generate a basic staging cluster for linguist we would do:
 ```
-gantree create stag-linguist-app-s1
+gantree create linguist-stag-s1
 ```
 
 In the elastic beanstalk console you will now see an application called 
