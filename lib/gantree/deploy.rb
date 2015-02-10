@@ -115,9 +115,16 @@ module Gantree
     end
 
     def check_eb_bucket
-      raise "Need to specify an 'eb_bucket' to store elastic beanstalk versions" unless @options[:eb_bucket]
-      bucket_name = "#{@options[:eb_bucket]}"
-      s3.buckets.create(bucket_name) unless s3.buckets[bucket_name].exists?
+      if @options[:eb_bucket]
+        bucket = @options[:eb_bucket]
+      else
+        bucket = generate_eb_bucket
+      end
+      s3.buckets.create(bucket) unless s3.buckets[bucket].exists?
+    end
+    def generate_eb_bucket 
+      unique_hash = Digest::SHA1.hexdigest ENV['AWS_ACCESS_KEY_ID']
+      "eb_bucket_#{unique_hash}"
     end
   end
 end
