@@ -72,7 +72,6 @@ module Gantree
     end
 
     def upload_to_s3
-      check_version_bucket
       puts "uploading #{@packaged_version} to #{@app}-versions"
       s3.buckets["#{@options[:eb_bucket]}"].objects["#{@app}-versions"].write(:file => @packaged_version)
     end
@@ -83,7 +82,7 @@ module Gantree
           :application_name => @app,
           :version_label => @packaged_version,
           :source_bundle => {
-            :s3_bucket => "#{@app}-versions",
+            :s3_bucket => "#{@options[:eb_bucket]}/#{@app}-versions",
             :s3_key => @packaged_version
           }
         })
