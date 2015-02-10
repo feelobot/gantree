@@ -78,15 +78,15 @@ module Gantree
     end
 
     def create_eb_version
-    begin
-      eb.create_application_version({
-        :application_name => @app,
-        :version_label => @packaged_version,
-        :source_bundle => {
-          :s3_bucket => "#{@app}-versions",
-          :s3_key => @packaged_version
-        }
-      })
+      begin
+        eb.create_application_version({
+          :application_name => @app,
+          :version_label => @packaged_version,
+          :source_bundle => {
+            :s3_bucket => "#{@app}-versions",
+            :s3_key => @packaged_version
+          }
+        })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
         puts "No Application named #{@app} found #{e}"
       end

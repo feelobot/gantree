@@ -100,7 +100,7 @@ module Gantree
 
     def get_ext_repo
       if ext_branch?
-        repo = @ext.sub(":#{get_ext_branch}", '')
+        @ext.sub(":#{get_ext_branch}", '')
       else
         @ext
       end
@@ -127,12 +127,6 @@ module Gantree
       end
     end
 
-    def check_version_bucket
-      name = "#{@app}-versions"
-      bucket = s3.buckets[name] # makes no request
-      s3.buckets.create(name) unless bucket.exists?
-    end
-    
     def clean_up
       FileUtils.rm_rf(@packaged_version)
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
