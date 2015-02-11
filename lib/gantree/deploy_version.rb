@@ -127,11 +127,6 @@ module Gantree
       end
     end
 
-    def clean_up
-      FileUtils.rm_rf(@packaged_version)
-      `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
-      `rm -rf .ebextensions/` if ext?
-    end
   end
 end
 

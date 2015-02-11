@@ -130,6 +130,12 @@ module Gantree
       unique_hash = Digest::SHA1.hexdigest ENV['AWS_ACCESS_KEY_ID']
       "eb_bucket_#{unique_hash}"
     end
+
+    def clean_up
+      FileUtils.rm_rf(@packaged_version)
+      `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
+      `rm -rf .ebextensions/` if ext?
+    end
   end
 end
 
