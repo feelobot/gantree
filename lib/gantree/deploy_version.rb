@@ -9,6 +9,7 @@ module Gantree
     def initialize options
       @options = options
       @ext = @options[:ext]
+      @dockerrun_file = "Dockerrun.aws.json"
     end
 
     def run
@@ -18,7 +19,7 @@ module Gantree
     def create_version_files
       unless ext?
         new_dockerrun = "#{version}-Dockerrun.aws.json"
-        FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
+        FileUtils.cp(@dockerrun_file, new_dockerrun)
         new_dockerrun
       else
         zip = "#{version}.zip"
