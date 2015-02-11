@@ -73,7 +73,7 @@ module Gantree
 
     def upload_to_s3
       puts "uploading #{@packaged_version} to #{@app}-versions"
-      s3.buckets["#{@options[:eb_bucket]}"].objects["#{@app}-versions"].write(:file => @packaged_version)
+      s3.buckets["#{set_bucket}"].objects["#{@app}-versions"].write(:file => @packaged_version)
     end
 
     def create_eb_version
@@ -82,7 +82,7 @@ module Gantree
           :application_name => @app,
           :version_label => @packaged_version,
           :source_bundle => {
-            :s3_bucket => "#{@options[:eb_bucket]}/#{@app}-versions",
+            :s3_bucket => "#{set_bucket}/#{@app}-versions",
             :s3_key => @packaged_version
           }
         })
@@ -114,13 +114,18 @@ module Gantree
     end
 
     def check_eb_bucket
+      bucket = set_bucket
+      s3.buckets.create(bucket) unless s3.buckets[bucket].exists?
+    end
+
+    def set_bucket
       if @options[:eb_bucket]
         bucket = @options[:eb_bucket]
       else
         bucket = generate_eb_bucket
       end
-      s3.buckets.create(bucket) unless s3.buckets[bucket].exists?
     end
+    
     def generate_eb_bucket 
       unique_hash = Digest::SHA1.hexdigest ENV['AWS_ACCESS_KEY_ID']
       "eb_bucket_#{unique_hash}"
