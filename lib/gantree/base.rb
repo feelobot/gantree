@@ -33,7 +33,7 @@ module Gantree
 
     def tag
       origin = `git config --get remote.origin.url`.match(":(.*)\/")[1]
-      branch = `git rev-parse --abbrev-ref HEAD`.strip
+      branch = `git rev-parse --abbrev-ref HEAD`.gsub("/", "_").strip
       hash = `git rev-parse --verify --short #{branch}`.strip
       "#{origin}-#{branch}-#{hash}"
     end
