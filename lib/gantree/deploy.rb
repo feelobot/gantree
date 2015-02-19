@@ -80,8 +80,8 @@ module Gantree
     def create_eb_version
       begin
         eb.create_application_version({
-          :application_name => @app,
-          :version_label => @packaged_version,
+          :application_name => "#{@app}",
+          :version_label => "#{@packaged_version}",
           :source_bundle => {
             :s3_bucket => "#{set_bucket}",
             :s3_key => "#{@app}-#{@packaged_version}"

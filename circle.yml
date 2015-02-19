@@ -6,7 +6,7 @@ machine:
 dependencies:
   pre:
     - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-    - wget -P $HOME/  http://bleacher-report.d.pr/1jaEC.gantreecfg
+    - wget -P $HOME/gantree/.gantreecfg  http://bleacher-report.d.pr/1jaEC.gantreecfg
 test:
   override:
     - bundle exec rake
