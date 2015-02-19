@@ -24,11 +24,6 @@ describe Gantree::Deploy do
     expect(Gantree::DeployVersion.new(options).send(:get_ext_repo)).to eq "git@github.com:br/.ebextensions"
   end
 
-  it "sets app roles if enabled" do
-    options = { autodetect_app_role: true}
-    expect(Gantree::DeployVersion.new(options).send(:autodetect_app_role, "stag-knarr-listener-s1")).to eq([{:option_name=>"ROLE", :value=>"listener", :namespace=>"aws:elasticbeanstalk:application:environment"}])
-  end
-
   it "AWS gets the correct keys" do
     gd = Gantree::Deploy.new(
       "image_name",
