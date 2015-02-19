@@ -59,9 +59,10 @@ module Gantree
     def deploy(envs)
       check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
-      @packaged_version = DeployVersion.new(@options).run
+      version = DeployVersion.new(@options)
+      @packaged_version = version.run
       upload_to_s3 
-      clean_up 
+      version.clean_up 
       create_eb_version
       update_application(envs)
       if @options[:slack]
@@ -72,8 +73,8 @@ module Gantree
     end
 
     def upload_to_s3
-      puts "uploading #{@packaged_version} to #{@app}-versions"
-      s3.buckets["#{set_bucket}"].objects["#{@app}-versions"].write(:file => @packaged_version)
+      puts "uploading #{@packaged_version} to #{set_bucket}"
+      s3.buckets["#{set_bucket}"].objects["#{@app}-#{@packaged_version}"].write(:file => @packaged_version)
     end
 
     def create_eb_version
@@ -82,8 +83,8 @@ module Gantree
           :application_name => @app,
           :version_label => @packaged_version,
           :source_bundle => {
-            :s3_bucket => "#{set_bucket}/#{@app}-versions",
-            :s3_key => @packaged_version
+            :s3_bucket => "#{set_bucket}",
+            :s3_key => "#{@app}-#{@packaged_version}"
           }
         })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
@@ -96,8 +97,7 @@ module Gantree
         begin
           eb.update_environment({
             :environment_name => env,
-            :version_label => @packaged_version,
-            :option_settings => autodetect_app_role(env)
+            :version_label => @packaged_version
           })
           puts "Deployed #{@packaged_version} to #{env} on #{@app}".green
         rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
@@ -128,14 +128,9 @@ module Gantree
     
     def generate_eb_bucket 
       unique_hash = Digest::SHA1.hexdigest ENV['AWS_ACCESS_KEY_ID']
-      "eb_bucket_#{unique_hash}"
+      "eb-bucket-#{unique_hash}"
     end
 
-    def clean_up
-      FileUtils.rm_rf(@packaged_version)
-      `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
-      `rm -rf .ebextensions/` if ext?
-    end
   end
 end
 
