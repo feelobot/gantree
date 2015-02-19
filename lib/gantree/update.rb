@@ -10,6 +10,7 @@ module Gantree
       @options[:stack_name] = stack_name 
       @options[:env] ||= create_default_env
       @options[:env_type] ||= env_type
+      @templates = ['master','resources','beanstalk']
     end
 
     def run
@@ -18,7 +19,7 @@ module Gantree
       change_solution_stack if @options[:solution]
       return if @options[:dry_run]
       upload_templates
-      puts "Stack Updated".green if @cfm.stacks[@options[:stack_name]].update(:template => stack_template)
+      puts "Stack Updated".green if cfm.stacks[@options[:stack_name]].update(:template => stack_template)
     end
 
     def stack_template

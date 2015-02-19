@@ -34,7 +34,7 @@ module Gantree
 
     def tag
       origin = `git config --get remote.origin.url`.match(":(.*)\/")[1]
-      branch = `git rev-parse --abbrev-ref HEAD`.strip
+      branch = `git rev-parse --abbrev-ref HEAD`.gsub("/", "_").strip
       hash = `git rev-parse --verify --short #{branch}`.strip
       "#{origin}-#{branch}-#{hash}"
     end
@@ -82,6 +82,8 @@ module Gantree
     end
 
     def check_template_bucket
+      puts "DEBUG: #{@options[:cfn_bucket]}"
+      raise "Set Bucket to Upload Templates with --cfn-bucket" unless @options[:cfn_bucket]
       bucket_name = "#{@options[:cfn_bucket]}/#{@options[:stack_name]}"
       if s3.buckets[bucket_name].exists?
         puts "uploading cfn templates to #{@options[:cfn_bucket]}/#{@options[:stack_name]}"
