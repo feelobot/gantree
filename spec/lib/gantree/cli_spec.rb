@@ -8,13 +8,12 @@ require 'spec_helper'
 describe Gantree::CLI do
   before(:all) do
 
-    @app = "stag-cms-app-s2"
-    @env = "cms-stag-s2"
+    @app = "stag-carburetor-app-s2"
+    @env = "carburetor"
     @owner = "bleacher"
     @repo = "cauldron"
     @tag =  "master"
     @user = "feelobot"
-    @new_env = "cms-stag-s3"
   end 
 
   describe "init" do
