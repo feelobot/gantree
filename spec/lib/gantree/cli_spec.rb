@@ -64,7 +64,7 @@ describe Gantree::CLI do
       expect(out).to include("Found Application: #{@env}")
     end
   end
-
+=begin
   describe "create" do
     it "should create clusters" do
       out = execute("bin/gantree create #{@env} --dry-run --cfn-bucket templates")
@@ -103,7 +103,7 @@ describe Gantree::CLI do
       expect(out).to include "Deleting"
     end
   end
-
+=end
   describe "#version" do
     it "should output gantree version" do
       out = execute("bin/gantree version")

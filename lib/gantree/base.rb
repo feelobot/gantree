@@ -33,7 +33,7 @@ module Gantree
 
 
     def tag
-      origin = `git config --get remote.origin.url`.match(":(.*)\/")[1]
+      origin = `git config --get remote.origin.url`.match("com(.*)\/")[1].gsub(":","").gsub("/","").strip
       branch = `git rev-parse --abbrev-ref HEAD`.gsub("/", "_").strip
       hash = `git rev-parse --verify --short #{branch}`.strip
       "#{origin}-#{branch}-#{hash}"
@@ -42,7 +42,7 @@ module Gantree
     def create_default_env
       tags = @options[:stack_name].split("-")
       if tags.length == 3
-        env = [tags[1],tags[0],"app",tags[2]].join('-')
+        [tags[1],tags[0],"app",tags[2]].join('-')
       else
         raise "Please Set Envinronment Name with -e"
       end
