@@ -14,58 +14,23 @@ module Gantree
       @options = options
       @ext = @options[:ext]
       @dockerrun_file = "Dockerrun.aws.json"
+      print_options
     end
 
     def run
+      check_eb_bucket
       if application?
-        puts "Found Application: #{@name}".green
-        @environments = eb.describe_environments({ :application_name => @app })[:environments]
-        if multiple_environments?
-          deploy_to_all
-        elsif environment_found?
-          deploy_to_one
-        else
-          puts "ERROR: There are no environments in this application".red
-          exit 1
-        end
+        DeployApplication.new(@name,@options).run
       elsif environment?
         puts "Found Environment: #{name}".green
         deploy([name])
       else
-        puts "You leave me with nothing to deploy".red
-        exit 1
+        error_msg "You leave me with nothing to deploy".red
       end
-    end
-
-    def application?
-      results = eb.describe_applications({ application_names: ["#{@name}"]})
-      if results[:applications].length > 1
-        raise "There are more than 1 matching application names"
-      elsif results[:applications].length == 0
-        return false
-      else 
-        @app = results[:applications][0][:application_name]
-        return true
-      end
-    end
-
-    def multiple_environments?
-      @environments.length > 1 ? true : false
     end
 
     def environment_found?
       @environments.length >=1 ? true : false
-    end
-
-    def deploy_to_all
-      puts "WARN: Deploying to All Environments in the Application: #{@name}".yellow
-      sleep 3
-      envs = []
-      @environments.each do |env|
-        envs << env[:environment_name]
-      end
-      puts "envs: #{envs}"
-      deploy(envs)
     end
 
     def deploy_to_one
@@ -73,6 +38,12 @@ module Gantree
       puts "Found Environment: #{env}".green
       deploy([env])
     end
+
+    def application?
+      results = eb.describe_applications({ application_names: ["#{@name}"]})
+      results[:applications].length == 1 ? true : false
+    end
+
 
     def environment?
       results = eb.describe_environments({ environment_names: ["#{@name}"]})[:environments]
@@ -86,12 +57,12 @@ module Gantree
     end
 
     def deploy(envs)
-      print_options
       check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
-      @packaged_version = create_version_files
+      version = DeployVersion.new(@options)
+      @packaged_version = version.run
       upload_to_s3 
-      clean_up 
+      version.clean_up 
       create_eb_version
       update_application(envs)
       if @options[:slack]
@@ -102,22 +73,20 @@ module Gantree
     end
 
     def upload_to_s3
-      key = File.basename(@packaged_version)
-      check_version_bucket
-      puts "uploading #{@packaged_version} to #{@app}-versions"
-      s3.buckets["#{@app}-versions"].objects[key].write(:file => @packaged_version)
+      puts "uploading #{@packaged_version} to #{set_bucket}"
+      s3.buckets["#{set_bucket}"].objects["#{@app}-#{@packaged_version}"].write(:file => @packaged_version)
     end
 
     def create_eb_version
-    begin
-      eb.create_application_version({
-        :application_name => @app,
-        :version_label => @packaged_version,
-        :source_bundle => {
-          :s3_bucket => "#{@app}-versions",
-          :s3_key => @packaged_version
-        }
-      })
+      begin
+        eb.create_application_version({
+          :application_name => @app,
+          :version_label => @packaged_version,
+          :source_bundle => {
+            :s3_bucket => "#{set_bucket}",
+            :s3_key => "#{@app}-#{@packaged_version}"
+          }
+        })
       rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
         puts "No Application named #{@app} found #{e}"
       end
@@ -128,8 +97,7 @@ module Gantree
         begin
           eb.update_environment({
             :environment_name => env,
-            :version_label => @packaged_version,
-            :option_settings => autodetect_app_role(env)
+            :version_label => @packaged_version
           })
           puts "Deployed #{@packaged_version} to #{env} on #{@app}".green
         rescue AWS::ElasticBeanstalk::Errors::InvalidParameterValue => e
@@ -139,122 +107,30 @@ module Gantree
       end
     end
 
-    def create_version_files
-      time_stamp = Time.now.to_i
-      branch = `git rev-parse --abbrev-ref HEAD`
-      puts "branch: #{branch}"
-      hash = `git rev-parse --verify --short #{branch}`.strip
-      puts "hash #{hash}"
-      version = "#{@app}-#{hash}-#{time_stamp}"
-      puts "version: #{version}"
-      #auto_detect_app_role if @options[:autodetect_app_role] == true
-      set_image_path if @options[:image_path]
-      set_tag_to_deploy if @options[:tag]
-      unless ext?
-        new_dockerrun = "#{version}-Dockerrun.aws.json"
-        FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
-        new_dockerrun
-      else
-        zip = "#{version}.zip"
-        clone_repo if repo?
-        Archive::Zip.archive(zip, ['.ebextensions/', @dockerrun_file])
-        zip
-      end
-    end
-
-    def set_tag_to_deploy
-      docker = JSON.parse(IO.read(@dockerrun_file))
-      image = docker["Image"]["Name"]
-      image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
-      IO.write(@dockerrun_file, JSON.pretty_generate(docker))
-    end
-
-    def set_image_path
-      docker = JSON.parse(IO.read(@dockerrun_file))
-      image = docker["Image"]["Name"]
-      image.gsub!(/(.*):/, "#{@options[:image_path]}:")
-      IO.write(@dockerrun_file, JSON.pretty_generate(docker))
-      image
-    end
-
-    def autodetect_app_role env
-      enabled = @options[:autodetect_app_role]
-      if enabled == true || enabled == "true"
-        role = env.split('-')[2]
-        puts "Deploying app as a #{role}"
-        [{:option_name => "ROLE", :value => role, :namespace => "aws:elasticbeanstalk:application:environment" }]
-      else 
-        []
-      end
-    end
-
-    def ext?
-      if @ext
-        true
-      else
-        false
-      end
-    end
-
-    def repo?
-      if @ext.include? "github"
-        puts "Cloning: #{@ext}..."
-        true
-      else
-        false
-      end
-    end
-
-    def local?
-      File.directory?(@ext)
-    end
-
-    def get_ext_repo
-      if ext_branch?
-        repo = @ext.sub(":#{get_ext_branch}", '')
-      else
-        @ext
-      end
-    end
-
-    def ext_branch?
-      if @ext.count(":") == 2
-        true
-      else
-        false
-      end
-    end
-
-    def get_ext_branch
-      branch = @ext.match(/:.*(:.*)$/)[1]
-      branch.tr(':','')
-    end
-
-    def clone_repo
-      if ext_branch?
-        `git clone -b #{get_ext_branch} #{get_ext_repo}`
-      else
-        `git clone #{get_ext_repo}`
-      end
-    end
-
-    def check_version_bucket
-      name = "#{@app}-versions"
-      bucket = s3.buckets[name] # makes no request
-      s3.buckets.create(name) unless bucket.exists?
-    end
-
-    def clean_up
-      FileUtils.rm_rf(@packaged_version)
-      `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
-      `rm -rf .ebextensions/` if ext?
-    end
-
     def check_dir_name envs
       dir_name = File.basename(Dir.getwd)
       msg = "WARN: You are deploying from a repo that doesn't match #{@app}"
       puts msg.yellow if envs.any? { |env| env.include?(dir_name) } == false
     end
+
+    def check_eb_bucket
+      bucket = set_bucket
+      s3.buckets.create(bucket) unless s3.buckets[bucket].exists?
+    end
+
+    def set_bucket
+      if @options[:eb_bucket]
+        bucket = @options[:eb_bucket]
+      else
+        bucket = generate_eb_bucket
+      end
+    end
+    
+    def generate_eb_bucket 
+      unique_hash = Digest::SHA1.hexdigest ENV['AWS_ACCESS_KEY_ID']
+      "eb-bucket-#{unique_hash}"
+    end
+
   end
 end
 

@@ -16,6 +16,7 @@ module Gantree
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :autodetect_app_role, :desc => "use naming convention to determin role (true|false)", :type => :boolean, :default => true
+    option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def deploy name
       Gantree::Deploy.new(name, merge_defaults(options)).run
     end
@@ -94,6 +95,7 @@ module Gantree
     option :autodetect_app_role, :desc => "use naming convention to determin role (true|flase)", :type => :boolean
     option :image_path, :aliases => "-i", :desc => "hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :hush, :desc => "quite puts messages", :default => true
+    option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def ship server
       docker = Gantree::Docker.new(merge_defaults(options))
       docker.build
@@ -110,23 +112,21 @@ module Gantree
     protected
 
     def merge_defaults(options={})
-      home_cfg = "#{ENV['HOME']}/.gantreecfg"
-      local_cfg = ".gantreecfg"
-      if File.exist?(home_cfg) && File.exist?(local_cfg)
-        home_opts = JSON.parse(File.open(home_cfg).read)
-        local_opts = JSON.parse(File.open(local_cfg).read)
-        defaults = home_opts.merge(local_opts)
-        hash = defaults.merge(options)
-      elsif File.exist?(local_cfg)
-        defaults = JSON.parse(File.open(local_cfg).read)
-        hash = defaults.merge(options)
-      elsif File.exist?(home_cfg)
-        defaults = JSON.parse(File.open(home_cfg).read)
-        hash = defaults.merge(options)
-      else
-        hash = options
+      configs = ["#{ENV['HOME']}/.gantreecfg",".gantreecfg"]
+      hash = {}
+      configs.each do |config|
+        hash.merge!(merge_config(options,config)) if config_exists?(config)
       end
       Hash[hash.map{ |k, v| [k.to_sym, v] }]
+    end 
+    
+    def merge_config options, config
+      defaults = JSON.parse(File.open(config).read) 
+      defaults.merge(options)
+    end 
+
+    def config_exists? config
+      File.exist? config
     end
   end
 end

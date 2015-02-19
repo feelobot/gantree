@@ -16,20 +16,12 @@ describe Gantree::Deploy do
 
   it "returns branch name of repo url" do
     options = { ext: "git@github.com:br/.ebextensions:basic" }
-    deploy = Gantree::Deploy.new(@env, options)
-    expect(deploy.send(:get_ext_branch)).to eq "basic"
+    expect(Gantree::DeployVersion.new(options).send(:get_ext_branch)).to eq "basic"
   end
 
   it "returns just the repo url" do 
     options = { ext: "git@github.com:br/.ebextensions:basic" }
-    deploy = Gantree::Deploy.new(@env,options)
-    expect(deploy.send(:get_ext_repo)).to eq "git@github.com:br/.ebextensions"
-  end
-
-  it "sets app roles if enabled" do
-    options = { autodetect_app_role: true}
-    deploy = Gantree::Deploy.new("stag-knarr-listener-s1", options)
-    expect(deploy.send(:autodetect_app_role, "stag-knarr-listener-s1")).to eq([{:option_name=>"ROLE", :value=>"listener", :namespace=>"aws:elasticbeanstalk:application:environment"}])
+    expect(Gantree::DeployVersion.new(options).send(:get_ext_repo)).to eq "git@github.com:br/.ebextensions"
   end
 
   it "AWS gets the correct keys" do

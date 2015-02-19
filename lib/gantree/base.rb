@@ -1,3 +1,4 @@
+require "colorize"
 module Gantree
   class Base
     def check_credentials
@@ -92,6 +93,10 @@ module Gantree
       end
     end
 
+    def error_msg msg
+      puts msg.red
+      exit 1
+    end
   end
 end
 
