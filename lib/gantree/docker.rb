@@ -14,27 +14,23 @@ module Gantree
 
     def build
       puts "Building..."
-      build_status = system("docker build -t #{@image_path}:#{@tag} .")
-      if build_status.success?
+      if system("docker build -t #{@image_path}:#{@tag} .")
         puts "Image Built: #{@image_path}:#{@tag}".green
         puts "gantree push --image-path #{@image_path} -t #{@tag}" unless @options[:hush]
         puts "gantree deploy app_name -t #{@tag}" unless @options[:hush]
       else
         puts "Error: Image was not built successfully".red
-        puts "#{output}"
         exit 1
       end
     end
 
     def push
       puts "Pushing to #{@image_path}:#{@tag} ..."
-      push_status = "docker push #{@image_path}:#{@tag}"
-      if push_status.success?
+      if system("docker push #{@image_path}:#{@tag}")
         puts "Image Pushed: #{@image_path}:#{@tag}".green
         puts "gantree deploy app_name -t #{@tag}" unless @options[:hush]
       else
         puts "Error: Image was not pushed successfully".red
-        puts "#{output}"
         exit 1
       end
     end
