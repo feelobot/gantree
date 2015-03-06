@@ -1,6 +1,7 @@
 require 'json'
 require 'archive/zip'
 require 'colorize'
+require 'librato/metrics'
 require_relative 'notification'
 
 module Gantree
@@ -69,6 +70,10 @@ module Gantree
         msg = "#{ENV['USER']} is deploying #{@packaged_version} to #{@app} "
         msg += "Tag: #{@options[:tag]}" if @options[:tag]
         Notification.new(@options[:slack]).say(msg) unless @options[:silent]
+      end
+      if @options[:librato]
+        Librato::Metrics.annotate :deployments, '#{@app}', :source => 'gantree',
+        :start_time => Time.now.to_i
       end
     end
 
