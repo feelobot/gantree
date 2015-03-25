@@ -34,9 +34,10 @@ module Gantree
 
     def tag
       origin = `git config --get remote.origin.url`.match("com(.*)\/")[1].gsub(":","").gsub("/","").strip
-      branch = `git rev-parse --abbrev-ref HEAD`.gsub("/", "_").strip
+      branch = `git rev-parse --abbrev-ref HEAD`.strip
       hash = `git rev-parse --verify --short #{branch}`.strip
-      "#{origin}-#{branch}-#{hash}"
+      branch = branch.gsub(%r{[/-]},"")
+      "#{origin}-#{branch}-#{hash}".gsub(":","").gsub("/","").strip
     end
 
     def create_default_env
