@@ -72,8 +72,10 @@ module Gantree
         Notification.new(@options[:slack]).say(msg) unless @options[:silent]
       end
       if @options[:librato]
-        Librato::Metrics.annotate :deployments, '#{@app}', :source => 'gantree',
-        :start_time => Time.now.to_i
+        puts "Found Librato Key"
+        Librato::Metrics.authenticate @options[:librato]["email"], @options[:librato]["token"]
+        Librato::Metrics.annotate :deploys, "deploys",:source => "#{@app}", :start_time => Time.now.to_i
+        puts "Librato metric submitted" 
       end
     end
 
