@@ -6,10 +6,12 @@ require_relative 'notification'
 module Gantree
   class DeployVersion < Deploy
 
-    def initialize options
+    def initialize options, env
       @options = options
       @ext = @options[:ext]
+      @ext_role = @options[:ext_role]
       @dockerrun_file = "Dockerrun.aws.json"
+      @env = env
     end
 
     def run
@@ -36,16 +38,21 @@ module Gantree
       puts "version: #{version}"
       set_image_path if @options[:image_path]
       set_tag_to_deploy if @options[:tag]
-      unless ext?
+      if File.directory?(".ebextensions/") || @ext || @ext_role
+        zip = "#{version}.zip"
+        merge_extensions
+        puts "The following files are being zipped".yellow
+        system('ls -l /tmp/merged_extensions/.ebextensions/')
+        Archive::Zip.archive(zip, ['/tmp/merged_extensions/.ebextensions/', @dockerrun_file])
+        zip
+      else
         new_dockerrun = "#{version}-Dockerrun.aws.json"
         FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
         new_dockerrun
-      else
-        zip = "#{version}.zip"
-        clone_repo if repo?
-        Archive::Zip.archive(zip, ['.ebextensions/', @dockerrun_file])
-        zip
       end
+    rescue => e
+      puts e
+      clean_up
     end
 
     def ext?
@@ -65,43 +72,61 @@ module Gantree
       end
     end
 
-    def local?
-      File.directory?(@ext)
+    def local_extensions?
+      File.directory?(".ebextensions/")
     end
 
-    def get_ext_repo
-      if ext_branch?
-        @ext.sub(":#{get_ext_branch}", '')
+    def get_ext_repo repo
+      if ext_branch? repo
+        repo.sub(":#{get_ext_branch repo}", '')
       else
-        @ext
+        repo
       end
     end
 
-    def ext_branch?
-      if @ext.count(":") == 2
+    def ext_branch? repo
+      if repo.count(":") == 2
         true
       else
         false
       end
     end
 
-    def get_ext_branch
-      branch = @ext.match(/:.*(:.*)$/)[1]
+    def get_ext_branch repo
+      branch = repo.match(/:.*(:.*)$/)[1]
       branch.tr(':','')
     end
 
-    def clone_repo
-      if ext_branch?
-        `git clone -b #{get_ext_branch} #{get_ext_repo}`
+    def clone_repo repo
+      repo_name = repo.split('/').last
+      FileUtils.mkdir("/tmp/#{repo_name}")
+      if ext_branch? repo
+        `git clone -b #{get_ext_branch repo} #{get_ext_repo repo} /tmp/#{repo_name}`
       else
-        `git clone #{get_ext_repo}`
+        `git clone #{get_ext_repo repo} /tmp/#{repo_name}`
       end
+      FileUtils.cp_r "/tmp/#{repo_name}/.", "/tmp/merged_extensions/.ebextensions/"
     end
 
     def clean_up
-      FileUtils.rm_rf(@packaged_version)
+      `rm -rf #{@packaged_version}` if @packaged_version
       `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
-      `rm -rf .ebextensions/` if ext?
+      FileUtils.rm_rf("/tmp/#{@ext.split('/').last}")
+      FileUtils.rm_rf("/tmp/#{@ext_role.split('/').last}:#{get_role_type}")
+      FileUtils.rm_rf("/tmp/merged_extensions/")
+      puts "Warning: had some trouble cleaning up".yellow
+    end
+    
+    def merge_extensions
+      clean_up
+      FileUtils.mkdir("/tmp/merged_extensions/")
+      FileUtils.mkdir("/tmp/merged_extensions/.ebextensions/")
+      clone_repo @ext if @ext
+      clone_repo "#{@ext_role}:#{get_role_type}" if @ext_role
+      FileUtils.cp_r('.ebextensions/.','/tmp/merged_extensions/.ebextensions') if File.directory? ".ebextensions/"
+    end
+    def get_role_type
+      @env.split('-')[2]
     end
   end
 end

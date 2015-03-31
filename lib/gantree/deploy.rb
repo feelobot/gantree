@@ -60,8 +60,9 @@ module Gantree
     def deploy(envs)
       check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
-      version = DeployVersion.new(@options)
+      version = DeployVersion.new(@options, envs[0])
       @packaged_version = version.run
+      puts @packaged_version
       upload_to_s3 
       version.clean_up 
       create_eb_version

@@ -13,6 +13,7 @@ module Gantree
     option :branch, :desc => 'branch to deploy'
     option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
+    option :ext_role, :desc => "role based extension repo (bleacher specific)"
     option :silent, :aliases => "-s", :desc => "mute notifications"
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :autodetect_app_role, :desc => "use naming convention to determin role (true|false)", :type => :boolean, :default => true
