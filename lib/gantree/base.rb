@@ -38,6 +38,8 @@ module Gantree
       branch = `git rev-parse --abbrev-ref HEAD`
       hash = `git rev-parse --verify --short #{branch}`.strip
       "#{origin}-#{branch.gsub('-','')}-#{hash}".gsub("/", "").strip.downcase
+      rescue
+        puts "ERROR: Using outside of a git repository".red
     end
 
     def create_default_env
