@@ -1,4 +1,5 @@
 require "colorize"
+require 'librato/metrics'
 module Gantree
   class Base
     def check_credentials
@@ -45,6 +46,12 @@ module Gantree
         [tags[1],tags[0],"app",tags[2]].join('-')
       else
         raise "Please Set Envinronment Name with -e"
+      end
+    end
+    
+    def authenticate_librato
+      if @options[:librato]
+        Librato::Metrics.authenticate @options[:librato][:email], @options[:librato][:token]
       end
     end
 
