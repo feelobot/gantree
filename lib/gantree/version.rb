@@ -1,3 +1,3 @@
 module Gantree
-  VERSION = "0.5.0.4"
+  VERSION = "0.5.0.5"
 end
