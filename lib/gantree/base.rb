@@ -1,4 +1,5 @@
 require "colorize"
+require 'librato/metrics'
 module Gantree
   class Base
     def check_credentials
@@ -34,9 +35,9 @@ module Gantree
 
     def tag
       origin = `git config --get remote.origin.url`.match("com(.*)\/")[1].gsub(":","").gsub("/","").strip
-      branch = `git rev-parse --abbrev-ref HEAD`.gsub("/", "_").strip.downcase
+      branch = `git rev-parse --abbrev-ref HEAD`
       hash = `git rev-parse --verify --short #{branch}`.strip
-      "#{origin}-#{branch}-#{hash}"
+      "#{origin}-#{branch.gsub('-','')}-#{hash}".gsub("/", "").strip.downcase
     end
 
     def create_default_env
@@ -45,6 +46,12 @@ module Gantree
         [tags[1],tags[0],"app",tags[2]].join('-')
       else
         raise "Please Set Envinronment Name with -e"
+      end
+    end
+    
+    def authenticate_librato
+      if @options[:librato]
+        Librato::Metrics.authenticate @options[:librato][:email], @options[:librato][:token]
       end
     end
 
