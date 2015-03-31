@@ -16,12 +16,12 @@ describe Gantree::Deploy do
 
   it "returns branch name of repo url" do
     options = { ext: "git@github.com:br/.ebextensions:basic" }
-    expect(Gantree::DeployVersion.new(options).send(:get_ext_branch)).to eq "basic"
+    expect(Gantree::DeployVersion.new(options, @env).send(:get_ext_branch,options[:ext])).to eq "basic"
   end
 
   it "returns just the repo url" do 
     options = { ext: "git@github.com:br/.ebextensions:basic" }
-    expect(Gantree::DeployVersion.new(options).send(:get_ext_repo)).to eq "git@github.com:br/.ebextensions"
+    expect(Gantree::DeployVersion.new(options,@env).send(:get_ext_repo, options[:ext])).to eq "git@github.com:br/.ebextensions"
   end
 
   it "AWS gets the correct keys" do
