@@ -114,7 +114,9 @@ module Gantree
       FileUtils.rm_rf("/tmp/#{@ext.split('/').last}")
       FileUtils.rm_rf("/tmp/#{@ext_role.split('/').last}:#{get_role_type}")
       FileUtils.rm_rf("/tmp/merged_extensions/")
+    rescue => e
       puts "Warning: had some trouble cleaning up".yellow
+      puts e
     end
     
     def merge_extensions
