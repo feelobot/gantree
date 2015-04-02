@@ -150,12 +150,20 @@ module Gantree
     end
     
     def write_release_notes
-      
-
+      release_notes_file = "Release-notes-br-#{@app}.md"
+      `echo "#{release_notes}" | cat - #{release_notes_file} > #{release_notes_file}.tmp  && mv #{release_notes_file}.tmp #{releas_notes_file}`
+    end
+    
+    def release_notes
+      "#{time} [#{last_deployed_hash}...#{new_hash}](https://github.com/br/#{app}/compare/#{last_deployed_hash}...#{new_hash})"
+    end
+    
+    def last_deployed_hash
+      @eb.describe_application_versions(@app).first.split("-").last
     end
     
     def create_diff_link
-
+      
     end
     
     def prod_deploy?
