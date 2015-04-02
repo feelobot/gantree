@@ -58,6 +58,7 @@ module Gantree
     end
 
     def deploy(envs)
+      @envs = envs
       check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
       version = DeployVersion.new(@options, envs[0])
@@ -77,6 +78,9 @@ module Gantree
         Librato::Metrics.authenticate @options[:librato]["email"], @options[:librato]["token"]
         Librato::Metrics.annotate :deploys, "deploys",:source => "#{@app}", :start_time => Time.now.to_i
         puts "Librato metric submitted" 
+      end
+      if @options[:release_notes]
+        generate_release_notes
       end
     end
 
@@ -138,7 +142,25 @@ module Gantree
       unique_hash = Digest::SHA1.hexdigest ENV['AWS_ACCESS_KEY_ID']
       "eb-bucket-#{unique_hash}"
     end
+    def get_release_notes
+      wiki_url = @options[:release_notes]  
+      rl_dir = "/tmp/wiki_release_notes"
+      FileUtils.rm_rf(rl_dir) if File.directory? rl_dir
+      `git clone #{wiki_url} /tmp/wiki_release_notes/` 
+    end
+    
+    def write_release_notes
+      
 
+    end
+    
+    def create_diff_link
+
+    end
+    
+    def prod_deploy?
+      @envs.first.split["-"].first == "prod" 
+    end 
   end
 end
 
