@@ -1,5 +1,7 @@
 # Gantree
 
+[![Join the chat at https://gitter.im/feelobot/gantree](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/feelobot/gantree?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Circle CI](https://circleci.com/gh/feelobot/gantree/tree/master.svg?style=svg)](https://circleci.com/gh/feelobot/gantree/tree/master)
 [![Test Coverage](https://codeclimate.com/github/feelobot/gantree/badges/coverage.svg)](https://codeclimate.com/github/feelobot/gantree)
 [![Code Climate](https://codeclimate.com/github/feelobot/gantree/badges/gpa.svg)](https://codeclimate.com/github/feelobot/gantree)
