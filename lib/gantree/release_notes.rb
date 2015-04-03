@@ -53,6 +53,5 @@ module Gantree
     def commit_release_notes
       `cd /tmp/wiki_release_notes && git add . && git commit -am "Updated release notes" && git push origin master`
     end
-    end
   end
 end

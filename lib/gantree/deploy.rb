@@ -79,7 +79,7 @@ module Gantree
         Librato::Metrics.annotate :deploys, "deploys",:source => "#{@app}", :start_time => Time.now.to_i
         puts "Librato metric submitted" 
       end
-      if @options[:release_notes_wiki]
+      if @options[:release_notes_wiki] && prod_deploy?
         ReleaseNotes.new(@options[:release_notes_wiki], @app, new_hash).create
       end
     end
