@@ -2,12 +2,12 @@ require 'json'
 require 'archive/zip'
 require 'colorize'
 require 'librato/metrics'
+require_relative 'release_notes'
 require_relative 'notification'
 
 module Gantree
   class Deploy < Base
     attr_reader :name
-
     def initialize name, options
       check_credentials
       set_aws_keys
@@ -79,8 +79,8 @@ module Gantree
         Librato::Metrics.annotate :deploys, "deploys",:source => "#{@app}", :start_time => Time.now.to_i
         puts "Librato metric submitted" 
       end
-      if @options[:release_notes]
-        generate_release_notes
+      if @options[:release_notes_wiki]
+        ReleaseNotes.new(@options[:release_notes_wiki], @app, new_hash).create
       end
     end
 
@@ -142,33 +142,13 @@ module Gantree
       unique_hash = Digest::SHA1.hexdigest ENV['AWS_ACCESS_KEY_ID']
       "eb-bucket-#{unique_hash}"
     end
-    def get_release_notes
-      wiki_url = @options[:release_notes]  
-      rl_dir = "/tmp/wiki_release_notes"
-      FileUtils.rm_rf(rl_dir) if File.directory? rl_dir
-      `git clone #{wiki_url} /tmp/wiki_release_notes/` 
-    end
-    
-    def write_release_notes
-      release_notes_file = "Release-notes-br-#{@app}.md"
-      `echo "#{release_notes}" | cat - #{release_notes_file} > #{release_notes_file}.tmp  && mv #{release_notes_file}.tmp #{releas_notes_file}`
-    end
-    
-    def release_notes
-      "#{time} [#{last_deployed_hash}...#{new_hash}](https://github.com/br/#{app}/compare/#{last_deployed_hash}...#{new_hash})"
-    end
-    
-    def last_deployed_hash
-      @eb.describe_application_versions(@app).first.split("-").last
-    end
-    
-    def create_diff_link
-      
-    end
-    
+
     def prod_deploy?
       @envs.first.split["-"].first == "prod" 
     end 
+    def new_hash
+      @packaged_version.split("-")[2]
+    end
   end
 end
 
