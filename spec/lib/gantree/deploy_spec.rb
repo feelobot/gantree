@@ -22,11 +22,6 @@ describe Gantree::Deploy do
     expect(Gantree::DeployVersion.new(options,@env).send(:get_ext_repo, options[:ext])).to eq "git@github.com:br/.ebextensions"
   end
   
-  it "retrieves the latest deploy hash" do 
-    options = { release_notes_wiki: "git@github.com:br/dev.wiki.git" }
-    expect(Gantree::Deploy.new(@env,options).send(:last_deployed_hash).length).to eq 7
-  end
-
   it "AWS gets the correct keys" do
     ENV['AWS_ACCESS_KEY_ID'] = 'FAKE_AWS_ACCESS_KEY'
     ENV['AWS_SECRET_ACCESS_KEY'] = 'FAKE_AWS_SECRET_ACCESS_KEY'
