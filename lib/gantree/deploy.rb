@@ -144,7 +144,7 @@ module Gantree
     end
 
     def prod_deploy?
-      @envs.first.split["-"].first == "prod" 
+      @envs.first.split("-").first == "prod" 
     end 
     def new_hash
       @packaged_version.split("-")[2]

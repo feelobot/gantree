@@ -24,7 +24,7 @@ module Gantree
       release_notes_file = "Release-notes-br-#{@application}.md"
       path_to_wiki_file = "#{wiki_dir}#{release_notes_file}"
       `touch #{path_to_wiki_file}` unless File.exist? "#{path_to_wiki_file}"
-      `echo "#{release_notes}" | cat - #{path_to_wiki_file} > #{path_to_wiki_file}.tmp  && mv #{path_to_wiki_file}.tmp #{path_to_wiki_file}`
+      `printf "#{release_notes}\n\n" | cat - #{path_to_wiki_file} > #{path_to_wiki_file}.tmp  && mv #{path_to_wiki_file}.tmp #{path_to_wiki_file}`
     end
 
     def release_notes
