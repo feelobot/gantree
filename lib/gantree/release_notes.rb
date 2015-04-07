@@ -33,14 +33,14 @@ module Gantree
     end
 
     def last_deployed_hash
-      get_latest_tag(@app).split("-").last
+      get_latest_tag.split("-").last
     end
 
-    def get_latest_tag repo
+    def get_latest_tag
       Aws.config[:credentials]
       beanstalk = Aws::ElasticBeanstalk::Client.new
       resp = beanstalk.describe_application_versions(
-        application_name: repo,
+        application_name: @application,
       )
       label = resp["application_versions"].select {|version| version["version_label"].include?("br-master") }.first
       if label
