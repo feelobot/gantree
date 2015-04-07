@@ -81,6 +81,7 @@ module Gantree
       end
       if @options[:release_notes_wiki] && prod_deploy?
         ReleaseNotes.new(@options[:release_notes_wiki], @app, new_hash).create
+        `git tag -a #{tag} #{new_hash}`
       end
     end
 
