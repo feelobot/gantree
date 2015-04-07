@@ -3,8 +3,6 @@ require "pry"
 
 describe Gantree::Deploy do
   before(:all) do
-    ENV['AWS_ACCESS_KEY_ID'] = 'FAKE_AWS_ACCESS_KEY'
-    ENV['AWS_SECRET_ACCESS_KEY'] = 'FAKE_AWS_SECRET_ACCESS_KEY'
 
     @stack_name = "knarr-stag-s1"
     @env = "stag-knarr-app-s1"
@@ -23,8 +21,10 @@ describe Gantree::Deploy do
     options = { ext: "git@github.com:br/.ebextensions:basic" }
     expect(Gantree::DeployVersion.new(options,@env).send(:get_ext_repo, options[:ext])).to eq "git@github.com:br/.ebextensions"
   end
-
+  
   it "AWS gets the correct keys" do
+    ENV['AWS_ACCESS_KEY_ID'] = 'FAKE_AWS_ACCESS_KEY'
+    ENV['AWS_SECRET_ACCESS_KEY'] = 'FAKE_AWS_SECRET_ACCESS_KEY'
     gd = Gantree::Deploy.new(
       "image_name",
        :env => "cauldron-stag-s1"

@@ -2,12 +2,12 @@ require 'json'
 require 'archive/zip'
 require 'colorize'
 require 'librato/metrics'
+require_relative 'release_notes'
 require_relative 'notification'
 
 module Gantree
   class Deploy < Base
     attr_reader :name
-
     def initialize name, options
       check_credentials
       set_aws_keys
@@ -58,6 +58,7 @@ module Gantree
     end
 
     def deploy(envs)
+      @envs = envs
       check_dir_name(envs) unless @options[:force]
       return if @options[:dry_run]
       version = DeployVersion.new(@options, envs[0])
@@ -77,6 +78,11 @@ module Gantree
         Librato::Metrics.authenticate @options[:librato]["email"], @options[:librato]["token"]
         Librato::Metrics.annotate :deploys, "deploys",:source => "#{@app}", :start_time => Time.now.to_i
         puts "Librato metric submitted" 
+      end
+      if @options[:release_notes_wiki] && prod_deploy?
+        ReleaseNotes.new(@options[:release_notes_wiki], @app, new_hash).create
+        `git tag #{tag}`
+        `git push --tags`
       end
     end
 
@@ -139,6 +145,12 @@ module Gantree
       "eb-bucket-#{unique_hash}"
     end
 
+    def prod_deploy?
+      @envs.first.split("-").first == "prod" 
+    end 
+    def new_hash
+      @packaged_version.split("-")[2]
+    end
   end
 end
 
