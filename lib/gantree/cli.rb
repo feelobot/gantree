@@ -99,6 +99,7 @@ module Gantree
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def ship server
       docker = Gantree::Docker.new(merge_defaults(options))
+      docker.pull
       docker.build
       docker.push
       Gantree::Deploy.new(server, merge_defaults(options)).run

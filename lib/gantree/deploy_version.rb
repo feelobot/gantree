@@ -101,9 +101,9 @@ module Gantree
       repo_name = repo.split('/').last
       FileUtils.mkdir("/tmp/#{repo_name}")
       if ext_branch? repo
-        `git clone -b #{get_ext_branch repo} #{get_ext_repo repo} /tmp/#{repo_name}`
+        `git clone -b #{get_ext_branch repo} #{get_ext_repo repo} /tmp/#{repo_name}/`
       else
-        `git clone #{get_ext_repo repo} /tmp/#{repo_name}`
+        `git clone #{get_ext_repo repo} /tmp/#{repo_name}/`
       end
       FileUtils.cp_r "/tmp/#{repo_name}/.", "/tmp/merged_extensions/.ebextensions/"
     end
