@@ -22,14 +22,14 @@ module Gantree
       docker = JSON.parse(IO.read(@dockerrun_file))
       image = docker["Image"]["Name"]
       image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
-      IO.write(@dockerrun_file, JSON.pretty_generate(docker))
+      IO.write("/tmp/#{@dockerrun_file}", JSON.pretty_generate(docker))
     end
 
     def set_image_path
       docker = JSON.parse(IO.read(@dockerrun_file))
       image = docker["Image"]["Name"]
       image.gsub!(/(.*):/, "#{@options[:image_path]}:")
-      IO.write(@dockerrun_file, JSON.pretty_generate(docker))
+      IO.write("/tmp/#{@dockerrun_file}", JSON.pretty_generate(docker))
       image
     end
 
@@ -37,13 +37,13 @@ module Gantree
       version = "#{tag}-#{Time.now.strftime("%b-%d-%Y-%a-%H-%M-%S")}"
       puts "version: #{version}"
       set_image_path if @options[:image_path]
-      set_tag_to_deploy if @options[:tag]
+      set_tag_to_deploy
       if File.directory?(".ebextensions/") || @ext || @ext_role
         zip = "#{version}.zip"
         merge_extensions
         puts "The following files are being zipped".yellow
         system('ls -l /tmp/merged_extensions/.ebextensions/')
-        Archive::Zip.archive(zip, ['/tmp/merged_extensions/.ebextensions/', @dockerrun_file])
+        Archive::Zip.archive(zip, ['/tmp/merged_extensions/.ebextensions/', "/tmp/#{@dockerrun_file}"])
         zip
       else
         new_dockerrun = "#{version}-Dockerrun.aws.json"

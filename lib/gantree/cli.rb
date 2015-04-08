@@ -84,7 +84,7 @@ module Gantree
 
     desc "tag", "tag a docker application"
     def tag
-      puts Gantree::Docker.new(merge_defaults(options)).tag
+      puts Gantree::Base::new.tag
     end
 
     desc "ship", "build, push and deploy docker container to elastic beanstalk"
