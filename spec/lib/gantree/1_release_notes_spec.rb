@@ -8,6 +8,7 @@ describe Gantree::ReleaseNotes do
     @hash = "9ef330b"
     @wiki = "git@github.com:br/dev.wiki.git"
     @release_notes = Gantree::ReleaseNotes.new(@wiki,@app,@hash)
+    @release_notes.instance_variable_set("@beanstalk", Aws::ElasticBeanstalk::Client.new(stub_responses: true))
   end
   
   it "can retrieve the latest deployed master tag" do
