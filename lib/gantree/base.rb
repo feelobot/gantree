@@ -8,6 +8,7 @@ module Gantree
     end
     
     def self.check_for_updates enabled
+      return if $0.include? "bin/gantree"
       latest_version = `gem search gantree | grep gantree | awk '{ print $2 }' | tr -d '()'`.strip
       current_version = `gantree -v`.strip
       puts "Auto updates enabled".light_blue if enabled
