@@ -19,8 +19,9 @@ module Gantree
     option :autodetect_app_role, :desc => "use naming convention to determin role (true|false)", :type => :boolean, :default => true
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def deploy name
-      Gantree::Base.check_for_updates
-      Gantree::Deploy.new(name, merge_defaults(options)).run
+      opts = merge_defaults(options)
+      Gantree::Base.check_for_updates(opts[:auto_updates])
+      Gantree::Deploy.new(name,opts).run 
     end
 
     desc "init IMAGE", "create a dockerrun for your IMAGE"
