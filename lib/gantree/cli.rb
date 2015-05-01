@@ -100,12 +100,13 @@ module Gantree
     option :hush, :desc => "quite puts messages", :default => true
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def ship server
-      Gantree::Base.check_for_updates
-      docker = Gantree::Docker.new(merge_defaults(options))
+      opts = merge_defaults(options)
+      Gantree::Base.check_for_updates(opts[:auto_updates])
+      docker = Gantree::Docker.new(opts)
       docker.pull
       docker.build
       docker.push
-      Gantree::Deploy.new(server, merge_defaults(options)).run
+      Gantree::Deploy.new(server,opts).run
     end
 
     map "-v" => :version
