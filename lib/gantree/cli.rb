@@ -11,7 +11,7 @@ module Gantree
     desc "deploy APP", "deploy specified APP"
     long_desc Help.deploy
     option :branch, :desc => 'branch to deploy'
-    option :tag, :aliases => "-t", :desc => "set docker tag to deploy"
+    option :tag, :aliases => "-t", :desc => "set docker tag to deploy", :default => Gantree::Base.new.tag
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :ext_role, :desc => "role based extension repo (bleacher specific)"
     option :silent, :aliases => "-s", :desc => "mute notifications"
@@ -19,6 +19,7 @@ module Gantree
     option :autodetect_app_role, :desc => "use naming convention to determin role (true|false)", :type => :boolean, :default => true
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def deploy name
+      Gantree::Base.check_for_updates
       Gantree::Deploy.new(name, merge_defaults(options)).run
     end
 
@@ -98,6 +99,7 @@ module Gantree
     option :hush, :desc => "quite puts messages", :default => true
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def ship server
+      Gantree::Base.check_for_updates
       docker = Gantree::Docker.new(merge_defaults(options))
       docker.pull
       docker.build
