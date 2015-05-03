@@ -7,22 +7,29 @@ module Gantree
       raise "Please set your AWS Environment Variables" unless ENV['AWS_ACCESS_KEY_ID']
     end
     
-    def self.check_for_updates enabled
-      return if $0.include? "bin/gantree"
+    def self.check_for_updates opts
+      puts opts.inspect
+      enabled =  opts[:auto_updates]
+      #return if $0.include? "bin/gantree"
       latest_version = `gem search gantree | grep gantree | awk '{ print $2 }' | tr -d '()'`.strip
       current_version = `gantree -v`.strip
       puts "Auto updates enabled".light_blue if enabled
       puts "Auto updates disabled".light_blue if !enabled
       if latest_version != current_version && enabled
         puts "Updating from #{current_version} to #{latest_version}...".green
-        if system("gem update gantree --force") 
-          puts "Gem updated".green
-        else 
-          puts "Gem failed to update".red
-        end
+        system("gem update gantree --force") 
       else 
         puts "gem already up to date".light_blue
       end
+      update_configuration(opts[:auto_configure]) if opts[:auto_configure]
+    end
+
+    def self.update_configuration repo
+      puts "Auto configuring from #{repo}".light_blue
+      FileUtils.rm_rf("/tmp/gantreecfg") if File.directory?("/tmp/gantreecfg")
+      system("git clone #{repo} /tmp/gantreecfg")
+      FileUtils.cp("/tmp/gantreecfg/.gantreecfg","#{ENV['HOME']}/")
+      puts "Auto Configured".green
     end
 
     def print_options
