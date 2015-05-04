@@ -1,5 +1,7 @@
 require "colorize"
 require 'librato/metrics'
+require 'bigdecimal'
+require 'bigdecimal/util'
 module Gantree
   class Base
     def check_credentials
@@ -11,12 +13,12 @@ module Gantree
       puts opts.inspect
       enabled =  opts[:auto_updates]
       #return if $0.include? "bin/gantree"
-      latest_version = `gem search gantree | grep gantree | awk '{ print $2 }' | tr -d '()'`.strip.to_f
-      current_version = VERSION.to_f
+      latest_version = `gem search gantree | grep gantree | awk '{ print $2 }' | tr -d '()'`.strip
+      current_version = VERSION
       puts "Auto updates enabled".light_blue if enabled
       puts "Auto updates disabled".light_blue if !enabled
       puts "Updating from #{current_version} to #{latest_version}...".green
-      if  current_version < latest_version && enabled
+      if  current_version == latest_version && enabled
         system("gem update gantree --force") 
       else 
         puts "gem already up to date".light_blue
