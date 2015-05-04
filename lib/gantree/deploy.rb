@@ -65,7 +65,6 @@ module Gantree
       @packaged_version = version.run
       puts @packaged_version
       upload_to_s3 
-      version.clean_up 
       create_eb_version
       update_application(envs)
       if @options[:slack]
@@ -84,6 +83,7 @@ module Gantree
         `git tag #{tag}`
         `git push --tags`
       end
+      version.clean_up
     end
 
     def upload_to_s3

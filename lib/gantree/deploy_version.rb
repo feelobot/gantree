@@ -34,7 +34,8 @@ module Gantree
     end
 
     def create_version_files
-      version = "#{tag}-#{Time.now.strftime("%b-%d-%Y-%a-%H-%M-%S")}"
+      clean_up
+      version = "#{tag}-#{Time.now.strftime("%m-%d-%Y-%H-%M-%S")}"
       puts "version: #{version}"
       set_image_path if @options[:image_path]
       set_tag_to_deploy
@@ -46,13 +47,10 @@ module Gantree
         Archive::Zip.archive(zip, ['/tmp/merged_extensions/.ebextensions/', "/tmp/#{@dockerrun_file}"])
         zip
       else
-        new_dockerrun = "#{version}-Dockerrun.aws.json"
-        FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
+        new_dockerrun = "/tmp/#{version}-Dockerrun.aws.json"
+        FileUtils.cp("/tmp/Dockerrun.aws.json", new_dockerrun)
         new_dockerrun
       end
-    rescue => e
-      puts e
-      clean_up
     end
 
     def ext?
@@ -109,18 +107,15 @@ module Gantree
     end
 
     def clean_up
-      `rm -rf #{@packaged_version}` if @packaged_version
-      `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
-      FileUtils.rm_rf("/tmp/#{@ext.split('/').last}")
-      FileUtils.rm_rf("/tmp/#{@ext_role.split('/').last}:#{get_role_type}")
-      FileUtils.rm_rf("/tmp/merged_extensions/")
-    rescue => e
-      puts "Warning: had some trouble cleaning up".yellow
-      puts e
+      puts "Cleaning up tmp files".yellow
+      FileUtils.rm_rf @packaged_version if @packaged_version
+      FileUtils.rm_rf("/tmp/#{@ext.split('/').last}") if File.directory?("/tmp/#{@ext.split('/').last}")
+      FileUtils.rm_rf("/tmp/#{@ext_role.split('/').last}:#{get_role_type}") if File.directory?("/tmp/#{@ext_role.split('/').last}:#{get_role_type}")
+      FileUtils.rm_rf("/tmp/merged_extensions/") if File.directory? "/tmp/merged_extensions/"
+      puts "All tmp files removed".green
     end
     
     def merge_extensions
-      clean_up
       FileUtils.mkdir("/tmp/merged_extensions/")
       FileUtils.mkdir("/tmp/merged_extensions/.ebextensions/")
       clone_repo @ext if @ext
