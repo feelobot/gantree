@@ -110,7 +110,7 @@ module Gantree
       puts "Cleaning up tmp files".yellow
       FileUtils.rm_rf @packaged_version if @packaged_version
       FileUtils.rm_rf("/tmp/#{@ext.split('/').last}") if File.directory?("/tmp/#{@ext.split('/').last}")
-      FileUtils.rm_rf("/tmp/#{@ext_role.split('/').last}:#{get_role_type}") if File.directory?("/tmp/#{@ext_role.split('/').last}:#{get_role_type}")
+      FileUtils.rm_rf("/tmp/#{@ext_role.split('/').last}:#{get_role_type}") if @ext_role
       FileUtils.rm_rf("/tmp/merged_extensions/") if File.directory? "/tmp/merged_extensions/"
       puts "All tmp files removed".green
     end
