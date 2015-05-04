@@ -10,7 +10,6 @@ module Gantree
 
     desc "deploy APP", "deploy specified APP"
     long_desc Help.deploy
-    option :branch, :desc => 'branch to deploy'
     option :tag, :aliases => "-t", :desc => "set docker tag to deploy", :default => Gantree::Base.new.tag
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :ext_role, :desc => "role based extension repo (bleacher specific)"
@@ -20,7 +19,7 @@ module Gantree
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def deploy name
       opts = merge_defaults(options)
-      Gantree::Base.check_for_updates(opts[:auto_updates])
+      Gantree::Base.check_for_updates(opts)
       Gantree::Deploy.new(name,opts).run 
     end
 
@@ -91,7 +90,6 @@ module Gantree
 
     desc "ship", "build, push and deploy docker container to elastic beanstalk"
     long_desc Help.ship
-    option :branch, :desc => 'branch to deploy'
     option :tag, :aliases => "-t", :desc => "set docker tag to deploy", :default => Gantree::Base.new.tag
     option :ext, :aliases => "-x", :desc => "ebextensions folder/repo"
     option :silent, :aliases => "-s", :desc => "mute notifications"
@@ -101,7 +99,7 @@ module Gantree
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     def ship server
       opts = merge_defaults(options)
-      Gantree::Base.check_for_updates(opts[:auto_updates])
+      Gantree::Base.check_for_updates(opts)
       docker = Gantree::Docker.new(opts)
       docker.pull
       docker.build
