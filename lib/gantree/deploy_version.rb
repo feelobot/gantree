@@ -35,12 +35,12 @@ module Gantree
 
     def create_version_files
       clean_up
-      version = "#{tag}-#{Time.now.strftime("%b-%d-%Y-%a-%H-%M-%S")}"
+      version = "#{tag}-#{Time.now.strftime("%m-%d-%Y-%H-%M-%S")}"
       puts "version: #{version}"
       set_image_path if @options[:image_path]
       set_tag_to_deploy
       if File.directory?(".ebextensions/") || @ext || @ext_role
-        zip = "/tmp/#{version}.zip"
+        zip = "#{version}.zip"
         merge_extensions
         puts "The following files are being zipped".yellow
         system('ls -l /tmp/merged_extensions/.ebextensions/')
