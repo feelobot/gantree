@@ -46,8 +46,8 @@ module Gantree
         Archive::Zip.archive(zip, ['/tmp/merged_extensions/.ebextensions/', "/tmp/#{@dockerrun_file}"])
         zip
       else
-        new_dockerrun = "#{version}-Dockerrun.aws.json"
-        FileUtils.cp("Dockerrun.aws.json", new_dockerrun)
+        new_dockerrun = "/tmp/#{version}-Dockerrun.aws.json"
+        FileUtils.cp("/tmp/Dockerrun.aws.json", new_dockerrun)
         new_dockerrun
       end
     rescue => e
@@ -109,14 +109,10 @@ module Gantree
     end
 
     def clean_up
-      `rm -rf #{@packaged_version}` if @packaged_version
-      `git checkout Dockerrun.aws.json` # reverts back to original Dockerrun.aws.json
-      FileUtils.rm_rf("/tmp/#{@ext.split('/').last}")
-      FileUtils.rm_rf("/tmp/#{@ext_role.split('/').last}:#{get_role_type}")
-      FileUtils.rm_rf("/tmp/merged_extensions/")
-    rescue => e
-      puts "Warning: had some trouble cleaning up".yellow
-      puts e
+      FileUtils.rm_rf @packaged_version if File.exists?(@packaged_version) || File.directory?(@packaged_version)
+      FileUtils.rm_rf("/tmp/#{@ext.split('/').last}") if File.directory?("/tmp/#{@ext.split('/').last}")
+      FileUtils.rm_rf("/tmp/#{@ext_role.split('/').last}:#{get_role_type}") if File.directory?("/tmp/#{@ext_role.split('/').last}:#{get_role_type}")
+      FileUtils.rm_rf("/tmp/merged_extensions/") if File.directory? "/tmp/merged_extensions/"
     end
     
     def merge_extensions
