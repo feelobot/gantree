@@ -83,6 +83,7 @@ module Gantree
         `git tag #{tag}`
         `git push --tags`
       end
+      version.clean_up
     end
 
     def upload_to_s3

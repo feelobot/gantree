@@ -40,7 +40,7 @@ module Gantree
       set_image_path if @options[:image_path]
       set_tag_to_deploy
       if File.directory?(".ebextensions/") || @ext || @ext_role
-        zip = "#{version}.zip"
+        zip = "/tmp/#{version}.zip"
         merge_extensions
         puts "The following files are being zipped".yellow
         system('ls -l /tmp/merged_extensions/.ebextensions/')
