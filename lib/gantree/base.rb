@@ -12,7 +12,7 @@ module Gantree
       enabled =  opts[:auto_updates]
       #return if $0.include? "bin/gantree"
       latest_version = `gem search gantree | grep gantree | awk '{ print $2 }' | tr -d '()'`.strip
-      current_version = `gantree -v`.strip
+      current_version = VERSION 
       puts "Auto updates enabled".light_blue if enabled
       puts "Auto updates disabled".light_blue if !enabled
       if latest_version != current_version && enabled
