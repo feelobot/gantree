@@ -71,7 +71,9 @@ module Gantree
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :tag, :aliases => "-t", :desc => "set docker tag to build"
     def build
-      Gantree::Docker.new(merge_defaults(options)).build
+      docker = Gantree::Docker.new(merge_defaults(options))
+      docker.pull
+      docker.build
     end
 
     desc "push", "build and tag a docker application"

@@ -129,6 +129,7 @@ module Gantree
 
     def check_eb_bucket
       bucket = set_bucket
+      puts "S3 Bucket: #{bucket}".light_blue
       s3.buckets.create(bucket) unless s3.buckets[bucket].exists?
     end
 

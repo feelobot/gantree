@@ -16,7 +16,7 @@ module Gantree
     def pull
       puts "Pulling Image First..."
       if @base_image_tag
-        puts "Pulled Image: #{@image_path}:#{@base_image_tag}".green if system("docker pull #{i@image_path}:#{@base_image_tag}")
+        puts "Pulled Image: #{@image_path}:#{@base_image_tag}".green if system("docker pull #{@image_path}:#{@base_image_tag}")
       elsif system("docker pull #{@image_path}")
         puts "Pulled Image: #{@image_path}".green
       else 
