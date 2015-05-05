@@ -78,7 +78,7 @@ module Gantree
         Librato::Metrics.annotate :deploys, "deploys",:source => "#{@app}", :start_time => Time.now.to_i
         puts "Librato metric submitted" 
       end
-      if @options[:release_notes_wiki] && prod_deploy?
+      if @options[:release_notes_wiki] == "enabled" && prod_deploy? && @app.include?("-app-")
         ReleaseNotes.new(@options[:release_notes_wiki], @app, new_hash).create
         `git tag #{tag}`
         `git push --tags`
