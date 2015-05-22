@@ -72,7 +72,6 @@ module Gantree
     option :tag, :aliases => "-t", :desc => "set docker tag to build"
     def build
       docker = Gantree::Docker.new(merge_defaults(options))
-      docker.pull
       docker.build
     end
 
