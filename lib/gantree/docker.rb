@@ -7,10 +7,14 @@ module Gantree
       check_credentials
       set_aws_keys
       @options = options
-      @image_path = @options[:image_path]
-      raise "Please provide an image path name in .gantreecfg ex. { 'image_path' : 'bleacher/cms' }" unless @image_path
+      @image_path = @options[:image_path] || get_image_path
       @tag = @options[:tag] ||= tag
       @base_image_tag = @options[:base_image_tag]
+    end
+
+    def get_image_path
+      dockerrun = JSON.parse(IO.read("Dockerrun.aws.json"))
+      image = docker["Image"]["Name"]
     end
     
     def pull
