@@ -14,7 +14,7 @@ module Gantree
 
     def get_image_path
       dockerrun = JSON.parse(IO.read("Dockerrun.aws.json"))
-      image = docker["Image"]["Name"]
+      image = dockerrun["Image"]["Name"].gsub!(/:(.*)$/, "")
     end
     
     def pull
