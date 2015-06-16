@@ -4,6 +4,10 @@ describe Gantree::DeployVersion do
   before(:all) do
   end
 
+  after(:all) do
+    FileUtils.rm_f(Dir.glob("spec/fixtures/project/*.zip"))
+  end
+
   it "should create package version" do
     @options = {
       :ext => "git@github.com:br/.ebextensions.git", 
