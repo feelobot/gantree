@@ -17,6 +17,7 @@ module Gantree
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :autodetect_app_role, :desc => "use naming convention to determin role (true|false)", :type => :boolean, :default => true
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
+    option :auth, :desc => "dockerhub authentation, example: bucket/key"
     def deploy name
       opts = merge_defaults(options)
       Gantree::Base.check_for_updates(opts)
@@ -98,6 +99,7 @@ module Gantree
     option :image_path, :aliases => "-i", :desc => "hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :hush, :desc => "quite puts messages", :default => true
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
+    option :auth, :desc => "dockerhub authentation, example: bucket/key"
     def ship server
       opts = merge_defaults(options)
       Gantree::Base.check_for_updates(opts)

@@ -6,11 +6,13 @@ require_relative 'notification'
 module Gantree
   class DeployVersion < Deploy
 
+    attr_reader :packaged_version
     def initialize options, env
       @options = options
       @ext = @options[:ext]
       @ext_role = @options[:ext_role]
-      @dockerrun_file = "Dockerrun.aws.json"
+      @project_root = @options[:project_root]
+      @dockerrun_file = "#{@project_root}Dockerrun.aws.json"
       @env = env
     end
 
@@ -29,7 +31,9 @@ module Gantree
       docker = JSON.parse(IO.read(@dockerrun_file))
       image = docker["Image"]["Name"]
       image.gsub!(/(.*):/, "#{@options[:image_path]}:")
-      IO.write("/tmp/#{@dockerrun_file}", JSON.pretty_generate(docker))
+      path = "/tmp/#{@dockerrun_file}"
+      FileUtils.mkdir_p(File.dirname(path)) unless File.exist?(path)
+      IO.write(path, JSON.pretty_generate(docker))
       image
     end
 
@@ -40,7 +44,7 @@ module Gantree
       set_image_path if @options[:image_path]
       set_tag_to_deploy
       if File.directory?(".ebextensions/") || @ext || @ext_role
-        zip = "#{version}.zip"
+        zip = "#{@project_root}#{version}.zip"
         merge_extensions
         puts "The following files are being zipped".yellow
         system('ls -l /tmp/merged_extensions/.ebextensions/')

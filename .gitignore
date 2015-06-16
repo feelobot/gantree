@@ -18,3 +18,5 @@ test/version_tmp
 tmp
 cfn/*
 tmp.txt
+
+spec/fixtures/project/*.zip
