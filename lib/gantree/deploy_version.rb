@@ -6,7 +6,7 @@ require_relative 'notification'
 module Gantree
   class DeployVersion < Deploy
 
-    attr_reader :packaged_version
+    attr_reader :packaged_version, :dockerrun_file
     def initialize options, env
       @options = options
       @ext = @options[:ext]
@@ -20,15 +20,27 @@ module Gantree
       @packaged_version = create_version_files
     end
 
+    def docker
+      @docker ||= JSON.parse(IO.read(@dockerrun_file))  
+    end
+
+    def set_auth
+      docker["Authentication"] = {}
+      items = @options[:auth].split("/")
+      bucket = items.shift
+      key = items.join("/")
+      docker["Authentication"]["Bucket"] = bucket
+      docker["Authentication"]["Key"] = key
+      IO.write("/tmp/#{@dockerrun_file}", JSON.pretty_generate(docker))
+    end
+
     def set_tag_to_deploy
-      docker = JSON.parse(IO.read(@dockerrun_file))
       image = docker["Image"]["Name"]
       image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
       IO.write("/tmp/#{@dockerrun_file}", JSON.pretty_generate(docker))
     end
 
     def set_image_path
-      docker = JSON.parse(IO.read(@dockerrun_file))
       image = docker["Image"]["Name"]
       image.gsub!(/(.*):/, "#{@options[:image_path]}:")
       path = "/tmp/#{@dockerrun_file}"
@@ -41,6 +53,7 @@ module Gantree
       clean_up
       version = "#{tag}-#{Time.now.strftime("%m-%d-%Y-%H-%M-%S")}"
       puts "version: #{version}"
+      set_auth if @options[:auth]
       set_image_path if @options[:image_path]
       set_tag_to_deploy
       if File.directory?(".ebextensions/") || @ext || @ext_role
