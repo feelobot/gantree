@@ -27,13 +27,13 @@ describe Gantree::DeployVersion do
       :tag => "br-develop_mkemnitz-30b9bf6", 
       :image_path => "bleacher/carburetor",
       :project_root => "spec/fixtures/project/",
-      :auth => "br-eb-versions/brops.dockercfg"
+      :auth => "docker-cfgs/brops.dockercfg"
     }
     @env = "stag-carburetor-app-s1"
     @version = Gantree::DeployVersion.new(@options, @env)
     @version.set_auth
     data = JSON.parse(IO.read("/tmp/#{@version.dockerrun_file}"))
-    expect(data["Authentication"]["Bucket"]).to eq "br-eb-versions"
+    expect(data["Authentication"]["Bucket"]).to eq "docker-cfgs"
     expect(data["Authentication"]["Key"]).to eq "brops.dockercfg"
   end
 
