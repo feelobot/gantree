@@ -35,7 +35,7 @@ module Gantree
       data = IO.read(@file_path) if File.exist?(@file_path)
       File.open(@file_path, "w") do |file|
         file.write(@notes)
-        file.write("\n\n")
+        file.write("\n")
         file.write(data) if data
       end
       true
