@@ -20,10 +20,31 @@ module Helpers
   def execute(cmd)
     puts "Running: #{cmd}" if ENV['DEBUG']
     out = `#{cmd}`
-    raise "Stack Trance Found: \n #{out}" if out.include? "Error"
+    raise "Stack Trace Found: \n #{out}" if out.include? "Error"
     puts out if ENV['DEBUG']
     out
   end
+
+  def git_log_mock
+    <<-EOL
+commit 1
+ COMMIT_SEPARATOR
+commit 2
+ COMMIT_SEPARATOR
+test up controller
+ COMMIT_SEPARATOR
+commit 4
+ COMMIT_SEPARATOR
+add to test
+note with newlie
+ COMMIT_SEPARATOR
+fix bug
+ COMMIT_SEPARATOR
+whatever
+ COMMIT_SEPARATOR
+EOL
+  end
+
 end
 
 RSpec.configure do |c|
