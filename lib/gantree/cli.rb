@@ -20,8 +20,8 @@ module Gantree
     option :auth, :desc => "dockerhub authentation, example: bucket/key"
     option :release_notes_staging, :type => :boolean, :default => false, :desc => "force release notes generation for staging deploys"
     def deploy name
-      opts = merge_defaults(options)
-      Gantree::Base.check_for_updates(opts)
+      opts = Gantree::Config.merge_defaults(options)
+      opts = Gantree::Base.check_for_updates(opts)
       Gantree::Deploy.new(name,opts).run 
     end
 
@@ -45,7 +45,7 @@ module Gantree
     option :dupe, :alias => "-d", :desc => "copy an existing template into a new template"
     option :local, :alias => "-l", :desc => "use a local cfn nested template"
     def create app
-      Gantree::Create.new(app, merge_defaults(options)).run
+      Gantree::Create.new(app, Gantree::Config.merge_defaults(options)).run
     end
 
     desc "update APP", "update a cfn stack"
@@ -54,18 +54,18 @@ module Gantree
     option :role, :aliases => "-r", :desc => "add an app role (worker|listner|scheduler)"
     option :solution, :aliases => "-s", :desc => "change solution stack"
     def update app
-      Gantree::Update.new(app, merge_defaults(options)).run
+      Gantree::Update.new(app, Gantree::Config.merge_defaults(options)).run
     end
 
     desc "delete APP", "delete a cfn stack"
     option :force, :desc => "do not prompt", :default => false
     def delete app
-      Gantree::Delete.new(app, merge_defaults(options)).run
+      Gantree::Delete.new(app, Gantree::Config.merge_defaults(options)).run
     end
 
     desc "restart APP", "restart an eb app"
     def restart app
-      Gantree::App.new(app, merge_defaults(options)).restart
+      Gantree::App.new(app, Gantree::Config.merge_defaults(options)).restart
     end
 
     desc "build", "build and tag a docker application"
@@ -73,7 +73,7 @@ module Gantree
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :tag, :aliases => "-t", :desc => "set docker tag to build"
     def build
-      docker = Gantree::Docker.new(merge_defaults(options))
+      docker = Gantree::Docker.new(Gantree::Config.merge_defaults(options))
       docker.build
     end
 
@@ -83,7 +83,7 @@ module Gantree
     option :image_path, :aliases => "-i", :desc => "docker hub image path ex. (bleacher/cms | quay.io/bleacherreport/cms)"
     option :tag, :aliases => "-t", :desc => "set docker tag to push"
     def push
-      Gantree::Docker.new(merge_defaults(options)).push
+      Gantree::Docker.new(Gantree::Config.merge_defaults(options)).push
     end
 
     desc "tag", "tag a docker application"
@@ -103,8 +103,8 @@ module Gantree
     option :auth, :desc => "dockerhub authentation, example: bucket/key"
     option :release_notes_staging, :type => :boolean, :default => false, :desc => "force release notes generation for staging deploys"
     def ship server
-      opts = merge_defaults(options)
-      Gantree::Base.check_for_updates(opts)
+      opts = Gantree::Config.merge_defaults(options)
+      opts = Gantree::Base.check_for_updates(opts)
       docker = Gantree::Docker.new(opts)
       docker.pull
       docker.build
@@ -118,25 +118,6 @@ module Gantree
       puts VERSION
     end
 
-    protected
-
-    def merge_defaults(options={})
-      configs = ["#{ENV['HOME']}/.gantreecfg",".gantreecfg"]
-      hash = {}
-      configs.each do |config|
-        hash.merge!(merge_config(options,config)) if config_exists?(config)
-      end
-      Hash[hash.map{ |k, v| [k.to_sym, v] }]
-    end 
-    
-    def merge_config options, config
-      defaults = JSON.parse(File.open(config).read) 
-      defaults.merge(options)
-    end 
-
-    def config_exists? config
-      File.exist? config
-    end
   end
 end
 

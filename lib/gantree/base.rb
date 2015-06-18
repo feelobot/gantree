@@ -24,6 +24,7 @@ module Gantree
         puts "gem already up to date".light_blue
       end
        update_configuration(opts[:auto_configure]) if opts[:auto_configure]
+       Gantree::Config.merge_defaults(opts)
     end
 
     def self.update_configuration repo
