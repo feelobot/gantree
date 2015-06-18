@@ -3,6 +3,7 @@ require 'archive/zip'
 require 'colorize'
 require 'librato/metrics'
 require_relative 'release_notes'
+require_relative 'wiki'
 require_relative 'notification'
 
 module Gantree

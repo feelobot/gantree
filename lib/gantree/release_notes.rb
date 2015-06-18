@@ -1,57 +1,83 @@
 require 'aws-sdk'
+
 module Gantree
   class ReleaseNotes
-    def initialize wiki, app, hash
-      @application = app
-      @new_hash = hash
-      @wiki_url = wiki
-    end 
+    attr_reader :current_sha
+    attr_writer :beanstalk
+    def initialize wiki, env_name, current_sha
+      @env_name = env_name
+      @wiki = wiki
+      @org = wiki.split("/")[0..-2].join("/")
+      @current_sha = current_sha
+    end
+
+    def beanstalk
+      return @beanstalk if @beanstalk
+      @beanstalk = Aws::ElasticBeanstalk::Client.new(
+        :region => ENV['AWS_REGION'] || "us-east-1"
+      )
+    end
+
+    def environment
+      beanstalk.describe_environments(:environment_names => [@env_name]).environments.first
+    end
+
+    def previous_tag
+      environment.version_label
+    end
+
+    def previous_sha
+      previous_tag.split("-")[2]
+    end
+
+    def app_name
+      name = environment.application_name
+      name.include?("-") ? name.split("-")[1] : name # TODO: business logic
+    end
+
+    def now
+      @now ||= Time.now.strftime("%a, %e %b %Y %H:%M:%S %z")
+    end
+
+    def commits
+      return @commits if @commits
+      # Get commits for this release
+      commits = git_log
+      commits = commits.split("COMMIT_SEPARATOR")
+      commits = commits.collect { |x| x.strip }
+      # only grab the line with the lighthouse info
+      # or the first line if no lighthouse info
+      commits = commits.collect do |x|
+        lines = x.split("\n")
+        lines.select { |y| y =~ /\[#\d+/ }.first || lines.first
+      end.compact
+      # rid of clean up ticket format [#1234 state:xxx]
+      commits = commits.map do |x|
+        x.gsub(/\[#(\d+)(.*)\]/, '\1')
+      end
+      @commits = commits.uniq.sort
+    end
+
+    def git_log
+      execute("git log --no-merges --pretty=format:'%B COMMIT_SEPARATOR' #{@left}..#{@right}").strip
+    end
+
+    def execute(cmd)
+      `#{cmd}`
+    end
+
+    def notes
+      compare = "#{previous_sha}...#{current_sha}"
+      notes = <<-EOL
+"#{@env_name} #{now} [compare](#{@org}/#{app_name}/compare/#{compare})"
+
+#{commits.collect{|x| "* #{x}" }.join("\n")}
+EOL
+    end
 
     def create
-      get_release_notes
-      write_release_notes
-      commit_release_notes
-    end
-    
-    def get_release_notes
-      rl_dir = "/tmp/wiki_release_notes"
-      FileUtils.rm_rf(rl_dir) if File.directory? rl_dir
-      `git clone #{@wiki_url} /tmp/wiki_release_notes/` 
-    end
-    
-    def write_release_notes
-      wiki_dir = "/tmp/wiki_release_notes/"
-      release_notes_file = "Release-notes-br-#{@application}.md"
-      path_to_wiki_file = "#{wiki_dir}#{release_notes_file}"
-      `touch #{path_to_wiki_file}` unless File.exist? "#{path_to_wiki_file}"
-      `printf "#{release_notes}\n\n" | cat - #{path_to_wiki_file} > #{path_to_wiki_file}.tmp  && mv #{path_to_wiki_file}.tmp #{path_to_wiki_file}`
-    end
-
-    def release_notes
-      time = Time.now.strftime("%a, %e %b %Y %H:%M:%S %z")
-      "#{time} [#{last_deployed_hash}...#{@new_hash}](https://github.com/br/#{@application}/compare/#{last_deployed_hash}...#{@new_hash})"
-    end
-
-    def last_deployed_hash
-      get_latest_tag.split("-").last
-    end
-
-    def get_latest_tag
-      Aws.config[:credentials]
-      beanstalk = Aws::ElasticBeanstalk::Client.new
-      resp = beanstalk.describe_application_versions(
-        application_name: @application,
-      )
-      label = resp["application_versions"].select {|version| version["version_label"].include?("br-master") }.first
-      if label
-        label["version_label"].split("-")[0..2].join('-')
-      else
-        raise "No Master Tags Deployed:\n #{resp["application_versions"].inspect}"
-        500
-      end
-    end
-    def commit_release_notes
-      `cd /tmp/wiki_release_notes && git add . && git commit -am "Updated release notes" && git push origin master`
+      filename = "Release-notes-br-#{app_name}.md" # business logic
+      Gantree::Wiki.new(notes, filename, @wiki).update
     end
   end
 end
