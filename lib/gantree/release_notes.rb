@@ -48,18 +48,18 @@ module Gantree
       # Get commits for this release
       commits = git_log
       commits = commits.split("COMMIT_SEPARATOR")
-      commits = commits.collect { |x| x.strip }
-      # only grab the line with the lighthouse info
-      # or the first line if no lighthouse info
-      commits = commits.collect do |x|
-        lines = x.split("\n")
-        lines.select { |y| y =~ /\[#\d+/ }.first || lines.first
-      end.compact
-      # rid of clean up ticket format [#1234 state:xxx]
-      commits = commits.map do |x|
-        x.gsub(/\[#(\d+)(.*)\]/, '\1')
+      commits = commits.collect { |x| x.strip }.reject {|x| x.empty? }
+      tickets = []
+      commits.each do |msg|
+        md = msg.match(/(\w+-\d+)/)
+        if md
+          ticket_id = md[1]
+          tickets << msg unless tickets.detect {|t| t =~ Regexp.new("^#{ticket_id}") }
+        else
+          tickets << msg
+        end
       end
-      @commits = commits.uniq.sort
+      tickets
     end
 
     def commits_list
