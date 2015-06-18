@@ -64,7 +64,7 @@ module Gantree
       return if @options[:dry_run]
       version = DeployVersion.new(@options, envs[0])
       @packaged_version = version.run
-      puts @packaged_version
+      puts "packaged_version: #{@packaged_version}"
       upload_to_s3 
       create_eb_version
       update_application(envs)
@@ -79,8 +79,9 @@ module Gantree
         Librato::Metrics.annotate :deploys, "deploys",:source => "#{@app}", :start_time => Time.now.to_i
         puts "Librato metric submitted" 
       end
-      if @options[:release_notes_wiki] == "enabled" && prod_deploy? && @app.include?("-app-")
-        ReleaseNotes.new(@options[:release_notes_wiki], @app, new_hash).create
+      env = @envs.find {|e| e =~ /-app/ }
+      if env && @options[:release_notes_wiki] && (prod_deploy? || @options[:release_notes_staging])
+        ReleaseNotes.new(@options[:release_notes_wiki], env, @packaged_version).create
         `git tag #{tag}`
         `git push --tags`
       end
@@ -150,9 +151,6 @@ module Gantree
     def prod_deploy?
       @envs.first.split("-").first == "prod" 
     end 
-    def new_hash
-      @packaged_version.split("-")[2]
-    end
   end
 end
 

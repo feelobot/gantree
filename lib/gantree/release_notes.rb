@@ -4,11 +4,15 @@ module Gantree
   class ReleaseNotes
     attr_reader :current_sha
     attr_writer :beanstalk
-    def initialize wiki, env_name, current_sha
+    def initialize(wiki, env_name, packaged_version)
       @env_name = env_name
       @wiki = wiki
       @org = wiki.split("/")[0..-2].join("/")
-      @current_sha = current_sha
+      @packaged_version = packaged_version
+    end
+
+    def current_sha
+      @packaged_version.split("-")[2]
     end
 
     def beanstalk
@@ -35,8 +39,8 @@ module Gantree
       name.include?("-") ? name.split("-")[1] : name # TODO: business logic
     end
 
-    def now
-      @now ||= Time.now.strftime("%a, %e %b %Y %H:%M:%S %z")
+    def pacific_time
+      Time.now.strftime '%Y-%m-%d %a %I:%M%p PDT'
     end
 
     def commits
@@ -58,8 +62,12 @@ module Gantree
       @commits = commits.uniq.sort
     end
 
+    def commits_list
+      commits.collect{|x| "* #{x}" }.join("\n")
+    end
+
     def git_log
-      execute("git log --no-merges --pretty=format:'%B COMMIT_SEPARATOR' #{@left}..#{@right}").strip
+      execute("git log --no-merges --pretty=format:'%B COMMIT_SEPARATOR' #{previous_sha}..#{current_sha}").strip
     end
 
     def execute(cmd)
@@ -69,9 +77,8 @@ module Gantree
     def notes
       compare = "#{previous_sha}...#{current_sha}"
       notes = <<-EOL
-"#{@env_name} #{now} [compare](#{@org}/#{app_name}/compare/#{compare})"
-
-#{commits.collect{|x| "* #{x}" }.join("\n")}
+#{@env_name} #{pacific_time} [#{compare}](#{@org}/#{app_name}/compare/#{compare}) by #{ENV['USER']} (#{@packaged_version})
+#{commits_list}
 EOL
     end
 

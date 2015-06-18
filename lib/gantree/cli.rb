@@ -18,6 +18,7 @@ module Gantree
     option :autodetect_app_role, :desc => "use naming convention to determin role (true|false)", :type => :boolean, :default => true
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     option :auth, :desc => "dockerhub authentation, example: bucket/key"
+    option :release_notes_staging, :type => :boolean, :default => false, :desc => "force release notes generation for staging deploys"
     def deploy name
       opts = merge_defaults(options)
       Gantree::Base.check_for_updates(opts)
@@ -100,6 +101,7 @@ module Gantree
     option :hush, :desc => "quite puts messages", :default => true
     option :eb_bucket, :desc => "bucket to store elastic beanstalk versions"
     option :auth, :desc => "dockerhub authentation, example: bucket/key"
+    option :release_notes_staging, :type => :boolean, :default => false, :desc => "force release notes generation for staging deploys"
     def ship server
       opts = merge_defaults(options)
       Gantree::Base.check_for_updates(opts)

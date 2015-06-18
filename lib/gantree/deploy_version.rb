@@ -49,9 +49,13 @@ module Gantree
       image
     end
 
+    def version_tag
+      @options[:tag] || tag
+    end
+
     def create_version_files
       clean_up
-      version = "#{tag}-#{Time.now.strftime("%m-%d-%Y-%H-%M-%S")}"
+      version = "#{version_tag}-#{Time.now.strftime("%m-%d-%Y-%H-%M-%S")}"
       puts "version: #{version}"
       set_auth if @options[:auth]
       set_image_path if @options[:image_path]

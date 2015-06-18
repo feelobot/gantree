@@ -28,11 +28,11 @@ describe Gantree::Wiki do
     FileUtils.rm_f(@wiki.file_path)
     @wiki.add_to_top
     notes = IO.read(@wiki.file_path)
-    expect(notes).to eq "#{@notes}\n\n"
+    expect(notes).to eq "#{@notes}\n"
 
     @wiki.add_to_top
     notes = IO.read(@wiki.file_path)
-    expect(notes).to eq "#{@notes}\n\n#{@notes}\n\n"
+    expect(notes).to eq "#{@notes}\n#{@notes}\n"
   end
 
   it "should push" do

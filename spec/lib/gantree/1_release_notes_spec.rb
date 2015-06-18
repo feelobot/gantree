@@ -4,8 +4,8 @@ describe Gantree::ReleaseNotes do
   before(:all) do
     @wiki = "https://github.com/br/dev.wiki.git"
     @env_name = "stag-rails-app-s1"
-    @current_sha = "d961c96"
-    @rn = Gantree::ReleaseNotes.new(@wiki, @env_name, @current_sha)
+    @packaged_version = "br-master-d961c96-06-17-2015-23-33-25.zip"
+    @rn = Gantree::ReleaseNotes.new(@wiki, @env_name, @packaged_version)
     @rn.beanstalk = Aws::ElasticBeanstalk::Client.new(stub_responses: true)
   end
 
@@ -27,7 +27,7 @@ describe Gantree::ReleaseNotes do
   end
 
   it "can retrieve the current sha" do
-    expect(@rn.current_sha).to eq @current_sha
+    expect(@rn.current_sha).to eq "d961c96"
   end
 
   it "should generate notes" do
@@ -36,7 +36,7 @@ describe Gantree::ReleaseNotes do
     notes = @rn.notes
     puts notes if ENV['DEBUG']
     expect(notes).to include(@env_name)
-    expect(notes).to include(@rn.now)
+    expect(notes).to include(@rn.pacific_time)
     expect(notes).to include("compare")
     expect(notes).to include("test up controller")
   end
