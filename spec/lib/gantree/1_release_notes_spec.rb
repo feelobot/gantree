@@ -49,4 +49,26 @@ describe Gantree::ReleaseNotes do
     expect(commits).to include("commit 1")
     expect(commits).to include("commit 2")
   end
+
+  it "should dedup the duplicate tickets from notes" do
+    git_log_mock =  <<-EOL
+CMS-296 sortable tweaks
+ COMMIT_SEPARATOR
+CMS-296 tweak test to match implementation
+ COMMIT_SEPARATOR
+CMS-423 Edit Content modal waits for Preview object to be fetched
+ COMMIT_SEPARATOR
+CMS-423 WIP PreviewView area read from/write to area of tracks' embed code
+ COMMIT_SEPARATOR
+EOL
+
+    allow(@rn).to receive(:git_log).and_return(git_log_mock)
+    commits = @rn.commits
+    p commits if ENV['DEBUG']
+    expect(commits).to be_a(Array)
+    expect(commits.size).to eq 2
+    expect(commits).to include("CMS-296 sortable tweaks")
+    expect(commits).to include("CMS-423 Edit Content modal waits for Preview object to be fetched")
+    expect(commits).to_not include("CMS-423 WIP PreviewView area read from/write to area of tracks' embed code")
+  end
 end
