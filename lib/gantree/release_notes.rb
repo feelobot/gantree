@@ -36,7 +36,7 @@ module Gantree
 
     def app_name
       name = environment.application_name
-      name.include?("-") ? name.split("-")[1] : name # TODO: business logic
+      name.include?("-") ? name.split("-")[0] : name # TODO: business logic
     end
 
     def pacific_time
