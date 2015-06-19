@@ -69,7 +69,7 @@ module Gantree
       create_eb_version
       update_application(envs)
       if @options[:slack]
-        msg = "#{ENV['USER']} is deploying #{@packaged_version} to #{@app} #{@envs.inspect} gantree version #{Gantree::VERSION}"
+        msg = "#{ENV['USER']} is deploying #{@packaged_version} to #{@app} #{@envs.inspect} gantree version #{Gantree::VERSION} "
         msg += "Tag: #{@options[:tag]}" if @options[:tag]
         Notification.new(@options[:slack]).say(msg) unless @options[:silent]
       end
