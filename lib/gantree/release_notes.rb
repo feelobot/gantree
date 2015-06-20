@@ -48,7 +48,10 @@ module Gantree
       # Get commits for this release
       commits = git_log
       commits = commits.split("COMMIT_SEPARATOR")
-      commits = commits.collect { |x| x.strip }.reject {|x| x.empty? }
+      commits = commits.
+                  collect {|x| x.strip }.
+                  reject  {|x| x.empty? }.
+                  collect {|x| x.gsub(/\n+/, ", ")}
       tickets = []
       commits.each do |msg|
         md = msg.match(/(\w+-\d+)/)
