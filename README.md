@@ -67,28 +67,6 @@ You can also specify a new image tag to use for the deploy
 gantree deploy -t latest stag-cauldon-app-s1
 ```
 
-
-### Create Stacks
-
-Gantree allows you to leverage the power of aws cloud formation to create your entire elastic beanstalk stack, rds, caching layer etc all while maintaining a set naming convention. This does the following: 
-* uses the ruby-cloudformation-dsl to generate nested cloud formation templates inside a cfn folder in your repo
-* uploads them to an s3 bucket
-* uses aws-sdk to communicate with cfn and initiate the stack creation
-
-To generate a basic staging cluster for linguist we would do:
-```
-gantree create linguist-stag-s1
-```
-
-In the elastic beanstalk console you will now see an application called 
-**linguist-stag-s1** with an environment called **stag-linguist-app-s1**
-
-You can modify the name of the environment if this does not fit your naming convention:
-```
-gantre create your_app_name -e your_env_name
-```
-
-
 ### Ship 
 
 This command does three things:
