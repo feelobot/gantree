@@ -78,11 +78,15 @@ module Gantree
     end
 
     def notes
-      compare = "#{previous_sha}...#{current_sha}"
-      notes = <<-EOL
+      if previous_sha
+        compare = "#{previous_sha}...#{current_sha}"
+        notes = <<-EOL
 #{@env_name} #{pacific_time} [#{compare}](#{@org}/#{app_name}/compare/#{compare}) by #{ENV['USER']} (#{@packaged_version})
 #{commits_list}
 EOL
+      else
+	notes = ""
+      end
     end
 
     def create
