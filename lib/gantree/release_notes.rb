@@ -31,7 +31,7 @@ module Gantree
     end
 
     def previous_sha
-      previous_tag.split("-")[2]
+      previous_tag.split("-")[2] if previous_tag
     end
 
     def app_name
