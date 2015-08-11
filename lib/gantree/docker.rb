@@ -35,7 +35,7 @@ module Gantree
     def build
       puts "Building..."
       
-      if system("git git rev-parse --short HEAD > version.txt")
+      if system("git rev-parse --short HEAD > version.txt")
         puts "Outputting short hash to version.txt"
       else
         puts "Error: Could not output commit hash to version.txt (is this a git repository?)"
@@ -50,7 +50,7 @@ module Gantree
         exit 1
       end
 
-      if system("rm -rf version.txt")
+      if system("rm -f version.txt")
         puts "Removing version.txt after docker build"
       else
         puts "Error: Can't remove version.txt after docker build"
