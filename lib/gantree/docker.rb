@@ -34,6 +34,13 @@ module Gantree
 
     def build
       puts "Building..."
+      
+      if system("git git rev-parse --short HEAD > version.txt")
+        puts "Outputting short hash to version.txt"
+      else
+        puts "Error: Could not output commit hash to version.txt (is this a git repository?)"
+      end
+
       if system("docker build -t #{@image_path}:#{@tag} .")
         puts "Image Built: #{@image_path}:#{@tag}".green
         puts "gantree push --image-path #{@image_path} -t #{@tag}" unless @options[:hush]
@@ -41,6 +48,12 @@ module Gantree
       else
         puts "Error: Image was not built successfully".red
         exit 1
+      end
+
+      if system("rm -rf version.txt")
+        puts "Removing version.txt after docker build"
+      else
+        puts "Error: Can't remove version.txt after docker build"
       end
     end
 
