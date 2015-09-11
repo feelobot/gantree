@@ -31,7 +31,12 @@ module Gantree
     end
 
     def previous_sha
-      previous_tag.split("-")[2] if previous_tag
+      if previous_tag
+        previous_tag.split("-")[2] 
+      else
+        # for edge case where release notes have never been generated before, just use 1 commit before the current one
+        "#{current_sha}~1"
+      end
     end
 
     def app_name
@@ -78,15 +83,11 @@ module Gantree
     end
 
     def notes
-      if previous_sha
-        compare = "#{previous_sha}...#{current_sha}"
-        notes = <<-EOL
+      compare = "#{previous_sha}...#{current_sha}"
+      notes = <<-EOL
 #{@env_name} #{pacific_time} [#{compare}](#{@org}/#{app_name}/compare/#{compare}) by #{ENV['USER']} (#{@packaged_version})
 #{commits_list}
 EOL
-      else
-	notes = ""
-      end
     end
 
     def create
