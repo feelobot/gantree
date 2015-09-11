@@ -31,7 +31,12 @@ module Gantree
     end
 
     def previous_sha
-      previous_tag.split("-")[2]
+      if previous_tag
+        previous_tag.split("-")[2] 
+      else
+        # for edge case where release notes have never been generated before, just use 1 commit before the current one
+        "#{current_sha}~1"
+      end
     end
 
     def app_name
