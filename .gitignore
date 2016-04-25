@@ -10,6 +10,8 @@ _yardoc
 coverage
 doc/
 lib/bundler/man
+packaging/vendor
+packaging/*.tar.gz
 pkg
 rdoc
 spec/reports
