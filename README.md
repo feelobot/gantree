@@ -184,6 +184,21 @@ PostgreSQL: ```gantree create your_app_name --rds pg```
 
 Mysql: ```gantree create your_app_name --rds msql```
 
+## Traveling Ruby : 
+
+You can now compile this into a tarball and distribute.  I would unpack in /opt and symlink to /usr/bin 
+
+Building in OSX : ```rake package:osx``` 
+
+Building in Docker for Linux : 
+
+```
+docker run -ti -v `pwd`:/workspace ruby:2.1.5 /bin/bash
+cd workspace && bundle install && bundle exec rake package:linux:x86_64
+``` 
+
+This creates a tarball with all ruby dependencies.  At the root you will find the binary.
+
 ## TODO:
 
 #### What if you want a cdn behind each of your generated applications

@@ -140,6 +140,3 @@ DEPENDENCIES
   slackr (= 0.0.6)
   vcr
   webmock
-
-BUNDLED WITH
-   1.11.2
