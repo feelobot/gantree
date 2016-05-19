@@ -36,7 +36,15 @@ module Gantree
 
     def set_tag_to_deploy
       image = docker["Image"]["Name"]
-      image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
+      token = image.split(":")
+      if token.length == 3
+        image = token[0] + (":") + token[1] + ":#{@options[:tag]}"
+        docker["Image"]["Name"] = image
+      elsif token.length == 2
+        image.gsub!(/:(.*)$/, "#{@options[:image_path]}:")
+      else
+        puts "Too many ':'".yellow
+      end
       IO.write("/tmp/#{@dockerrun_file}", JSON.pretty_generate(docker))
     end
 
