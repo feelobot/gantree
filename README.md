@@ -19,6 +19,14 @@ This tool is intended to help you setup a Dockerrun.aws.json which allows you to
 ### Prerequisites 
 You need to have your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables set in order to use the tool as well as the proper aws permissions for Elastic Beanstalk, and S3 access. 
 
+Note : From gantree 0.6.16, The necessity / configuration of AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables is not neccessary if gantree is installed in EC2 instance with proper IAM Role and policy.
+
+To check if your EC2 has iam role or not, run below command.
+
+```
+curl http://169.254.169.254/latest/meta-data/iam/info/
+```
+
 *Install docker for MAC OSX*
 https://docs.docker.com/installation/mac/
 
