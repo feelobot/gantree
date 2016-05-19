@@ -9,9 +9,9 @@ module Gantree
       cmd="curl http://169.254.169.254/latest/meta-data/iam/info/ -m 5 -s"
       op=system(cmd)
       if op
-        puts "Using IAM Role ? : #{op}".green
+        puts "Using IAM Role : #{op}".green
       else
-        puts "using IAM Role / Creds ?: #{op}".yellow
+        puts "IAM or ENV variable not found".red
         raise "Please set your AWS Environment Variables" unless ENV['AWS_SECRET_ACCESS_KEY']
         raise "Please set your AWS Environment Variables" unless ENV['AWS_ACCESS_KEY_ID']
       end
