@@ -2,6 +2,7 @@
 *.swo
 *.gem
 *.rbc
+*.tar.gz
 .bundle
 .config
 .yardoc
@@ -9,7 +10,10 @@ InstalledFiles
 _yardoc
 coverage
 doc/
+gantree-*
 lib/bundler/man
+packaging/vendor
+packaging/*.tar.gz
 pkg
 rdoc
 spec/reports
