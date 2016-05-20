@@ -5,8 +5,16 @@ require 'bigdecimal/util'
 module Gantree
   class Base
     def check_credentials
-      raise "Please set your AWS Environment Variables" unless ENV['AWS_SECRET_ACCESS_KEY']
-      raise "Please set your AWS Environment Variables" unless ENV['AWS_ACCESS_KEY_ID']
+      #curl command with timeout & silence flag
+      cmd="curl http://169.254.169.254/latest/meta-data/iam/info/ -m 5 -s"
+      iam_flag=system(cmd)
+      puts "iam_flag Status : #{iam_flag}"
+      if iam_flag
+        puts "Using IAM Role : #{iam_flag}".green
+      else
+        raise "Please set your AWS Environment Variables" unless ENV['AWS_SECRET_ACCESS_KEY']
+        raise "Please set your AWS Environment Variables" unless ENV['AWS_ACCESS_KEY_ID']
+      end
     end
     
     def self.check_for_updates opts
@@ -42,10 +50,17 @@ module Gantree
     end
 
     def set_aws_keys
-      AWS.config(
-        :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
-        :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY']
-      )
+      cmd="curl http://169.254.169.254/latest/meta-data/iam/info/ -m 5 -s"
+      iam_flag=system(cmd)
+      if iam_flag
+        puts "Using IAM Role ? : #{iam_flag}".green
+        AWS.config(:credential_provider => AWS::Core::CredentialProviders::EC2Provider.new)
+      else
+        AWS.config(
+            :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
+            :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY']
+        )
+      end
     end
 
     def s3
