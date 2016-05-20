@@ -51,8 +51,9 @@ module Gantree
 
     def set_aws_keys
       cmd="curl http://169.254.169.254/latest/meta-data/iam/info/ -m 5 -s"
-      if system(cmd)
-        puts "Using IAM Role ? : #{op}".green
+      iam_flag=system(cmd)
+      if iam_flag
+        puts "Using IAM Role ? : #{iam_flag}".green
         AWS.config(:credential_provider => AWS::Core::CredentialProviders::EC2Provider.new)
       else
         AWS.config(
