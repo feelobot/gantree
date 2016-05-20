@@ -11,3 +11,4 @@ unset BUNDLE_IGNORE_CONFIG
 
 # Run the actual app using the bundled Ruby interpreter, with Bundler activated.
 eval "$SELFDIR/lib/ruby/bin/ruby" -rbundler/setup -rreadline "$SELFDIR/app/bin/gantree $@"
+
