@@ -13,9 +13,9 @@ install:
 	gem install --local gantree-${VERSION}.gem
 
 linux:
-	docker run -ti --rm -v `pwd`:/workspace -w /workspace ruby:2.1.5 /bin/bash -c "bundle install && bundle exec rake package:linux:x86_64"
+	#docker run -ti --rm -v `pwd`:/workspace -w /workspace ruby:2.1.5 /bin/bash -c "bundle install && bundle exec rake package:linux:x86_64"
 	@echo "=> push latest version linux binary to : ${S3_BUCKET}"
-	aws s3 cp ./gantree-${VERSION}-linux-x86_64.tar.gz @echo ${S3_BUCKET}/ --sse AES256 --acl public-read
+	aws s3 cp ./gantree-${VERSION}-linux-x86_64.tar.gz ${S3_BUCKET}/ --sse AES256 --acl public-read
 
 osx:
 	docker run -ti --rm -v `pwd`:/workspace -w /workspace ruby:2.1.5 /bin/bash -c "bundle install && bundle exec rake package:osx"
