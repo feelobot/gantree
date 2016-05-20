@@ -2,14 +2,27 @@ require "colorize"
 require 'librato/metrics'
 require 'bigdecimal'
 require 'bigdecimal/util'
+require 'net/http'
+
 module Gantree
   class Base
     def check_credentials
-      #curl command with timeout & silence flag
-      cmd="curl http://169.254.169.254/latest/meta-data/iam/info/ -m 5 -s"
-      iam_flag=system(cmd)
-      puts "iam_flag Status : #{iam_flag}"
-      if iam_flag
+      timeout = false
+
+      url = URI.parse("http://169.254.169.254/latest/meta-data/iam/info/")
+
+      http = Net::HTTP.new(url.host, url.port)
+
+      http.read_timeout = 3
+      http.open_timeout = 3
+      
+      begin
+          resp = http.start() { |http| http.get(url.path) }.code
+      rescue Net::OpenTimeout
+          timeout = true
+      end
+
+      if timeout == false && resp == '200'
         puts "Using IAM Role : #{iam_flag}".green
       else
         raise "Please set your AWS Environment Variables" unless ENV['AWS_SECRET_ACCESS_KEY']
@@ -50,16 +63,13 @@ module Gantree
     end
 
     def set_aws_keys
-      cmd="curl http://169.254.169.254/latest/meta-data/iam/info/ -m 5 -s"
-      iam_flag=system(cmd)
-      if iam_flag
-        puts "Using IAM Role ? : #{iam_flag}".green
-        AWS.config(:credential_provider => AWS::Core::CredentialProviders::EC2Provider.new)
-      else
+      unless ENV['AWS_ACCESS_KEY_ID'] == nil && ENV['AWS_SECRET_ACCESS_KEY'] == nil
         AWS.config(
             :access_key_id => ENV['AWS_ACCESS_KEY_ID'],
             :secret_access_key => ENV['AWS_SECRET_ACCESS_KEY']
         )
+      else
+        AWS.config(:credential_provider => AWS::Core::CredentialProviders::EC2Provider.new)
       end
     end
 
