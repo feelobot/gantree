@@ -19,7 +19,7 @@ This tool is intended to help you setup a Dockerrun.aws.json which allows you to
 ### Prerequisites 
 You need to have your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables set in order to use the tool as well as the proper aws permissions for Elastic Beanstalk, and S3 access. 
 
-Note : From gantree 0.6.16, The necessity / configuration of AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables is not neccessary if gantree is installed in EC2 instance with proper IAM Role and policy.
+Note : For gantree versions >= 0.6.14, configuration of AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables is not necessary if running on an instance with IAM Roles enabled.
 
 To check if your EC2 has iam role or not, run below command.
 
@@ -191,6 +191,21 @@ gantree ceate your_app_name -i m3.medium
 PostgreSQL: ```gantree create your_app_name --rds pg```
 
 Mysql: ```gantree create your_app_name --rds msql```
+
+## Traveling Ruby : 
+ 
+ You can now compile this into a tarball and distribute.  I would unpack in /opt and symlink to /usr/bin 
+ 
+ Building in OSX : ```rake package:osx``` 
+ 
+ Building in Docker for Linux : 
+ 
+ ```
+docker run -ti -v `pwd`:/workspace -w /workspace ruby:2.1.5 \
+/bin/bash -c "bundle install && bundle exec rake package:linux:x86_64"
+ ``` 
+ 
+ This creates a tarball with all ruby dependencies.  At the root you will find the binary.
 
 ## TODO:
 
