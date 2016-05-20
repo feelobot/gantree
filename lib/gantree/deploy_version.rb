@@ -41,7 +41,7 @@ module Gantree
         image = token[0] + (":") + token[1] + ":#{@options[:tag]}"
         docker["Image"]["Name"] = image
       elsif token.length == 2
-        image.gsub!(/:(.*)$/, "#{@options[:tag]}:")
+        image.gsub!(/:(.*)$/, ":#{@options[:tag]}")
       else
         puts "Too many ':'".yellow
       end

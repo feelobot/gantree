@@ -19,7 +19,7 @@ This tool is intended to help you setup a Dockerrun.aws.json which allows you to
 ### Prerequisites 
 You need to have your AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables set in order to use the tool as well as the proper aws permissions for Elastic Beanstalk, and S3 access. 
 
-Note : For gantree versions >= 0.6.15, configuration of AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables is not necessary if running on an instance with IAM Roles enabled.
+Note : For gantree versions >= 0.6.14, configuration of AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables is not necessary if running on an instance with IAM Roles enabled.
 
 To check if your EC2 has iam role or not, run below command.
 
