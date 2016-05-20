@@ -194,18 +194,20 @@ Mysql: ```gantree create your_app_name --rds msql```
 
 ## Traveling Ruby : 
  
- You can now compile this into a tarball and distribute.  I would unpack in /opt and symlink to /usr/bin 
+You can now compile this into a tarball and distribute.  
  
- Building in OSX : ```rake package:osx``` 
- 
- Building in Docker for Linux : 
- 
- ```
-docker run -ti -v `pwd`:/workspace -w /workspace ruby:2.1.5 \
-/bin/bash -c "bundle install && bundle exec rake package:linux:x86_64"
- ``` 
- 
- This creates a tarball with all ruby dependencies.  At the root you will find the binary.
+#### To generate tarball & push to s3.ß
+```
+# Change below variable in Makefile before you run below command
+S3_BUCKET := s3://<YOUR_AWS_BUCKET>
+make clean && make linux
+```
+#### To use gantree binary
+```
+aws s3 cp s3://<your_bucket>/gantree-0.6.14-linux-x86_64.tar.gz .
+tar -xf gantree-0.6.14-linux-x86_64.tar.gz -C /opt
+ln -s /opt/gantree-0.6.14-linux-x86_64/gantree /usr/bin/gantree
+```
 
 ## TODO:
 
