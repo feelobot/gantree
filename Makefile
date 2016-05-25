@@ -3,8 +3,10 @@ VERSION := 0.6.17
 # Change this variable to your organisation s3 bucket
 S3_BUCKET := s3://br-jenkins/gantree
 
-
 all: build
+
+version:
+	@echo "${VERSION}"
 
 build:
 	gem build gantree.gemspec

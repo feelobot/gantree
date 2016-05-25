@@ -15,7 +15,7 @@ module Gantree
 
       http.read_timeout = 3
       http.open_timeout = 3
-      
+
       begin
           resp = http.start() { |http| http.get(url.path) }.code
       rescue Net::OpenTimeout
@@ -23,13 +23,13 @@ module Gantree
       end
 
       if timeout == false && resp == '200'
-        puts "Using IAM Role : #{iam_flag}".green
+        puts "Using IAM Role".green
       else
         raise "Please set your AWS Environment Variables" unless ENV['AWS_SECRET_ACCESS_KEY']
         raise "Please set your AWS Environment Variables" unless ENV['AWS_ACCESS_KEY_ID']
       end
     end
-    
+
     def self.check_for_updates opts
       puts opts.inspect
       enabled =  opts[:auto_updates]
@@ -40,8 +40,8 @@ module Gantree
       puts "Auto updates disabled".light_blue if !enabled
       puts "Updating from #{current_version} to #{latest_version}...".green
       if  current_version == latest_version && enabled
-        system("gem update gantree --force") 
-      else 
+        system("gem update gantree --force")
+      else
         puts "gem already up to date".light_blue
       end
        update_configuration(opts[:auto_configure]) if opts[:auto_configure]
@@ -103,7 +103,7 @@ module Gantree
         raise "Please Set Envinronment Name with -e"
       end
     end
-    
+
     def authenticate_librato
       if @options[:librato]
         Librato::Metrics.authenticate @options[:librato][:email], @options[:librato][:token]
@@ -151,7 +151,7 @@ module Gantree
         puts "uploading cfn templates to #{@options[:cfn_bucket]}/#{@options[:stack_name]}"
       else
         puts "creating bucket #{@options[:cfn_bucket]}/#{@options[:stack_name]} to upload templates"
-        s3.buckets.create(bucket_name) 
+        s3.buckets.create(bucket_name)
       end
     end
 
